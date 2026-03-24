@@ -1,5 +1,7 @@
 import type { ChatMessage } from "@/types/chat"
 import { formatDistanceToNow } from "date-fns"
+import { ToolCallBubble } from "@/components/tool-call-bubble"
+import { ToolResultBubble } from "@/components/tool-result-bubble"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 
@@ -13,6 +15,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       .filter((part) => part.type === "text")
       .map((part) => part.text)
       .join("\n")
+    const toolCalls = message.content.filter((part) => part.type === "toolCall")
 
     return (
       <div className="flex flex-col gap-2 border-l border-foreground/10 pl-4">
@@ -23,7 +26,12 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             ${message.usage.cost.total.toFixed(4)}
           </Badge>
         </div>
-        <div className="whitespace-pre-wrap text-sm leading-6">{text || "…"}</div>
+        {text ? (
+          <div className="whitespace-pre-wrap text-sm leading-6">{text}</div>
+        ) : null}
+        {toolCalls.map((toolCall) => (
+          <ToolCallBubble key={toolCall.id} toolCall={toolCall} />
+        ))}
         {message.errorMessage ? (
           <div className="text-xs text-destructive">{message.errorMessage}</div>
         ) : null}
@@ -51,7 +59,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
     )
   }
 
-  return null
+  return <ToolResultBubble message={message} />
 }
 
 export function ChatThread(props: { isStreaming: boolean; messages: ChatMessage[] }) {
