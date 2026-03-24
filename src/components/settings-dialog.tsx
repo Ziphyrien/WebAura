@@ -1,0 +1,52 @@
+import type { SessionData } from "@/types/storage"
+import { CostsPanel } from "@/components/costs-panel"
+import { ProviderSettings } from "@/components/provider-settings"
+import { ProxySettings } from "@/components/proxy-settings"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
+
+export function SettingsDialog(props: {
+  onOpenChange: (open: boolean) => void
+  open: boolean
+  session: SessionData
+}) {
+  return (
+    <Dialog onOpenChange={props.onOpenChange} open={props.open}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+          <DialogDescription>
+            Manage local provider credentials, proxy behavior, and cost tracking.
+          </DialogDescription>
+        </DialogHeader>
+        <Tabs className="gap-4" defaultValue="providers">
+          <TabsList variant="line">
+            <TabsTrigger value="providers">Providers</TabsTrigger>
+            <TabsTrigger value="proxy">Proxy</TabsTrigger>
+            <TabsTrigger value="costs">Costs</TabsTrigger>
+          </TabsList>
+          <TabsContent value="providers">
+            <ProviderSettings />
+          </TabsContent>
+          <TabsContent value="proxy">
+            <ProxySettings />
+          </TabsContent>
+          <TabsContent value="costs">
+            <CostsPanel session={props.session} />
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  )
+}

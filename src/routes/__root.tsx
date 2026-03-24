@@ -1,4 +1,9 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import {
+  HeadContent,
+  Link,
+  Scripts,
+  createRootRoute,
+} from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -16,7 +21,12 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: "GitOverflow",
+      },
+      {
+        name: "description",
+        content:
+          "Client-side Sitegeist Web v0 with local sessions, provider auth, streaming chat, and cost tracking.",
       },
     ],
     links: [
@@ -26,6 +36,7 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
 })
 
@@ -51,5 +62,23 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  )
+}
+
+function NotFoundPage() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center">
+      <h1 className="text-lg font-medium">Page not found</h1>
+      <p className="max-w-md text-xs text-muted-foreground">
+        The route does not exist or the dev server reloaded while the router was
+        resolving the page.
+      </p>
+      <Link
+        className="text-xs underline underline-offset-4 hover:text-foreground"
+        to="/"
+      >
+        Go back home
+      </Link>
+    </div>
   )
 }
