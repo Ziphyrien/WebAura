@@ -17,8 +17,10 @@ export interface RepoSource {
 export interface SessionData {
   cost: number
   createdAt: string
+  error?: string
   id: string
-  messages: ChatMessage[]
+  isStreaming: boolean
+  messageCount: number
   model: string
   preview: string
   provider: ProviderId
@@ -34,6 +36,7 @@ export interface SessionMetadata {
   cost: number
   createdAt: string
   id: string
+  isStreaming: boolean
   lastModified: string
   messageCount: number
   model: string
@@ -41,9 +44,17 @@ export interface SessionMetadata {
   preview: string
   provider: ProviderId
   providerGroup?: ProviderGroupId
+  repoSource?: RepoSource
   thinkingLevel: ThinkingLevel
   title: string
   usage: Usage
+}
+
+export type MessageStatus = "aborted" | "completed" | "error" | "streaming"
+
+export type MessageRow = ChatMessage & {
+  sessionId: string
+  status: MessageStatus
 }
 
 export interface SettingsRow {

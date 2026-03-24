@@ -1,80 +1,22 @@
-// Mirrors Sitegeist session persistence rules: derive metadata on save and avoid persisting empty conversations.
-import { createId } from "@/lib/ids"
 import { getIsoNow } from "@/lib/dates"
+import { createId } from "@/lib/ids"
+import { getCanonicalProvider, getDefaultProviderGroup } from "@/models/catalog"
+import { normalizeRepoSource } from "@/repo/settings"
+import { buildPreview, generateTitle, hasPersistableExchange } from "@/sessions/session-metadata"
+import {
+  getMostRecentSession,
+  getSession,
+  getSessionMessages,
+  putSession,
+} from "@/db/schema"
 import {
   createEmptyUsage,
   type ProviderGroupId,
   type ThinkingLevel,
+  type Usage,
 } from "@/types/models"
-import { getMostRecentSession, getSession, saveSession } from "@/db/schema"
-import type { RepoSource, SessionData } from "@/types/storage"
-import type { Usage } from "@/types/models"
-import { buildPreview, buildSessionMetadata, generateTitle, hasPersistableExchange } from "@/sessions/session-metadata"
-import { normalizeRepoSource } from "@/repo/settings"
-import { getCanonicalProvider, getDefaultProviderGroup } from "@/models/catalog"
-
-export function createSession(params: {
-  model: string
-  providerGroup: ProviderGroupId
-  repoSource?: RepoSource
-  thinkingLevel?: ThinkingLevel
-}): SessionData {
-  const now = getIsoNow()
-  const provider = getCanonicalProvider(params.providerGroup)
-
-  return {
-    cost: 0,
-    createdAt: now,
-    id: createId(),
-    messages: [],
-    model: params.model,
-    preview: "",
-    provider,
-    providerGroup: params.providerGroup,
-    repoSource: normalizeRepoSource(params.repoSource),
-    thinkingLevel: params.thinkingLevel ?? "medium",
-    title: "New chat",
-    updatedAt: now,
-    usage: createEmptyUsage(),
-  }
-}
-
-export async function persistSession(session: SessionData): Promise<void> {
-  if (!shouldSaveSession(session)) {
-    return
-  }
-
-  await persistSessionSnapshot(session)
-}
-
-export async function persistSessionSnapshot(
-  session: SessionData
-): Promise<void> {
-  const persistedSession = buildPersistedSession(session)
-  await saveSession(persistedSession, buildSessionMetadata(persistedSession))
-}
-
-export async function loadSession(id: string): Promise<SessionData | undefined> {
-  const session = await getSession(id)
-  return session ? normalizeSessionProviderGroup(session) : undefined
-}
-
-export async function loadMostRecentSession(): Promise<SessionData | undefined> {
-  const session = await getMostRecentSession()
-  return session ? normalizeSessionProviderGroup(session) : undefined
-}
-
-export function updateSessionSummaries(session: SessionData): SessionData {
-  return {
-    ...session,
-    preview: buildPreview(session.messages),
-    title: generateTitle(session.messages),
-  }
-}
-
-export function shouldSaveSession(session: SessionData): boolean {
-  return hasPersistableExchange(session.messages)
-}
+import type { ChatMessage } from "@/types/chat"
+import type { MessageRow, RepoSource, SessionData } from "@/types/storage"
 
 function mergeUsage(left: Usage, right: Usage): Usage {
   return {
@@ -93,8 +35,78 @@ function mergeUsage(left: Usage, right: Usage): Usage {
   }
 }
 
-export function aggregateSessionUsage(session: SessionData): Usage {
-  return session.messages.reduce((usage, message) => {
+function toChatMessage(message: ChatMessage | MessageRow): ChatMessage {
+  const { sessionId: _sessionId, status: _status, ...chatMessage } = message as MessageRow
+  return chatMessage as ChatMessage
+}
+
+export function createSession(params: {
+  model: string
+  providerGroup: ProviderGroupId
+  repoSource?: RepoSource
+  thinkingLevel?: ThinkingLevel
+}): SessionData {
+  const now = getIsoNow()
+  const provider = getCanonicalProvider(params.providerGroup)
+
+  return {
+    cost: 0,
+    createdAt: now,
+    error: undefined,
+    id: createId(),
+    isStreaming: false,
+    messageCount: 0,
+    model: params.model,
+    preview: "",
+    provider,
+    providerGroup: params.providerGroup,
+    repoSource: normalizeRepoSource(params.repoSource),
+    thinkingLevel: params.thinkingLevel ?? "medium",
+    title: "New chat",
+    updatedAt: now,
+    usage: createEmptyUsage(),
+  }
+}
+
+export async function persistSession(session: SessionData): Promise<void> {
+  await putSession(normalizeSessionProviderGroup(session))
+}
+
+export async function persistSessionSnapshot(
+  session: SessionData
+): Promise<void> {
+  await persistSession(session)
+}
+
+export async function loadSession(id: string): Promise<SessionData | undefined> {
+  const session = await getSession(id)
+  return session ? normalizeSessionProviderGroup(session) : undefined
+}
+
+export async function loadMostRecentSession(): Promise<SessionData | undefined> {
+  const session = await getMostRecentSession()
+  return session ? normalizeSessionProviderGroup(session) : undefined
+}
+
+export async function loadSessionWithMessages(
+  id: string
+): Promise<{ messages: MessageRow[]; session: SessionData } | undefined> {
+  const session = await loadSession(id)
+
+  if (!session) {
+    return undefined
+  }
+
+  return {
+    messages: await getSessionMessages(id),
+    session,
+  }
+}
+
+export function aggregateSessionUsage(
+  messages: Array<ChatMessage | MessageRow>
+): Usage {
+  return messages.reduce((usage, message) => {
     if (message.role !== "assistant") {
       return usage
     }
@@ -103,20 +115,33 @@ export function aggregateSessionUsage(session: SessionData): Usage {
   }, createEmptyUsage())
 }
 
-export function buildPersistedSession(session: SessionData): SessionData {
-  const usage = aggregateSessionUsage(session)
+export function buildPersistedSession(
+  session: SessionData,
+  messages: Array<ChatMessage | MessageRow>
+): SessionData {
+  const chatMessages = messages.map(toChatMessage)
+  const usage = aggregateSessionUsage(chatMessages)
   const providerGroup =
     session.providerGroup ?? getDefaultProviderGroup(session.provider)
 
-  return updateSessionSummaries({
+  return {
     ...session,
     cost: usage.cost.total,
-    createdAt: session.createdAt,
+    error: session.error,
+    isStreaming: session.isStreaming,
+    messageCount: chatMessages.length,
+    preview: buildPreview(chatMessages),
     provider: getCanonicalProvider(providerGroup),
     providerGroup,
     repoSource: normalizeRepoSource(session.repoSource),
+    title: generateTitle(chatMessages),
+    updatedAt: session.updatedAt,
     usage,
-  })
+  }
+}
+
+export function shouldSaveSession(messages: Array<ChatMessage | MessageRow>): boolean {
+  return hasPersistableExchange(messages.map(toChatMessage))
 }
 
 export function normalizeSessionProviderGroup(session: SessionData): SessionData {
