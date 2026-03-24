@@ -2,7 +2,7 @@
 
 ## Goal
 
-Add first-class tool calling to GitOverflow so the agent can answer repository questions by using two tools:
+Add first-class tool calling to gitinspect.com so the agent can answer repository questions by using two tools:
 
 - `read`
 - `bash`

@@ -2,7 +2,7 @@ import { vi } from "vitest"
 
 const mockFileContent = {
   "README.md": {
-    content: btoa("# GitOverflow\nA local agent.\n"),
+    content: btoa("# gitinspect.com\nA local agent.\n"),
     download_url:
       "https://raw.githubusercontent.com/test-owner/test-repo/main/README.md",
     encoding: "base64",

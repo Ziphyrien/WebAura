@@ -403,7 +403,7 @@ Open implementation detail:
 
 - decide the canonical dev origin and production origin early so provider OAuth apps can be registered correctly
 
-the project will live in dev mode under localhost:3000 and in prod under gitoverflow.com use the NODE_ENV to put the right one ! 
+the project will live in dev mode under localhost:3000 and in prod under gitinspect.com use the NODE_ENV to put the right one ! 
 
 ### 2. Browser Storage Security
 

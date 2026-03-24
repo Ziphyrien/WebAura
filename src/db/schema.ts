@@ -1,9 +1,10 @@
 // Rebuilds the Sitegeist/web-ui Dexie contract with the same store split and local-only persistence model.
 import Dexie, { type EntityTable } from "dexie"
 import { getDateKey, getIsoNow } from "@/lib/dates"
-import { applyMigrations, getSessionsMetadataTable } from "@/db/migrations"
+import { applyMigrations } from "@/db/migrations"
 import type {
   DailyCostAggregate,
+  MessageRow,
   ProviderKeyRecord,
   SessionData,
   SessionMetadata,
@@ -14,14 +15,16 @@ import type { ProviderId, Usage } from "@/types/models"
 
 export class AppDb extends Dexie {
   dailyCosts!: EntityTable<DailyCostAggregate, "date">
+  messages!: EntityTable<MessageRow, "id">
   providerKeys!: EntityTable<ProviderKeyRecord, "provider">
   sessions!: EntityTable<SessionData, "id">
   settings!: EntityTable<SettingsRow, "key">
 
   constructor() {
-    super("gitoverflow")
+    super("gitinspect")
     applyMigrations(this)
     this.dailyCosts = this.table("daily_costs")
+    this.messages = this.table("messages")
     this.providerKeys = this.table("provider-keys")
     this.sessions = this.table("sessions")
     this.settings = this.table("settings")
@@ -30,41 +33,71 @@ export class AppDb extends Dexie {
 
 export const db = new AppDb()
 
-export function sessionsMetadataTable() {
-  return getSessionsMetadataTable(db)
+function toSessionMetadata(session: SessionData): SessionMetadata {
+  return {
+    cost: session.cost,
+    createdAt: session.createdAt,
+    id: session.id,
+    isStreaming: session.isStreaming,
+    lastModified: session.updatedAt,
+    messageCount: session.messageCount,
+    model: session.model,
+    modelId: session.model,
+    preview: session.preview,
+    provider: session.provider,
+    providerGroup: session.providerGroup,
+    repoSource: session.repoSource,
+    thinkingLevel: session.thinkingLevel,
+    title: session.title,
+    usage: session.usage,
+  }
 }
 
-export async function saveSession(
+export async function putSession(session: SessionData): Promise<void> {
+  await db.sessions.put(session)
+}
+
+export async function putMessage(message: MessageRow): Promise<void> {
+  await db.messages.put(message)
+}
+
+export async function putMessages(messages: MessageRow[]): Promise<void> {
+  if (messages.length === 0) {
+    return
+  }
+
+  await db.messages.bulkPut(messages)
+}
+
+export async function putSessionAndMessages(
   session: SessionData,
-  metadata: SessionMetadata
+  messages: MessageRow[]
 ): Promise<void> {
-  await db.transaction(
-    "rw",
-    db.sessions,
-    sessionsMetadataTable(),
-    async () => {
-      await db.sessions.put(session)
-      await sessionsMetadataTable().put(metadata)
-    }
-  )
+  await db.transaction("rw", db.sessions, db.messages, async () => {
+    await db.sessions.put(session)
+    await putMessages(messages)
+  })
 }
 
 export async function getSession(id: string): Promise<SessionData | undefined> {
   return await db.sessions.get(id)
 }
 
-export async function getSessionMetadata(
-  id: string
-): Promise<SessionMetadata | undefined> {
-  return await sessionsMetadataTable().get(id)
+export async function getSessionMessages(sessionId: string): Promise<MessageRow[]> {
+  return await db.messages
+    .where("[sessionId+timestamp]")
+    .between([sessionId, Dexie.minKey], [sessionId, Dexie.maxKey])
+    .sortBy("timestamp")
 }
 
 export async function listSessionMetadata(): Promise<SessionMetadata[]> {
-  return await sessionsMetadataTable().orderBy("lastModified").reverse().toArray()
+  return (await db.sessions.orderBy("updatedAt").reverse().toArray()).map(
+    toSessionMetadata
+  )
 }
 
 export async function getLatestSessionId(): Promise<string | undefined> {
-  return (await sessionsMetadataTable().orderBy("lastModified").reverse().first())
+  return (await db.sessions.orderBy("updatedAt").reverse().first())
     ?.id
 }
 
@@ -78,16 +111,20 @@ export async function getMostRecentSession(): Promise<SessionData | undefined> {
   return await getSession(latestId)
 }
 
+export async function deleteMessagesBySession(sessionId: string): Promise<void> {
+  const messageIds = await db.messages
+    .where("sessionId")
+    .equals(sessionId)
+    .primaryKeys()
+
+  await db.messages.bulkDelete(messageIds)
+}
+
 export async function deleteSession(id: string): Promise<void> {
-  await db.transaction(
-    "rw",
-    db.sessions,
-    sessionsMetadataTable(),
-    async () => {
-      await db.sessions.delete(id)
-      await sessionsMetadataTable().delete(id)
-    }
-  )
+  await db.transaction("rw", db.sessions, db.messages, async () => {
+    await db.sessions.delete(id)
+    await deleteMessagesBySession(id)
+  })
 }
 
 export async function setSetting(

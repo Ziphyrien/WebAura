@@ -148,7 +148,7 @@ function ReadyAppShell(props: {
           <header className="flex flex-wrap items-center justify-between gap-4 border-b border-foreground/10 px-6 py-4">
             <div>
               <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                GitOverflow
+                gitinspect.com
               </div>
               <div className="mt-1 text-lg font-medium">
                 {activeSession?.title ?? "Loading session..."}

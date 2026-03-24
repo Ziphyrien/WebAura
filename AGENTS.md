@@ -1,4 +1,4 @@
-# GitOverflow / Sitegeist Web v0
+# gitinspect.com / Sitegeist Web v0
 
 This repo is a strictly client-side browser app that recreates the core Sitegeist loop: auth, model selection, persistent sessions, streaming chat, resumable history, and local cost tracking.
 

@@ -95,7 +95,7 @@ describe("webMessageTransformer", () => {
         },
       },
       {
-        content: [{ text: "# GitOverflow", type: "text" }],
+        content: [{ text: "# gitinspect.com", type: "text" }],
         isError: false,
         role: "toolResult",
         timestamp: 3,
@@ -124,7 +124,7 @@ describe("webMessageTransformer", () => {
       },
       {
         call_id: "call-1",
-        output: "# GitOverflow",
+        output: "# gitinspect.com",
         type: "function_call_output",
       },
     ])
