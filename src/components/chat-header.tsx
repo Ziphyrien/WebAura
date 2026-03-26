@@ -67,6 +67,9 @@ function HeaderTooltip({
   )
 }
 
+const repoLinkClass =
+  "whitespace-nowrap font-geist-pixel-square text-sm font-semibold leading-none tracking-tight text-foreground underline-offset-4 hover:underline sm:text-base"
+
 export function ChatHeader(props: ChatHeaderProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const parsed = parseRepoPathname(pathname)
@@ -86,7 +89,7 @@ export function ChatHeader(props: ChatHeaderProps) {
                   <span className="inline-flex items-center gap-1.5">
                     <SquareOwnerAvatar owner={parsed.owner} />
                     <BreadcrumbLink
-                      className="whitespace-nowrap font-medium text-foreground underline-offset-4 hover:underline"
+                      className={repoLinkClass}
                       href={`https://github.com/${encodeURIComponent(parsed.owner)}`}
                       rel="noreferrer"
                       target="_blank"
@@ -95,10 +98,12 @@ export function ChatHeader(props: ChatHeaderProps) {
                     </BreadcrumbLink>
                   </span>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator className="shrink-0" />
+                <BreadcrumbSeparator className="shrink-0 text-muted-foreground [&>svg]:hidden">
+                  /
+                </BreadcrumbSeparator>
                 <BreadcrumbItem className="shrink-0">
                   <BreadcrumbLink
-                    className="whitespace-nowrap font-medium text-foreground underline-offset-4 hover:underline"
+                    className={repoLinkClass}
                     href={`https://github.com/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}`}
                     rel="noreferrer"
                     target="_blank"
