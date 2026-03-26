@@ -2,6 +2,7 @@ import { AgentHost } from "@/agent/agent-host"
 import type {
   RuntimeMutationResult,
 } from "@/agent/runtime-worker-types"
+import { getGithubPersonalAccessToken } from "@/repo/github-token"
 import { loadSessionWithMessages } from "@/sessions/session-service"
 import type { ProviderGroupId, ThinkingLevel } from "@/types/models"
 import type { RepoSource } from "@/types/storage"
@@ -20,9 +21,13 @@ export class SessionRuntimeRegistry {
       return false
     }
 
+    const githubRuntimeToken = await getGithubPersonalAccessToken()
     this.sessionHosts.set(
       sessionId,
-      new AgentHost(loaded.session, loaded.messages)
+      new AgentHost(loaded.session, loaded.messages, {
+        getGithubToken: getGithubPersonalAccessToken,
+        githubRuntimeToken,
+      })
     )
 
     return true
@@ -147,6 +152,41 @@ export class SessionRuntimeRegistry {
     }
 
     await host.setRepoSource(repoSource)
+
+    return {
+      ok: true,
+    }
+  }
+
+  async refreshGithubToken(
+    sessionId: string
+  ): Promise<RuntimeMutationResult> {
+    const exists = await this.ensureSession(sessionId)
+
+    if (!exists) {
+      return {
+        error: "missing-session",
+        ok: false,
+      }
+    }
+
+    const host = this.sessionHosts.get(sessionId)
+
+    if (!host) {
+      return {
+        error: "missing-session",
+        ok: false,
+      }
+    }
+
+    if (host.isBusy()) {
+      return {
+        error: "busy",
+        ok: false,
+      }
+    }
+
+    await host.refreshGithubToken()
 
     return {
       ok: true,

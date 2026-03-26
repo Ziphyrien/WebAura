@@ -3,6 +3,7 @@ import { SessionRuntimeRegistry } from "@/agent/session-runtime-registry"
 const registry = new SessionRuntimeRegistry()
 
 export const ensureSession = registry.ensureSession.bind(registry)
+export const refreshGithubToken = registry.refreshGithubToken.bind(registry)
 export const send = registry.send.bind(registry)
 export const abort = registry.abort.bind(registry)
 export const releaseSession = async (

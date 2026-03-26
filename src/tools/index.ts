@@ -3,9 +3,14 @@ import { createBashTool } from "@/tools/bash"
 import { createReadTool } from "@/tools/read"
 import { toAgentTool, toProviderToolDefinition } from "@/tools/types"
 
-export function createRepoTools(runtime: RepoRuntime) {
-  const read = createReadTool(runtime)
-  const bash = createBashTool(runtime)
+export function createRepoTools(
+  runtime: RepoRuntime,
+  options?: {
+    onRepoError?: (error: unknown) => void | Promise<void>
+  }
+) {
+  const read = createReadTool(runtime, options?.onRepoError)
+  const bash = createBashTool(runtime, options?.onRepoError)
   const definitions = [read, bash]
 
   return {

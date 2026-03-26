@@ -29,5 +29,9 @@ export function getMessageText(message: ChatMessage): string {
     return getTextFromAssistantContent(message.content)
   }
 
+  if (message.role === "system") {
+    return message.message
+  }
+
   return getTextFromUserContent(message.content)
 }

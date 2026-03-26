@@ -49,7 +49,8 @@ function isProbablyBinary(content: string): boolean {
 }
 
 export function createReadTool(
-  runtime: RepoRuntime
+  runtime: RepoRuntime,
+  onRepoError?: (error: unknown) => void | Promise<void>
 ): AppToolDefinition<typeof readSchema, ReadToolDetails> {
   return {
     description:
@@ -67,6 +68,10 @@ export function createReadTool(
       try {
         text = await runtime.fs.readFile(resolvedPath)
       } catch (error) {
+        if (onRepoError) {
+          await onRepoError(error)
+        }
+
         if (error instanceof GitHubFsError) {
           throw new Error(error.message)
         }

@@ -67,6 +67,10 @@ export function normalizeMessages(messages: AgentMessage[]): ChatMessage[] {
 }
 
 export function inferMessageStatus(message: ChatMessage): MessageStatus {
+  if (message.role === "system") {
+    return "completed"
+  }
+
   if (message.role !== "assistant") {
     return "completed"
   }
@@ -100,8 +104,11 @@ export function toChatMessage(message: MessageRow): ChatMessage {
   return chatMessage as ChatMessage
 }
 
+/** Rows the LLM / pi-agent should see (excludes local system notices). */
 export function toAgentMessages(messages: MessageRow[]): Message[] {
-  return messages.map((message) => toChatMessage(message))
+  return messages
+    .filter((row) => row.role !== "system")
+    .map((message) => toChatMessage(message) as Message)
 }
 
 export function normalizeAssistantDraft(

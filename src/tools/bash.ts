@@ -22,7 +22,8 @@ export interface BashToolDetails {
 }
 
 export function createBashTool(
-  runtime: RepoRuntime
+  runtime: RepoRuntime,
+  onRepoError?: (error: unknown) => void | Promise<void>
 ): AppToolDefinition<typeof bashSchema, BashToolDetails> {
   return {
     description:
@@ -33,7 +34,18 @@ export function createBashTool(
         throw new Error("Command aborted")
       }
 
-      const result = await execInRepoShell(runtime, params.command, signal)
+      let result: Awaited<ReturnType<typeof execInRepoShell>>
+
+      try {
+        result = await execInRepoShell(runtime, params.command, signal)
+      } catch (error) {
+        if (onRepoError) {
+          await onRepoError(error)
+        }
+
+        throw error
+      }
+
       const combined = [result.stdout, result.stderr].filter(Boolean).join("\n")
       const truncation = truncateTail(combined || "(no output)")
       let output = truncation.content || "(no output)"
@@ -44,7 +56,12 @@ export function createBashTool(
 
       if (result.exitCode !== 0) {
         output += `\n\nCommand exited with code ${result.exitCode}`
-        throw new Error(output)
+        const err = new Error(output)
+        if (onRepoError) {
+          await onRepoError(err)
+        }
+
+        throw err
       }
 
       return {

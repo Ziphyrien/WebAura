@@ -11,6 +11,7 @@ export interface RuntimeMutationResult {
 export interface RuntimeWorkerApi {
   abort(sessionId: string): Promise<void>
   ensureSession(sessionId: string): Promise<boolean>
+  refreshGithubToken(sessionId: string): Promise<RuntimeMutationResult>
   releaseSession(sessionId: string): Promise<void>
   send(sessionId: string, content: string): Promise<RuntimeMutationResult>
   setModelSelection(

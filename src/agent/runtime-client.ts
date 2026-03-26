@@ -70,6 +70,17 @@ export class RuntimeClient {
     await this.api?.releaseSession(sessionId)
   }
 
+  async refreshGithubToken(
+    sessionId: string
+  ): Promise<RuntimeMutationResult> {
+    await this.ensureConnected()
+    await this.ensureSession(sessionId)
+    return (await this.api?.refreshGithubToken(sessionId)) ?? {
+      error: "missing-session",
+      ok: false,
+    }
+  }
+
   async setModelSelection(
     sessionId: string,
     providerGroup: ProviderGroupId,

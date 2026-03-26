@@ -19,6 +19,10 @@ import {
   normalizeMessages,
   toMessageRow,
 } from "@/agent/session-adapter"
+import {
+  buildSystemMessage,
+  classifyRuntimeError,
+} from "@/agent/runtime-errors"
 import { streamChatWithPiAgent } from "@/agent/live-runtime"
 import { webMessageTransformer } from "@/agent/message-transformer"
 import { createRepoRuntime } from "@/repo/repo-runtime"
@@ -46,13 +50,25 @@ export class AgentHost {
   private disposed = false
   private persistQueue = Promise.resolve()
   private promptPending = false
+  private githubRuntimeTokenSnapshot?: string
+  private getGithubToken?: () => Promise<string | undefined>
+  private readonly systemNoticeFingerprints: string[] = []
   private repoRuntime
   private session: SessionData
   private unsubscribe?: () => void
 
-  constructor(session: SessionData, messages: MessageRow[]) {
+  constructor(
+    session: SessionData,
+    messages: MessageRow[],
+    options?: {
+      getGithubToken?: () => Promise<string | undefined>
+      githubRuntimeToken?: string
+    }
+  ) {
     this.lastTerminalStatus = undefined
     this.session = session
+    this.githubRuntimeTokenSnapshot = options?.githubRuntimeToken
+    this.getGithubToken = options?.getGithubToken
     this.repoRuntime = this.createRuntime(session.repoSource)
     this.seedRecordedCosts(messages)
 
@@ -164,6 +180,7 @@ export class AgentHost {
       if (this.disposed) {
         return
       }
+      await this.appendSystemNoticeFromError(error)
       this.lastTerminalStatus = "error"
       this.session = {
         ...this.session,
@@ -251,7 +268,9 @@ export class AgentHost {
     if (this.disposed) {
       return this.session
     }
-    this.repoRuntime = this.createRuntime(repoSource)
+    const token = await this.getGithubToken?.()
+    this.githubRuntimeTokenSnapshot = token
+    this.repoRuntime = this.createRuntime(repoSource, token)
     this.session = {
       ...this.session,
       repoSource: normalizeRepoSource(repoSource),
@@ -260,6 +279,18 @@ export class AgentHost {
     this.agent.setTools(this.getAgentTools(this.repoRuntime))
     await putSession(this.session)
     return this.session
+  }
+
+  /** Re-read PAT from local storage and rebuild repo tools (e.g. after saving token in settings). */
+  async refreshGithubToken(): Promise<void> {
+    if (this.disposed) {
+      return
+    }
+
+    const token = await this.getGithubToken?.()
+    this.githubRuntimeTokenSnapshot = token
+    this.repoRuntime = this.createRuntime(this.session.repoSource, token)
+    this.agent.setTools(this.getAgentTools(this.repoRuntime))
   }
 
   dispose(): void {
@@ -370,6 +401,9 @@ export class AgentHost {
 
     if (!this.agent.state.isStreaming && this.agent.state.error) {
       this.lastTerminalStatus ??= "error"
+      void this.appendSystemNoticeFromError(
+        new Error(this.agent.state.error)
+      )
     }
 
     if (event.type === "message_end" && event.message.role === "assistant") {
@@ -525,12 +559,79 @@ export class AgentHost {
     }
   }
 
-  private createRuntime(repoSource?: RepoSource) {
+  private createRuntime(repoSource?: RepoSource, token?: string) {
     const normalized = normalizeRepoSource(repoSource)
-    return normalized ? createRepoRuntime(normalized) : undefined
+
+    if (!normalized) {
+      return undefined
+    }
+
+    const resolved =
+      token !== undefined ? token : this.githubRuntimeTokenSnapshot
+
+    return createRepoRuntime(normalized, { runtimeToken: resolved })
   }
 
   private getAgentTools(runtime = this.repoRuntime) {
-    return runtime ? createRepoTools(runtime).agentTools : []
+    if (!runtime) {
+      return []
+    }
+
+    return createRepoTools(runtime, {
+      onRepoError: (err) => this.appendSystemNoticeFromError(err),
+    }).agentTools
+  }
+
+  private rememberSystemNoticeFingerprint(fingerprint: string): boolean {
+    if (this.systemNoticeFingerprints.includes(fingerprint)) {
+      return false
+    }
+
+    this.systemNoticeFingerprints.push(fingerprint)
+
+    if (this.systemNoticeFingerprints.length > 20) {
+      this.systemNoticeFingerprints.shift()
+    }
+
+    return true
+  }
+
+  private async appendSystemNoticeFromError(error: unknown): Promise<void> {
+    if (this.disposed) {
+      return
+    }
+
+    const classified = classifyRuntimeError(error)
+
+    if (!this.rememberSystemNoticeFingerprint(classified.fingerprint)) {
+      return
+    }
+
+    const systemMessage = buildSystemMessage(
+      classified,
+      createId(),
+      Date.now()
+    )
+    const row = toMessageRow(this.session.id, systemMessage)
+
+    this.persistQueue = this.persistQueue.then(async () => {
+      if (this.disposed) {
+        return
+      }
+
+      const existing = await getSessionMessages(this.session.id)
+      const merged = [...existing, row].sort(sortByTimestamp)
+      this.session = buildPersistedSession(
+        {
+          ...this.session,
+          updatedAt: getIsoNow(),
+        },
+        merged
+      )
+      await putSessionAndMessages(this.session, [row])
+      this.persistedMessageIds.add(row.id)
+    })
+
+    await this.persistQueue
   }
 }

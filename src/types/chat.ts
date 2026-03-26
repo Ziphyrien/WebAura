@@ -29,4 +29,25 @@ export type AssistantMessage = PiAssistantMessage & { id: string }
 
 export type ToolResultMessage = PiToolResultMessage & { id: string }
 
-export type ChatMessage = AssistantMessage | ToolResultMessage | UserMessage
+/** Local-only transcript row: not sent to the LLM (filtered in session-adapter). */
+export type SystemNoticeSeverity = "error" | "warning" | "info"
+
+export type SystemNoticeAction = "open-github-settings"
+
+export interface SystemMessage {
+  id: string
+  role: "system"
+  timestamp: number
+  /** High-level category for styling and CTAs */
+  kind: string
+  severity: SystemNoticeSeverity
+  source: "github" | "provider" | "runtime"
+  message: string
+  action?: SystemNoticeAction
+}
+
+export type ChatMessage =
+  | AssistantMessage
+  | SystemMessage
+  | ToolResultMessage
+  | UserMessage
