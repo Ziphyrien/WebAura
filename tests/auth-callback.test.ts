@@ -1,7 +1,7 @@
 import * as React from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
-import { AuthCallbackPage } from "@/routes/auth.callback"
+import { AuthCallbackPage } from "@/components/auth-callback-page"
 
 describe("auth callback page", () => {
   let originalOpener: PropertyDescriptor | undefined
