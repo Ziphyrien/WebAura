@@ -32,6 +32,9 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 
+/** Set to true when subscription OAuth login should be offered again. */
+const OAUTH_SUBSCRIPTION_LOGIN_ENABLED = false
+
 const SUBSCRIPTION_OAUTH_PROVIDERS: OAuthProviderId[] = [
   "anthropic",
   "openai-codex",
@@ -128,8 +131,17 @@ export function ProviderSettings(props: {
         <div className="space-y-1.5">
           <h3 className="text-sm font-medium">Subscription Login</h3>
           <p className="text-xs text-muted-foreground">
-            Log in with your existing subscription. No API key needed. Tokens are
-            stored locally and refreshed automatically.
+            {OAUTH_SUBSCRIPTION_LOGIN_ENABLED ? (
+              <>
+                Log in with your existing subscription. No API key needed. Tokens
+                are stored locally and refreshed automatically.
+              </>
+            ) : (
+              <>
+                Subscription OAuth login is coming soon. You can still use API
+                keys below.
+              </>
+            )}
           </p>
         </div>
 
@@ -190,7 +202,7 @@ export function ProviderSettings(props: {
                       >
                         Logout
                       </Button>
-                    ) : (
+                    ) : OAUTH_SUBSCRIPTION_LOGIN_ENABLED ? (
                       <Button
                         onClick={async () => {
                           try {
@@ -228,6 +240,15 @@ export function ProviderSettings(props: {
                         variant="secondary"
                       >
                         Login
+                      </Button>
+                    ) : (
+                      <Button
+                        disabled
+                        size="sm"
+                        type="button"
+                        variant="secondary"
+                      >
+                        Coming soon
                       </Button>
                     )}
                   </ItemActions>
