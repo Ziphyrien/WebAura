@@ -17,6 +17,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation"
+import { ProgressiveBlur } from "@/components/ui/progressive-blur"
 import type { RepoComboboxHandle } from "./repo-combobox"
 import { toast } from "sonner"
 import { Icons } from "@/components/icons"
@@ -412,7 +413,17 @@ export function Chat(props: ChatProps) {
             })
           )}
         </ConversationContent>
-        <ConversationScrollButton />
+        <ConversationScrollButton className="z-[15]" />
+        {messages.length > 0 ? (
+          <>
+            <ProgressiveBlur className="z-[5]" height="32px" position="top" />
+            <ProgressiveBlur
+              className="z-[5]"
+              position="bottom"
+              style={{ bottom: "var(--chat-input-height, 0px)" }}
+            />
+          </>
+        ) : null}
       </Conversation>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
