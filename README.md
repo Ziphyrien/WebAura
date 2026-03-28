@@ -17,8 +17,6 @@ bun install
 bun run dev
 ```
 
-→ [localhost:3000](http://localhost:3000)
-
 ```bash
 bun test
 bun run build
