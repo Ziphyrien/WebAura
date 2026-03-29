@@ -228,6 +228,17 @@ describe("WorkerBackedAgentHost", () => {
     persistenceGetSeedMessages.mockClear()
     persistenceAppendSystemNoticeFromError.mockClear()
     persistenceApplySnapshot.mockClear()
+    persistenceApplySnapshot.mockImplementation(
+      async (envelope: {
+        snapshot: WorkerSnapshotEnvelope["snapshot"]
+        terminalStatus?: WorkerSnapshotEnvelope["terminalStatus"]
+      }): Promise<void> => {
+        persistenceSession = {
+          ...persistenceSession,
+          isStreaming: envelope.snapshot.isStreaming,
+        }
+      }
+    )
     persistencePersistCurrentTurnBoundary.mockClear()
     persistencePersistCurrentTurnBoundary.mockImplementation(
       async (_snapshot: WorkerSnapshotEnvelope["snapshot"]): Promise<boolean> => {
@@ -311,6 +322,68 @@ describe("WorkerBackedAgentHost", () => {
     expect(persistencePersistCurrentTurnBoundary).toHaveBeenCalledWith(
       finalEnvelope.snapshot
     )
+    expect(persistenceRepairTurnFailure).not.toHaveBeenCalled()
+  })
+
+  it("injects terminal GitHub errors into the snapshot before persistence cleanup", async () => {
+    const erroredEnvelope: WorkerSnapshotEnvelope = {
+      sessionId: "session-1",
+      snapshot: {
+        error: undefined,
+        isStreaming: false,
+        messages: [
+          {
+            content: "hello",
+            role: "user",
+            timestamp: 1,
+          },
+        ],
+        streamMessage: null,
+      },
+      terminalErrorMessage: "Authentication required: /",
+      terminalStatus: "error",
+    }
+
+    workerStartTurn.mockImplementation(
+      async (
+        _input: {
+          githubRuntimeToken?: string
+          messages: MessageRow[]
+          session: SessionData
+          turn: {
+            assistantMessageId: string
+            turnId: string
+            userMessage: {
+              content: string
+              id: string
+              role: "user"
+              timestamp: number
+            }
+          }
+        },
+        events: RuntimeWorkerEvents
+      ): Promise<void> => {
+        await events.pushSnapshot(erroredEnvelope)
+      }
+    )
+    workerWaitForTurn.mockResolvedValue(erroredEnvelope)
+
+    const { WorkerBackedAgentHost } = await import(
+      "@/agent/worker-backed-agent-host"
+    )
+    const host = new WorkerBackedAgentHost(createSession(), [])
+
+    await host.startTurn("hello")
+    await host.waitForTurn()
+
+    expect(persistenceApplySnapshot).toHaveBeenCalledWith({
+      snapshot: {
+        ...erroredEnvelope.snapshot,
+        error: "Authentication required: /",
+      },
+      terminalStatus: "error",
+    })
+    expect(persistencePersistCurrentTurnBoundary).not.toHaveBeenCalled()
     expect(persistenceRepairTurnFailure).not.toHaveBeenCalled()
   })
 })

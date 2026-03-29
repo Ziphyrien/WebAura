@@ -16,6 +16,7 @@ import {
   type AgentStateSnapshot,
   type TerminalAssistantStatus,
 } from "@/agent/agent-turn-persistence"
+import { shouldStopStreamingForRuntimeError } from "@/agent/runtime-errors"
 import { webMessageTransformer } from "@/agent/message-transformer"
 import { streamChatWithPiAgent } from "@/agent/provider-stream"
 import { buildInitialAgentState } from "@/agent/session-adapter"
@@ -49,6 +50,7 @@ export class AgentHost {
   private watchdogError?: Error
   private watchdogInterval?: ReturnType<typeof setInterval>
   private recoveringFromHandlerError = false
+  private terminalErrorMessage?: string
 
   constructor(
     session: SessionData,
@@ -108,6 +110,7 @@ export class AgentHost {
 
     const turn = this.persistence.createTurn(trimmed)
     this.lastTerminalStatus = undefined
+    this.terminalErrorMessage = undefined
     this.watchdogError = undefined
     this.promptPending = true
 
@@ -141,6 +144,7 @@ export class AgentHost {
 
   abort(): void {
     this.lastTerminalStatus = "aborted"
+    this.terminalErrorMessage = undefined
     this.agent.abort()
   }
 
@@ -215,8 +219,9 @@ export class AgentHost {
       await this.flushPersistence()
 
       if (!this.isDisposed() && this.session.isStreaming) {
+        const snapshot = this.snapshotWithTerminalError(this.snapshotAgentState())
         const finalized = await this.persistence.persistCurrentTurnBoundary(
-          this.snapshotAgentState()
+          snapshot
         )
 
         if (!finalized) {
@@ -224,13 +229,14 @@ export class AgentHost {
             this.watchdogError ??
               promptError ??
               new Error("Runtime stopped before clearing the streaming state."),
-            this.snapshotAgentState()
+            snapshot
           )
         }
       }
 
       this.watchdogError = undefined
       this.lastTerminalStatus = undefined
+      this.terminalErrorMessage = undefined
     }
   }
 
@@ -243,26 +249,28 @@ export class AgentHost {
     }
 
     this.markProgress()
+    const nextSnapshot = this.snapshotWithTerminalError(snapshot)
 
-    if (!snapshot.isStreaming && snapshot.error) {
+    if (!nextSnapshot.isStreaming && nextSnapshot.error) {
       this.lastTerminalStatus ??= "error"
     }
 
     await this.persistence.applySnapshot({
-      snapshot,
+      snapshot: nextSnapshot,
       terminalStatus: this.lastTerminalStatus,
     })
 
     if (
-      snapshot.isStreaming &&
+      nextSnapshot.isStreaming &&
       event.type === "turn_end" &&
       event.toolResults.length > 0
     ) {
       this.persistence.rotateStreamingAssistantDraft()
     }
 
-    if (!snapshot.isStreaming) {
+    if (!nextSnapshot.isStreaming) {
       this.lastTerminalStatus = undefined
+      this.terminalErrorMessage = undefined
     }
   }
 
@@ -339,10 +347,22 @@ export class AgentHost {
     }
 
     return createRepoTools(runtime, {
-      onRepoError: (error) =>
-        this.persistence.appendSystemNoticeFromError(
+      onRepoError: async (error) => {
+        const nextError =
           error instanceof Error ? error : new Error(String(error))
-        ),
+
+        await this.persistence.appendSystemNoticeFromError(nextError)
+
+        if (
+          shouldStopStreamingForRuntimeError(nextError) &&
+          this.terminalErrorMessage === undefined
+        ) {
+          this.terminalErrorMessage = nextError.message
+          this.watchdogError = nextError
+          this.lastTerminalStatus = "error"
+          this.agent.abort()
+        }
+      },
     }).agentTools
   }
 
@@ -388,6 +408,22 @@ export class AgentHost {
         this.agent.state.streamMessage === null
           ? null
           : cloneValue(this.agent.state.streamMessage),
+    }
+  }
+
+  private snapshotWithTerminalError(
+    snapshot: AgentStateSnapshot
+  ): AgentStateSnapshot {
+    if (
+      this.terminalErrorMessage === undefined ||
+      snapshot.error !== undefined
+    ) {
+      return snapshot
+    }
+
+    return {
+      ...snapshot,
+      error: this.terminalErrorMessage,
     }
   }
 }

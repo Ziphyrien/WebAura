@@ -4,6 +4,7 @@ import type {
   AgentTool,
 } from "@mariozechner/pi-agent-core"
 import { BusyRuntimeError } from "@/agent/runtime-command-errors"
+import { shouldStopStreamingForRuntimeError } from "@/agent/runtime-errors"
 import { webMessageTransformer } from "@/agent/message-transformer"
 import { streamChatWithPiAgent } from "@/agent/provider-stream"
 import { buildInitialAgentState } from "@/agent/session-adapter"
@@ -48,6 +49,7 @@ class WorkerAgentRunner {
   private readonly events: RuntimeWorkerEvents
   private flushTimer?: ReturnType<typeof setTimeout>
   private latestTerminalStatus: "aborted" | "error" | undefined
+  private terminalErrorMessage?: string
   private rotateStreamingAssistantDraft = false
   private pendingRuntimeErrors: string[] = []
   private lastEnvelope?: WorkerSnapshotEnvelope
@@ -112,6 +114,7 @@ class WorkerAgentRunner {
     }
 
     this.latestTerminalStatus = undefined
+    this.terminalErrorMessage = undefined
     this.promptPending = true
     this.markProgress()
     this.runningTurn = this.runTurnToCompletion(turn.userMessage).finally(() => {
@@ -126,6 +129,7 @@ class WorkerAgentRunner {
 
   abort(): void {
     this.latestTerminalStatus = "aborted"
+    this.terminalErrorMessage = undefined
     this.agent.abort()
     void this.flushSnapshotNow()
   }
@@ -275,6 +279,7 @@ class WorkerAgentRunner {
           : undefined,
       sessionId: this.sessionId,
       snapshot: this.snapshotAgentState(),
+      terminalErrorMessage: this.terminalErrorMessage,
       terminalStatus: this.latestTerminalStatus,
     }
 
@@ -357,9 +362,19 @@ class WorkerAgentRunner {
 
     return createRepoTools(runtime, {
       onRepoError: (error) => {
-        this.pendingRuntimeErrors.push(
-          error instanceof Error ? error.message : String(error)
-        )
+        const nextError =
+          error instanceof Error ? error : new Error(String(error))
+        this.pendingRuntimeErrors.push(nextError.message)
+
+        if (
+          shouldStopStreamingForRuntimeError(nextError) &&
+          this.terminalErrorMessage === undefined
+        ) {
+          this.terminalErrorMessage = nextError.message
+          this.latestTerminalStatus = "error"
+          this.agent.abort()
+        }
+
         this.queueSnapshotFlush(true)
       },
     }).agentTools

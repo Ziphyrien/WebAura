@@ -45,6 +45,9 @@ type Subscriber = (event: MockAgentEvent) => void
 
 let subscriber: Subscriber | undefined
 let resolvePrompt: (() => void) | undefined
+let onRepoError:
+  | ((error: unknown) => void | Promise<void>)
+  | undefined
 
 const agentState: MockAgentState = {
   error: undefined,
@@ -97,9 +100,20 @@ vi.mock("@mariozechner/pi-agent-core", () => ({
 }))
 
 vi.mock("@/tools", () => ({
-  createRepoTools: vi.fn(() => ({
-    agentTools: [] as AgentTool[],
-  })),
+  createRepoTools: vi.fn(
+    (
+      _runtime: unknown,
+      options?: {
+        onRepoError?: (error: unknown) => void | Promise<void>
+      }
+    ) => {
+      onRepoError = options?.onRepoError
+
+      return {
+        agentTools: [] as AgentTool[],
+      }
+    }
+  ),
 }))
 
 function createSession(): SessionData {
@@ -167,6 +181,7 @@ describe("runtime worker", () => {
     setToolsMock.mockClear()
     subscriber = undefined
     resolvePrompt = undefined
+    onRepoError = undefined
     agentState.error = undefined
     agentState.isStreaming = false
     agentState.messages = []
@@ -217,7 +232,14 @@ describe("runtime worker", () => {
     await worker.startTurn(
       {
         messages: [],
-        session: createSession(),
+        session: {
+          ...createSession(),
+          repoSource: {
+            owner: "acme",
+            ref: "main",
+            repo: "demo",
+          },
+        },
         turn: createTurn(),
       },
       { pushSnapshot }
@@ -260,7 +282,14 @@ describe("runtime worker", () => {
     await worker.startTurn(
       {
         messages: [],
-        session: createSession(),
+        session: {
+          ...createSession(),
+          repoSource: {
+            owner: "acme",
+            ref: "main",
+            repo: "demo",
+          },
+        },
         turn: createTurn(),
       },
       { pushSnapshot }
@@ -312,7 +341,14 @@ describe("runtime worker", () => {
     await worker.startTurn(
       {
         messages: [],
-        session: createSession(),
+        session: {
+          ...createSession(),
+          repoSource: {
+            owner: "acme",
+            ref: "main",
+            repo: "demo",
+          },
+        },
         turn: createTurn(),
       },
       { pushSnapshot }
@@ -326,6 +362,65 @@ describe("runtime worker", () => {
       expect.objectContaining({
         sessionId: "session-1",
         terminalStatus: "aborted",
+      })
+    )
+
+    await worker.disposeSession("session-1")
+  })
+
+  it("stops streaming on the first actionable GitHub repo error", async () => {
+    abortMock.mockImplementation(() => {
+      agentState.isStreaming = false
+      agentState.streamMessage = null
+    })
+    promptMock.mockImplementation(async () => {
+      agentState.isStreaming = true
+      agentState.streamMessage = createAssistantMessage({
+        content: [{ text: "Reading...", type: "text" }],
+        id: "assistant-stream",
+        stopReason: "toolUse",
+      })
+
+      await new Promise<void>(() => {})
+    })
+
+    const worker = await import("@/agent/runtime-worker")
+    const repoModule = await import("@/repo/github-fs")
+    const pushSnapshot = vi.fn(async () => {})
+
+    await worker.startTurn(
+      {
+        messages: [],
+        session: {
+          ...createSession(),
+          repoSource: {
+            owner: "acme",
+            ref: "main",
+            repo: "demo",
+          },
+        },
+        turn: createTurn(),
+      },
+      { pushSnapshot }
+    )
+
+    expect(onRepoError).toBeTypeOf("function")
+
+    await onRepoError?.(
+      new repoModule.GitHubFsError(
+        "EACCES",
+        "Authentication required: /",
+        "/"
+      )
+    )
+    await flushMicrotasks()
+
+    expect(abortMock).toHaveBeenCalledTimes(1)
+    expect(pushSnapshot).toHaveBeenCalledWith(
+      expect.objectContaining({
+        runtimeErrors: ["Authentication required: /"],
+        terminalErrorMessage: "Authentication required: /",
+        terminalStatus: "error",
       })
     )
 

@@ -276,3 +276,13 @@ export function buildSystemMessage(
     timestamp,
   }
 }
+
+export function shouldStopStreamingForRuntimeError(error: unknown): boolean {
+  const classified = classifyRuntimeError(error)
+
+  return (
+    classified.source === "github" &&
+    classified.severity === "error" &&
+    classified.action === "open-github-settings"
+  )
+}

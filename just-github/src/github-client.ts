@@ -42,6 +42,8 @@ export class GitHubClient {
   private readonly ref: string;
   private readonly token?: string;
   private readonly baseUrl: string;
+  private blockedUntilMs = 0;
+  private secondaryBackoffMs = 60 * 1000;
   rateLimit: RateLimitInfo | null = null;
 
   constructor(options: GitHubClientOptions) {
@@ -59,6 +61,8 @@ export class GitHubClient {
   }
 
   async fetchRaw(path: string): Promise<string> {
+    this.throwIfRateLimited(path);
+
     const normalized = normalizePath(path);
     const url = `https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.ref}/${normalized}`;
     const headers: Record<string, string> = {};
@@ -67,13 +71,16 @@ export class GitHubClient {
     }
 
     const res = await fetch(url, { headers });
+    this.updateRateLimit(res);
     if (!res.ok) {
-      throw this.httpError(res.status, path);
+      throw await this.httpError(res, path);
     }
     return res.text();
   }
 
   async fetchRawBuffer(path: string): Promise<Uint8Array> {
+    this.throwIfRateLimited(path);
+
     const normalized = normalizePath(path);
     const url = `https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.ref}/${normalized}`;
     const headers: Record<string, string> = {};
@@ -82,8 +89,9 @@ export class GitHubClient {
     }
 
     const res = await fetch(url, { headers });
+    this.updateRateLimit(res);
     if (!res.ok) {
-      throw this.httpError(res.status, path);
+      throw await this.httpError(res, path);
     }
     return new Uint8Array(await res.arrayBuffer());
   }
@@ -143,6 +151,8 @@ export class GitHubClient {
   }
 
   private async request<T>(url: string, pathForError: string): Promise<T> {
+    this.throwIfRateLimited(pathForError);
+
     const headers: Record<string, string> = {
       Accept: "application/vnd.github.v3+json",
     };
@@ -154,7 +164,7 @@ export class GitHubClient {
     this.updateRateLimit(res);
 
     if (!res.ok) {
-      throw this.httpError(res.status, pathForError);
+      throw await this.httpError(res, pathForError);
     }
 
     return res.json() as Promise<T>;
@@ -164,6 +174,7 @@ export class GitHubClient {
     const limit = res.headers.get("x-ratelimit-limit");
     const remaining = res.headers.get("x-ratelimit-remaining");
     const reset = res.headers.get("x-ratelimit-reset");
+    const retryAfter = parsePositiveInt(res.headers.get("retry-after"));
 
     if (limit && remaining && reset) {
       this.rateLimit = {
@@ -171,15 +182,86 @@ export class GitHubClient {
         remaining: parseInt(remaining, 10),
         reset: new Date(parseInt(reset, 10) * 1000),
       };
+
+      if (this.rateLimit.remaining === 0) {
+        this.blockedUntilMs = Math.max(
+          this.blockedUntilMs,
+          this.rateLimit.reset.getTime(),
+        );
+        this.secondaryBackoffMs = 60 * 1000;
+      } else if (res.ok && this.blockedUntilMs <= Date.now()) {
+        this.blockedUntilMs = 0;
+        this.secondaryBackoffMs = 60 * 1000;
+      }
+    }
+
+    if (retryAfter !== undefined) {
+      this.blockedUntilMs = Math.max(
+        this.blockedUntilMs,
+        Date.now() + retryAfter * 1000,
+      );
     }
   }
 
-  private httpError(status: number, path: string): GitHubFsError {
-    if (status === 403 && this.rateLimit && this.rateLimit.remaining === 0) {
-      const resetAt = this.rateLimit.reset.toLocaleTimeString();
-      return new GitHubFsError("EACCES", `GitHub API rate limit exceeded (resets at ${resetAt}): ${path}`, path);
+  private throwIfRateLimited(path: string): void {
+    if (this.blockedUntilMs <= Date.now()) {
+      return;
     }
-    switch (status) {
+
+    throw this.createRateLimitError(path);
+  }
+
+  private createRateLimitError(path: string): GitHubFsError {
+    const retryAt = new Date(this.blockedUntilMs).toLocaleTimeString();
+    return new GitHubFsError(
+      "EACCES",
+      `GitHub API rate limit exceeded (retry after ${retryAt}): ${path}`,
+      path,
+    );
+  }
+
+  private async readErrorMessage(res: Response): Promise<string | undefined> {
+    try {
+      const data = await res.clone().json() as { message?: unknown };
+      if (typeof data.message === "string" && data.message.trim().length > 0) {
+        return data.message.trim();
+      }
+    } catch {}
+
+    try {
+      const text = (await res.clone().text()).trim();
+      return text.length > 0 ? text : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private async httpError(res: Response, path: string): Promise<GitHubFsError> {
+    const detail = (await this.readErrorMessage(res))?.toLowerCase();
+    const retryAfter = parsePositiveInt(res.headers.get("retry-after"));
+
+    if (
+      res.status === 429 ||
+      retryAfter !== undefined ||
+      (res.status === 403 &&
+        (this.rateLimit?.remaining === 0 || detail?.includes("rate limit")))
+    ) {
+      const retryAt =
+        retryAfter !== undefined
+          ? Date.now() + retryAfter * 1000
+          : this.rateLimit?.remaining === 0
+            ? this.rateLimit.reset.getTime()
+            : Date.now() + this.secondaryBackoffMs;
+
+      this.blockedUntilMs = Math.max(this.blockedUntilMs, retryAt);
+      this.secondaryBackoffMs = Math.min(
+        this.secondaryBackoffMs * 2,
+        15 * 60 * 1000,
+      );
+      return this.createRateLimitError(path);
+    }
+
+    switch (res.status) {
       case 404:
         return new GitHubFsError("ENOENT", `No such file or directory: ${path}`, path);
       case 403:
@@ -187,9 +269,18 @@ export class GitHubClient {
       case 401:
         return new GitHubFsError("EACCES", `Authentication required: ${path}`, path);
       default:
-        return new GitHubFsError("EIO", `GitHub API error (${status}): ${path}`, path);
+        return new GitHubFsError("EIO", `GitHub API error (${res.status}): ${path}`, path);
     }
   }
+}
+
+function parsePositiveInt(value: string | null): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
 function normalizePath(path: string): string {
