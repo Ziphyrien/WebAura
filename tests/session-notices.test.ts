@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import type { Message } from "@mariozechner/pi-ai"
 import type { MessageRow, SessionData, SessionRuntimeRow } from "@/types/storage"
 import { createEmptyUsage } from "@/types/models"
+import {
+  toOpenAIResponsesInput,
+  webMessageTransformer,
+} from "@/agent/message-transformer"
 import {
   appendSessionNotice,
   reconcileInterruptedSession,
@@ -398,5 +403,33 @@ describe("session-notices", () => {
         }),
       ])
     )
+  })
+
+  it("repairs interrupted history so the next replay emits no orphan function outputs", async () => {
+    helpers.state.sessions.set(
+      "session-1",
+      buildSession({
+        isStreaming: true,
+      })
+    )
+    helpers.state.messagesBySession.set("session-1", [
+      buildUserMessage(),
+      buildStreamingAssistant({
+        content: [{ text: "", type: "text" }],
+      }),
+      buildToolResultMessage({
+        toolCallId: "functions_bash_0|fc-1",
+      }),
+    ])
+
+    await reconcileInterruptedSession("session-1")
+
+    const replayMessages = (helpers.state.messagesBySession.get("session-1") ?? [])
+      .filter((message) => message.role !== "system") as Message[]
+    const replayInput = toOpenAIResponsesInput(webMessageTransformer(replayMessages))
+
+    expect(
+      replayInput.some((item) => item.type === "function_call_output")
+    ).toBe(false)
   })
 })

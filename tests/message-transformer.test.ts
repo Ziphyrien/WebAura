@@ -5,7 +5,7 @@ import {
 } from "@/agent/message-transformer"
 
 describe("webMessageTransformer", () => {
-  it("forwards only llm-compatible message roles", () => {
+  it("forwards only llm-compatible message roles with orphan tool results removed", () => {
     const transformed = webMessageTransformer([
       {
         content: "hello",
@@ -49,11 +49,7 @@ describe("webMessageTransformer", () => {
       } as never,
     ])
 
-    expect(transformed.map((message) => message.role)).toEqual([
-      "user",
-      "toolResult",
-      "assistant",
-    ])
+    expect(transformed.map((message) => message.role)).toEqual(["user", "assistant"])
   })
 
   it("serializes responses input using message and function items", () => {

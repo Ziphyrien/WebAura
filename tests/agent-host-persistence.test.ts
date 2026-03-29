@@ -672,7 +672,7 @@ describe("AgentHost persistence", () => {
     )
 
     expect(
-      putSessionAndMessages.mock.calls.some(
+      replaceSessionMessages.mock.calls.some(
         ([session, messages]) =>
           session.isStreaming === false &&
           messages.some(
