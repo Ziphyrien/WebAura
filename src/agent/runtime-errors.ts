@@ -8,6 +8,7 @@ import {
 
 export type RuntimeErrorKind =
   | "missing_session"
+  | "provider_api"
   | "github_rate_limit"
   | "github_auth"
   | "github_not_found"
@@ -30,6 +31,19 @@ export interface ClassifiedRuntimeError {
 }
 
 const RATE_LIMIT_SUBSTR = "github api rate limit exceeded"
+const PROVIDER_MARKERS = [
+  "anthropic",
+  "openai",
+  "openai-codex",
+  "fireworks",
+  "api.fireworks.ai",
+  "gemini",
+  "google",
+  "groq",
+  "mistral",
+  "x.ai",
+  "proxy",
+] as const
 
 function isProviderRateLimitMessage(lower: string): boolean {
   if (lower.includes("github")) {
@@ -51,6 +65,18 @@ function normalizeMessage(error: unknown): string {
   }
 
   return String(error)
+}
+
+function isProviderMessage(lower: string, message: string): boolean {
+  if (lower.includes("github")) {
+    return false
+  }
+
+  if (message.includes(" → https://") || message.includes(" → http://")) {
+    return true
+  }
+
+  return PROVIDER_MARKERS.some((marker) => lower.includes(marker))
 }
 
 function fingerprintFor(
@@ -197,6 +223,16 @@ export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
     return {
       fingerprint: fingerprintFor("provider_rate_limit", message),
       kind: "provider_rate_limit",
+      message,
+      severity: "error",
+      source: "provider",
+    }
+  }
+
+  if (isProviderMessage(lower, message)) {
+    return {
+      fingerprint: fingerprintFor("provider_api", message),
+      kind: "provider_api",
       message,
       severity: "error",
       source: "provider",
