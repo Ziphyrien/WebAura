@@ -150,12 +150,6 @@ function getLastAssistantMessage(
     )
 }
 
-function trackMessageSent(path?: string) {
-  void trackEvent("Message sent", path).catch(() => {
-    // Analytics must never interfere with chat sends.
-  })
-}
-
 export function Chat(props: ChatProps) {
   const navigate = useNavigate()
   const search = useSearch({ strict: false })
@@ -554,7 +548,9 @@ export function Chat(props: ChatProps) {
             })
           : await createSessionForChat(base)
         await runtimeClient.startInitialTurn(session, content)
-        trackMessageSent()
+        void trackEvent("Message sent").catch(() => {
+          // Analytics must never interfere with chat sends.
+        })
         await navigate({
           params: {
             sessionId: session.id,
@@ -599,7 +595,9 @@ export function Chat(props: ChatProps) {
 
         try {
           await runtime.send(content)
-          trackMessageSent("/chat")
+          void trackEvent("Message sent", "/chat").catch(() => {
+            // Analytics must never interfere with chat sends.
+          })
         } catch (error) {
           reportRuntimeFailure(
             error instanceof Error ? error : new Error(String(error))
