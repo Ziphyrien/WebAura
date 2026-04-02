@@ -1,13 +1,10 @@
 import { toast } from "sonner";
-import {
-  GitHubRateLimitController,
-  type GitHubRateLimitKind,
-} from "@gitinspect/pi/lib/github/github-rate-limit";
+import { GitHubRateLimitController, type GitHubRateLimitKind } from "just-github/github-rate-limit";
 import {
   readGitHubErrorMessage,
   shouldRetryUnauthenticated,
   stripAuthorization,
-} from "@gitinspect/pi/lib/github/github-http";
+} from "just-github/github-http";
 import { classifyRuntimeError } from "@gitinspect/pi/agent/runtime-errors";
 import { getGithubPersonalAccessToken } from "@gitinspect/pi/repo/github-token";
 import { appendSessionNotice } from "@gitinspect/pi/sessions/session-notices";

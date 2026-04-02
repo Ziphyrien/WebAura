@@ -135,7 +135,9 @@ export class GitHubFs implements IFileSystem {
     return entries.map((e) => e.name);
   }
 
-  async readdirWithFileTypes(path: string): Promise<{ name: string; isFile: boolean; isDirectory: boolean; isSymbolicLink: boolean }[]> {
+  async readdirWithFileTypes(
+    path: string,
+  ): Promise<{ name: string; isFile: boolean; isDirectory: boolean; isSymbolicLink: boolean }[]> {
     const entries = await this.readdirInternal(path);
     return entries.map((e) => ({
       name: e.name,
@@ -145,12 +147,30 @@ export class GitHubFs implements IFileSystem {
     }));
   }
 
-  async stat(path: string): Promise<{ isFile: boolean; isDirectory: boolean; isSymbolicLink: boolean; mode: number; size: number; mtime: Date }> {
+  async stat(
+    path: string,
+  ): Promise<{
+    isFile: boolean;
+    isDirectory: boolean;
+    isSymbolicLink: boolean;
+    mode: number;
+    size: number;
+    mtime: Date;
+  }> {
     const info = await this.statInternal(path);
     return toFsStat(info.type, info.size, info.mode);
   }
 
-  async lstat(path: string): Promise<{ isFile: boolean; isDirectory: boolean; isSymbolicLink: boolean; mode: number; size: number; mtime: Date }> {
+  async lstat(
+    path: string,
+  ): Promise<{
+    isFile: boolean;
+    isDirectory: boolean;
+    isSymbolicLink: boolean;
+    mode: number;
+    size: number;
+    mtime: Date;
+  }> {
     return this.stat(path);
   }
 
@@ -220,7 +240,9 @@ export class GitHubFs implements IFileSystem {
     }));
   }
 
-  private async statInternal(path: string): Promise<{ type: string; size: number; sha: string; mode: string }> {
+  private async statInternal(
+    path: string,
+  ): Promise<{ type: string; size: number; sha: string; mode: string }> {
     const normalized = normalizePath(path);
 
     if (normalized === "") {
@@ -378,9 +400,7 @@ export class GitHubFs implements IFileSystem {
   private async readBlobText(sha: string): Promise<string> {
     const blob = await this.client.fetchBlob(sha);
 
-    return blob.encoding === "base64"
-      ? decodeBase64(blob.content)
-      : blob.content;
+    return blob.encoding === "base64" ? decodeBase64(blob.content) : blob.content;
   }
 
   private async readBlobBuffer(sha: string): Promise<Uint8Array> {
@@ -393,7 +413,30 @@ export class GitHubFs implements IFileSystem {
 }
 
 function normalizePath(path: string): string {
-  return path.replace(/^\/+/, "").replace(/\/+$/, "");
+  const trimmed = path.trim();
+
+  if (!trimmed || trimmed === "/" || trimmed === ".") {
+    return "";
+  }
+
+  const normalizedSegments: string[] = [];
+
+  for (const segment of trimmed.split("/")) {
+    const next = segment.trim();
+
+    if (!next || next === ".") {
+      continue;
+    }
+
+    if (next === "..") {
+      normalizedSegments.pop();
+      continue;
+    }
+
+    normalizedSegments.push(next);
+  }
+
+  return normalizedSegments.join("/");
 }
 
 function treeEntryType(type: string, mode: string): DirEntry["type"] {

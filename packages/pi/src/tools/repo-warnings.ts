@@ -1,4 +1,4 @@
-import { GitHubFsError } from "@gitinspect/pi/lib/github/types";
+import { GitHubFsError } from "just-github/types";
 
 export function warningMessageToError(message: string): GitHubFsError {
   return new GitHubFsError({

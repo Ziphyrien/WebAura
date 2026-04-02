@@ -1,5 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
-import { GitHubFsError } from "@gitinspect/pi/lib/github/types";
+import { GitHubFsError } from "just-github/types";
 import { execInRepoShell } from "@gitinspect/pi/repo/repo-runtime";
 import type { RepoRuntime } from "@gitinspect/pi/repo/repo-types";
 import { warningMessageToError } from "@gitinspect/pi/tools/repo-warnings";

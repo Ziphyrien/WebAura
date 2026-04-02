@@ -1,5 +1,5 @@
-import { readGitHubErrorMessage, toGitHubFsError } from "@gitinspect/pi/lib/github/github-http";
-import { GitHubFsError } from "@gitinspect/pi/lib/github/types";
+import { readGitHubErrorMessage, toGitHubFsError } from "just-github/github-http";
+import { GitHubFsError } from "just-github/types";
 import { githubApiFetch } from "@gitinspect/pi/repo/github-fetch";
 import {
   createBranchRepoRef,

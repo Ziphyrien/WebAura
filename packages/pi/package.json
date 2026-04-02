@@ -18,6 +18,7 @@
     "comlink": "^4.4.2",
     "dexie-react-hooks": "^4.2.0",
     "just-bash": "^2.14.0",
+    "just-github": "workspace:*",
     "react": "catalog:",
     "sonner": "catalog:"
   },

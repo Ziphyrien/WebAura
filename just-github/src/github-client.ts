@@ -4,15 +4,8 @@ import {
   type GitHubContentResponse,
   type GitHubTreeResponse,
 } from "./types.js";
-import {
-  displayResolvedRef,
-  toCommitApiRef,
-  type GitHubResolvedRef,
-} from "./refs.js";
-import {
-  GitHubRateLimitController,
-  parseGitHubRateLimitInfo,
-} from "./github-rate-limit.js";
+import { displayResolvedRef, toCommitApiRef, type GitHubResolvedRef } from "./refs.js";
+import { GitHubRateLimitController, parseGitHubRateLimitInfo } from "./github-rate-limit.js";
 import {
   readGitHubErrorMessage,
   shouldRetryUnauthenticated,
@@ -102,9 +95,7 @@ export class GitHubClient {
       if (
         this.ref.kind === "tag" &&
         error instanceof GitHubFsError &&
-        (error.kind === "conflict" ||
-          error.kind === "not_found" ||
-          error.kind === "validation")
+        (error.kind === "conflict" || error.kind === "not_found" || error.kind === "validation")
       ) {
         await this.throwUnsupportedTagTarget();
       }
@@ -114,10 +105,14 @@ export class GitHubClient {
   }
 
   private async request<T>(url: string, pathForError: string): Promise<T> {
-    const res = await this.fetchWithOptionalAnonymousFallback(url, {
-      Accept: "application/vnd.github.v3+json",
-      ...this.buildHeaders(),
-    }, pathForError);
+    const res = await this.fetchWithOptionalAnonymousFallback(
+      url,
+      {
+        Accept: "application/vnd.github.v3+json",
+        ...this.buildHeaders(),
+      },
+      pathForError,
+    );
 
     if (!res.ok) {
       throw await this.httpError(res, pathForError);
@@ -200,10 +195,7 @@ export class GitHubClient {
     throw this.createRateLimitError(path, rateLimitBlock.blockedUntilMs);
   }
 
-  private createRateLimitError(
-    path: string,
-    blockedUntilMs: number,
-  ): GitHubFsError {
+  private createRateLimitError(path: string, blockedUntilMs: number): GitHubFsError {
     return new GitHubFsError({
       code: "EACCES",
       isRetryable: true,
@@ -256,5 +248,28 @@ export class GitHubClient {
 }
 
 function normalizePath(path: string): string {
-  return path.replace(/^\/+/, "").replace(/\/+$/, "");
+  const trimmed = path.trim();
+
+  if (!trimmed || trimmed === "/" || trimmed === ".") {
+    return "";
+  }
+
+  const normalizedSegments: string[] = [];
+
+  for (const segment of trimmed.split("/")) {
+    const next = segment.trim();
+
+    if (!next || next === ".") {
+      continue;
+    }
+
+    if (next === "..") {
+      normalizedSegments.pop();
+      continue;
+    }
+
+    normalizedSegments.push(next);
+  }
+
+  return normalizedSegments.join("/");
 }
