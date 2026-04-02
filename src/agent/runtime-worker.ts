@@ -23,10 +23,10 @@ import type {
 } from "@/agent/runtime-worker-types"
 import { resolveApiKeyForProvider } from "@/auth/resolve-api-key"
 import { getCanonicalProvider, getModel } from "@/models/catalog"
-import { createRepoRuntime } from "@/repo/repo-runtime"
+import { createOptionalRepoRuntime } from "@/repo/repo-runtime"
 import { createRepoTools } from "@/tools"
 import type { ProviderId } from "@/types/models"
-import type { ResolvedRepoSource, SessionData } from "@/types/storage"
+import type { SessionData } from "@/types/storage"
 
 const TURN_IDLE_TIMEOUT_MS = 15 * 60_000
 const TURN_IDLE_POLL_MS = 30_000
@@ -70,7 +70,9 @@ class WorkerAgentRunner {
     this.sessionData = session
     this.events = events
     this.githubRuntimeTokenSnapshot = options?.githubRuntimeToken
-    this.repoRuntime = this.createRuntime(session.repoSource)
+    this.repoRuntime = createOptionalRepoRuntime(session.repoSource, {
+      runtimeToken: this.githubRuntimeTokenSnapshot,
+    })
 
     const model = getModel(session.provider, session.model)
 
@@ -182,7 +184,9 @@ class WorkerAgentRunner {
     }
 
     this.githubRuntimeTokenSnapshot = token
-    this.repoRuntime = this.createRuntime(this.session.repoSource, token)
+    this.repoRuntime = createOptionalRepoRuntime(this.session.repoSource, {
+      runtimeToken: token,
+    })
     this.agent.setTools(this.getAgentTools(this.repoRuntime))
   }
 
@@ -347,17 +351,6 @@ class WorkerAgentRunner {
 
     clearTimeout(this.flushTimer)
     this.flushTimer = undefined
-  }
-
-  private createRuntime(repoSource?: ResolvedRepoSource, token?: string) {
-    if (!repoSource) {
-      return undefined
-    }
-
-    const resolved =
-      token !== undefined ? token : this.githubRuntimeTokenSnapshot
-
-    return createRepoRuntime(repoSource, { runtimeToken: resolved })
   }
 
   private getAgentTools(runtime = this.repoRuntime): AgentTool[] {

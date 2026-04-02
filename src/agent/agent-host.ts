@@ -9,7 +9,7 @@ import type {
   ProviderId,
   ThinkingLevel,
 } from "@/types/models"
-import type { MessageRow, ResolvedRepoSource, SessionData } from "@/types/storage"
+import type { MessageRow, SessionData } from "@/types/storage"
 import { BusyRuntimeError } from "@/agent/runtime-command-errors"
 import {
   AgentTurnPersistence,
@@ -25,7 +25,7 @@ import { streamChatWithPiAgent } from "@/agent/provider-stream"
 import { buildInitialAgentState } from "@/agent/session-adapter"
 import { resolveApiKeyForProvider } from "@/auth/resolve-api-key"
 import { getCanonicalProvider, getModel } from "@/models/catalog"
-import { createRepoRuntime } from "@/repo/repo-runtime"
+import { createOptionalRepoRuntime } from "@/repo/repo-runtime"
 import { createRepoTools } from "@/tools"
 
 const TURN_IDLE_TIMEOUT_MS = 15 * 60_000
@@ -65,7 +65,9 @@ export class AgentHost {
     this.persistence = new AgentTurnPersistence(session, messages)
     this.githubRuntimeTokenSnapshot = options?.githubRuntimeToken
     this.getGithubToken = options?.getGithubToken
-    this.repoRuntime = this.createRuntime(session.repoSource)
+    this.repoRuntime = createOptionalRepoRuntime(session.repoSource, {
+      runtimeToken: this.githubRuntimeTokenSnapshot,
+    })
 
     const model = getModel(this.session.provider, this.session.model)
 
@@ -182,7 +184,9 @@ export class AgentHost {
 
     const token = await this.getGithubToken?.()
     this.githubRuntimeTokenSnapshot = token
-    this.repoRuntime = this.createRuntime(this.session.repoSource, token)
+    this.repoRuntime = createOptionalRepoRuntime(this.session.repoSource, {
+      runtimeToken: token,
+    })
     this.agent.setTools(this.getAgentTools(this.repoRuntime))
   }
 
@@ -334,17 +338,6 @@ export class AgentHost {
 
   private isDisposed(): boolean {
     return this.disposed
-  }
-
-  private createRuntime(repoSource?: ResolvedRepoSource, token?: string) {
-    if (!repoSource) {
-      return undefined
-    }
-
-    const resolved =
-      token !== undefined ? token : this.githubRuntimeTokenSnapshot
-
-    return createRepoRuntime(repoSource, { runtimeToken: resolved })
   }
 
   private getAgentTools(runtime = this.repoRuntime): AgentTool[] {

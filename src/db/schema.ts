@@ -1,11 +1,19 @@
 // Rebuilds the Sitegeist/web-ui Dexie contract with the same store split and local-only persistence model.
 import Dexie, { type EntityTable, type Table } from "dexie"
 import { getDateKey, getIsoNow } from "@/lib/dates"
+import {
+  createBranchRepoRef,
+  createCommitRepoRef,
+  createTagRepoRef,
+  displayResolvedRepoRef,
+} from "@/repo/refs"
 import type {
   DailyCostAggregate,
   MessageRow,
   ProviderKeyRecord,
   RepoRefOrigin,
+  ResolvedRepoRef,
+  ResolvedRepoSource,
   RepositoryRow,
   SessionData,
   SessionLeaseRow,
@@ -16,22 +24,114 @@ import type { JsonValue } from "@/types/common"
 import type { ProviderId, Usage } from "@/types/models"
 
 const DB_NAME = "gitinspect-store"
+const FULL_COMMIT_SHA_PATTERN = /^[0-9a-f]{40}$/i
 
 type LegacyRepositoryRow = Omit<RepositoryRow, "refOrigin"> & {
   refOrigin?: RepoRefOrigin
 }
 
-type LegacySessionRepoSource = NonNullable<SessionData["repoSource"]> & {
+type LegacySessionRepoSource = {
+  owner?: string
+  ref?: string
   refOrigin?: RepoRefOrigin
-  resolvedRef?: SessionData["repoSource"] extends infer T
-    ? T extends { resolvedRef: infer TResolvedRef }
-      ? TResolvedRef
-      : never
-    : never
+  repo?: string
+  resolvedRef?: ResolvedRepoRef
+  token?: string
 }
 
 type LegacySessionData = Omit<SessionData, "repoSource"> & {
   repoSource?: LegacySessionRepoSource
+}
+
+function trimToUndefined(value: string | undefined): string | undefined {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : undefined
+}
+
+function normalizeResolvedRepoRef(
+  ref: ResolvedRepoRef | undefined
+): ResolvedRepoRef | undefined {
+  if (!ref) {
+    return undefined
+  }
+
+  if (ref.kind === "commit") {
+    const sha = trimToUndefined(ref.sha)
+    return sha ? createCommitRepoRef(sha) : undefined
+  }
+
+  const name = trimToUndefined(ref.name)
+
+  if (!name) {
+    return undefined
+  }
+
+  return ref.kind === "branch"
+    ? createBranchRepoRef(name)
+    : createTagRepoRef(name)
+}
+
+function resolveDeterministicLegacyRef(
+  ref: string
+): ResolvedRepoRef | undefined {
+  if (FULL_COMMIT_SHA_PATTERN.test(ref)) {
+    return createCommitRepoRef(ref)
+  }
+
+  if (ref.startsWith("refs/heads/")) {
+    const name = trimToUndefined(ref.slice("refs/heads/".length))
+    return name ? createBranchRepoRef(name) : undefined
+  }
+
+  if (ref.startsWith("heads/")) {
+    const name = trimToUndefined(ref.slice("heads/".length))
+    return name ? createBranchRepoRef(name) : undefined
+  }
+
+  if (ref.startsWith("refs/tags/")) {
+    const name = trimToUndefined(ref.slice("refs/tags/".length))
+    return name ? createTagRepoRef(name) : undefined
+  }
+
+  if (ref.startsWith("tags/")) {
+    const name = trimToUndefined(ref.slice("tags/".length))
+    return name ? createTagRepoRef(name) : undefined
+  }
+
+  return undefined
+}
+
+function migrateLegacyRepoSource(
+  source: LegacySessionRepoSource | undefined
+): ResolvedRepoSource | undefined {
+  if (!source) {
+    return undefined
+  }
+
+  const owner = trimToUndefined(source.owner)
+  const repo = trimToUndefined(source.repo)
+  const ref = trimToUndefined(source.ref)
+
+  if (!owner || !repo || !ref) {
+    return undefined
+  }
+
+  const resolvedRef =
+    normalizeResolvedRepoRef(source.resolvedRef) ??
+    resolveDeterministicLegacyRef(ref)
+
+  if (!resolvedRef) {
+    return undefined
+  }
+
+  return {
+    owner,
+    ref: displayResolvedRepoRef(resolvedRef),
+    refOrigin: source.refOrigin ?? "explicit",
+    repo,
+    resolvedRef,
+    token: trimToUndefined(source.token),
+  }
 }
 
 export class AppDb extends Dexie {
@@ -88,15 +188,33 @@ export class AppDb extends Dexie {
             row.refOrigin = "explicit"
           }
         })
+      })
+    this.version(4)
+      .stores({
+        daily_costs: "date",
+        messages:
+          "id, sessionId, [sessionId+timestamp], [sessionId+status], timestamp, status",
+        "provider-keys": "provider, updatedAt",
+        repositories: "[owner+repo+ref], lastOpenedAt",
+        session_leases: "sessionId, ownerTabId, heartbeatAt",
+        session_runtime:
+          "sessionId, status, ownerTabId, lastProgressAt, updatedAt",
+        sessions: "id, updatedAt, createdAt, provider, model, isStreaming",
+        settings: "key, updatedAt",
+      })
+      .upgrade(async (tx) => {
+        const repositories = tx.table(
+          "repositories"
+        ) as Table<LegacyRepositoryRow, [string, string, string]>
+        await repositories.toCollection().modify((row) => {
+          if (row.refOrigin === undefined) {
+            row.refOrigin = "explicit"
+          }
+        })
 
         const sessions = tx.table("sessions") as Table<LegacySessionData, string>
         await sessions.toCollection().modify((row) => {
-          if (row.repoSource && row.repoSource.refOrigin === undefined) {
-            row.repoSource = {
-              ...row.repoSource,
-              refOrigin: "explicit",
-            }
-          }
+          row.repoSource = migrateLegacyRepoSource(row.repoSource)
         })
       })
     this.dailyCosts = this.table("daily_costs")

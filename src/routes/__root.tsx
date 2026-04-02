@@ -9,8 +9,6 @@ import {
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router"
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
-import { TanStackDevtools } from "@tanstack/react-devtools"
 import appCss from "../styles.css?url"
 import { AppSettingsDialog } from "@/components/settings-dialog"
 import { Analytics } from "@/components/analytics"
@@ -91,6 +89,7 @@ export const Route = createRootRoute({
   notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
   component: RootLayout,
+  ssr: false,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -111,17 +110,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             <Toaster position="bottom-right" />
           </TooltipProvider>
         </ThemeProvider>
-        <TanStackDevtools
-          config={{
-            position: "middle-right",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
         <Scripts />
         <Analytics />
       </body>
@@ -132,14 +120,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function RootLayout() {
   const navigate = useNavigate()
   const search = Route.useSearch()
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  })
-
-  if (pathname === "/auth/callback") {
-    return <Outlet />
-  }
-
   return (
     <SidebarProvider
       onOpenChange={(open) => {

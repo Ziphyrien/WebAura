@@ -95,7 +95,7 @@ export function parseRepoPathname(pathname: string): ParsedRepoPath | undefined 
 
   const segments = raw
     .split("/")
-    .map((s) => s.trim())
+    .map((s) => decodePathSegment(s.trim()))
     .filter(Boolean)
 
   if (segments.length < 2) {
@@ -224,4 +224,12 @@ export function parsedPathToRepoTarget(
 function trimSingleSegment(value: string | undefined): string | undefined {
   const trimmed = value?.trim()
   return trimmed ? trimmed : undefined
+}
+
+function decodePathSegment(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
 }

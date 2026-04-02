@@ -393,7 +393,30 @@ export class GitHubFs implements IFileSystem {
 }
 
 function normalizePath(path: string): string {
-  return path.replace(/^\/+/, "").replace(/\/+$/, "");
+  const trimmed = path.trim()
+
+  if (!trimmed || trimmed === "/" || trimmed === ".") {
+    return ""
+  }
+
+  const normalizedSegments: string[] = []
+
+  for (const segment of trimmed.split("/")) {
+    const next = segment.trim()
+
+    if (!next || next === ".") {
+      continue
+    }
+
+    if (next === "..") {
+      normalizedSegments.pop()
+      continue
+    }
+
+    normalizedSegments.push(next)
+  }
+
+  return normalizedSegments.join("/")
 }
 
 function treeEntryType(type: string, mode: string): DirEntry["type"] {

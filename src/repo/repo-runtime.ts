@@ -68,6 +68,17 @@ export function createRepoRuntime(
   }
 }
 
+export function createOptionalRepoRuntime(
+  source: ResolvedRepoSource | undefined,
+  options?: { runtimeToken?: string }
+): RepoRuntime | undefined {
+  if (!source) {
+    return undefined
+  }
+
+  return createRepoRuntime(source, options)
+}
+
 export async function execInRepoShell(
   runtime: RepoRuntime,
   command: string,

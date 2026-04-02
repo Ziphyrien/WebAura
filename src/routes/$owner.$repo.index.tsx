@@ -1,12 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router"
-import type { RepoTarget } from "@/types/storage"
-import { ResolvedRepoChat } from "@/components/resolved-repo-chat"
+import { Chat } from "@/components/chat"
+import { resolveRepoTarget } from "@/repo/ref-resolver"
 
 type RepoSearch = {
   q?: string
 }
 
 export const Route = createFileRoute("/$owner/$repo/")({
+  loader: async ({ params }) =>
+    await resolveRepoTarget({
+      owner: params.owner,
+      repo: params.repo,
+    }),
   validateSearch: (search: RepoSearch) => ({
     q:
       typeof search.q === "string" && search.q.trim().length > 0
@@ -17,11 +22,7 @@ export const Route = createFileRoute("/$owner/$repo/")({
 })
 
 function RepoChatRoute() {
-  const params = Route.useParams()
-  const repoTarget: RepoTarget = {
-    owner: params.owner,
-    repo: params.repo,
-  }
+  const repoSource = Route.useLoaderData()
 
-  return <ResolvedRepoChat repoTarget={repoTarget} />
+  return <Chat repoSource={repoSource} />
 }
