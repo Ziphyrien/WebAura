@@ -1,3 +1,4 @@
+import { env } from "@gitinspect/env/server";
 import { defineHandler } from "nitro";
 
 const ALLOWED_HOSTS = new Set(["api.fireworks.ai"]);
@@ -23,7 +24,7 @@ export default defineHandler(async (event) => {
     return { error: `Host not allowed: ${target.host}` };
   }
 
-  const apiKey = process.env.FIREWORKS_API_KEY;
+  const apiKey = env.FIREWORKS_API_KEY;
   if (!apiKey) {
     event.res.status = 503;
     return { error: "Server proxy is not configured" };

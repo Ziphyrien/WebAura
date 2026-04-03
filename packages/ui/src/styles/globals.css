@@ -2,17 +2,22 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "streamdown/styles.css";
+@import "katex/dist/katex.min.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/inter";
 @source "../../../apps/web/src/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
-@source "../../../node_modules/streamdown/dist/*.js";
+@source "../../../../node_modules/streamdown/dist/*.js";
+@source "../../../../node_modules/@streamdown/cjk/dist/*.js";
+@source "../../../../node_modules/@streamdown/code/dist/*.js";
+@source "../../../../node_modules/@streamdown/math/dist/*.js";
+@source "../../../../node_modules/@streamdown/mermaid/dist/*.js";
 
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
   font-family: "Geist Pixel Square";
-  src: url("../../../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Square.woff2")
+  src: url("../../../../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Square.woff2")
     format("woff2");
   font-style: normal;
   font-weight: 800;

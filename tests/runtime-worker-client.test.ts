@@ -14,9 +14,13 @@ describe("runtime worker client", () => {
   });
 
   it("creates the worker lazily and reuses the singleton", async () => {
-    const constructorMock = vi.fn(
-      (_url: URL, _options: { name: string; type: "module" }): Record<string, never> => ({}),
-    );
+    const constructorMock = vi.fn(function (
+      this: unknown,
+      _url: URL,
+      _options: { name: string; type: "module" },
+    ): Record<string, never> {
+      return {};
+    });
 
     Reflect.set(globalThis, "ComlinkWorker", constructorMock);
 
@@ -39,9 +43,13 @@ describe("runtime worker client", () => {
   });
 
   it("wraps event sinks with Comlink.proxy", async () => {
-    const constructorMock = vi.fn(
-      (_url: URL, _options: { name: string; type: "module" }): Record<string, never> => ({}),
-    );
+    const constructorMock = vi.fn(function (
+      this: unknown,
+      _url: URL,
+      _options: { name: string; type: "module" },
+    ): Record<string, never> {
+      return {};
+    });
 
     Reflect.set(globalThis, "ComlinkWorker", constructorMock);
 

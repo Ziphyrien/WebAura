@@ -34,12 +34,15 @@ function createBrowserNodeZlibAliasPlugin() {
 
 export default defineConfig({
   optimizeDeps: {
-    exclude: [
+    include: [
       "streamdown",
       "@streamdown/cjk",
       "@streamdown/code",
       "@streamdown/math",
       "@streamdown/mermaid",
+      "mermaid",
+      "dayjs",
+      "@braintree/sanitize-url",
     ],
   },
   plugins: [
@@ -51,6 +54,13 @@ export default defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+  resolve: {
+    alias: {
+      "@gitinspect/pi/agent/runtime-worker-client": fileURLToPath(
+        new URL("./src/agent/runtime-worker-client.ts", import.meta.url),
+      ),
+    },
+  },
   server: {
     port: 3001,
   },

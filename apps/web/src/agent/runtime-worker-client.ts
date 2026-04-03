@@ -6,17 +6,15 @@ declare const ComlinkWorker: new <T>(scriptURL: URL, options?: WorkerOptions) =>
 let workerApi: Comlink.Remote<typeof import("./runtime-worker")> | undefined;
 
 export function getRuntimeWorker(): Comlink.Remote<typeof import("./runtime-worker")> {
-  if (!workerApi) {
-    workerApi = new ComlinkWorker<typeof import("./runtime-worker")>(
-      new URL("./runtime-worker", import.meta.url),
-      {
-        name: "gitinspect-runtime-worker",
-        type: "module",
-      },
-    );
-  }
+  workerApi ??= new ComlinkWorker<typeof import("./runtime-worker")>(
+    new URL("./runtime-worker", import.meta.url),
+    {
+      name: "gitinspect-runtime-worker",
+      type: "module",
+    },
+  );
 
-  return workerApi!;
+  return workerApi;
 }
 
 export function createRuntimeWorkerEvents(sink: RuntimeWorkerEvents): RuntimeWorkerEvents {
