@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-const resolveRepoTargetMock = vi.fn();
+const parseRepoRoutePathMock = vi.fn();
+const resolveRepoIntentMock = vi.fn();
+const toResolvedRepoSourceMock = vi.fn();
 
-vi.mock("@/components/chat", () => ({
+vi.mock("@gitinspect/ui/components/chat", () => ({
   Chat: (props: {
     repoSource?: { owner: string; ref?: string; repo: string };
     sessionId?: string;
@@ -18,14 +20,16 @@ vi.mock("@/components/chat", () => ({
   ),
 }));
 
-vi.mock("@/repo/ref-resolver", () => ({
-  resolveRepoTarget: (target: {
-    owner: string;
-    ref?: string;
-    refPathTail?: string;
-    repo: string;
-    token?: string;
-  }) => resolveRepoTargetMock(target),
+vi.mock("@gitinspect/pi/repo/path-parser", () => ({
+  parseRepoRoutePath: (path: string) => parseRepoRoutePathMock(path),
+}));
+
+vi.mock("@gitinspect/pi/repo/ref-resolver", () => ({
+  resolveRepoIntent: (intent: unknown) => resolveRepoIntentMock(intent),
+}));
+
+vi.mock("@gitinspect/pi/repo/path-intent", () => ({
+  toResolvedRepoSource: (location: unknown) => toResolvedRepoSourceMock(location),
 }));
 
 describe("chat routes", () => {
@@ -95,7 +99,7 @@ describe("chat routes", () => {
     expect(screen.getByTestId("chat-view").textContent).toBe("acme/demo@feature/foo");
   });
 
-  it("parses deep tree URLs in the route loader before resolution", async () => {
+  it("composes parser and resolver in the splat route loader", async () => {
     const { Route } = await import("@/routes/$owner.$repo.$");
     const loader = Route.options.loader;
 
@@ -103,7 +107,26 @@ describe("chat routes", () => {
       throw new Error("Missing route loader");
     }
 
-    resolveRepoTargetMock.mockResolvedValue({
+    parseRepoRoutePathMock.mockReturnValue({
+      owner: "acme",
+      repo: "demo",
+      tail: "feature/foo/src/lib",
+      type: "tree-page",
+    });
+    resolveRepoIntentMock.mockResolvedValue({
+      owner: "acme",
+      ref: "feature/foo",
+      refOrigin: "explicit",
+      repo: "demo",
+      resolvedRef: {
+        apiRef: "heads/feature/foo",
+        fullRef: "refs/heads/feature/foo",
+        kind: "branch",
+        name: "feature/foo",
+      },
+      view: "tree",
+    });
+    toResolvedRepoSourceMock.mockReturnValue({
       owner: "acme",
       ref: "feature/foo",
       refOrigin: "explicit",
@@ -124,7 +147,7 @@ describe("chat routes", () => {
       location: undefined,
       navigate: undefined,
       params: {
-        _splat: "tree/feature/foo/src/lib",
+        _splat: "tree%2Ffeature%2Ffoo%2Fsrc%2Flib",
         owner: "acme",
         repo: "demo",
       },
@@ -133,56 +156,14 @@ describe("chat routes", () => {
       route: Route,
     } as never);
 
-    expect(resolveRepoTargetMock).toHaveBeenCalledWith({
+    expect(parseRepoRoutePathMock).toHaveBeenCalledWith("/acme/demo/tree/feature/foo/src/lib");
+    expect(resolveRepoIntentMock).toHaveBeenCalledWith({
       owner: "acme",
-      ref: "feature/foo",
       repo: "demo",
+      tail: "feature/foo/src/lib",
+      type: "tree-page",
     });
-  });
-
-  it("decodes encoded tree refs in the route loader before resolution", async () => {
-    const { Route } = await import("@/routes/$owner.$repo.$");
-    const loader = Route.options.loader;
-
-    if (typeof loader !== "function") {
-      throw new Error("Missing route loader");
-    }
-
-    resolveRepoTargetMock.mockResolvedValue({
-      owner: "acme",
-      ref: "main",
-      refOrigin: "explicit",
-      repo: "demo",
-      resolvedRef: {
-        apiRef: "heads/main",
-        fullRef: "refs/heads/main",
-        kind: "branch",
-        name: "main",
-      },
-    });
-
-    await loader({
-      abortController: new AbortController(),
-      cause: "enter",
-      context: undefined,
-      deps: {},
-      location: undefined,
-      navigate: undefined,
-      params: {
-        _splat: "tree%2Fmain",
-        owner: "acme",
-        repo: "demo",
-      },
-      parentMatchPromise: Promise.resolve(undefined),
-      preload: false,
-      route: Route,
-    } as never);
-
-    expect(resolveRepoTargetMock).toHaveBeenCalledWith({
-      owner: "acme",
-      ref: "main",
-      repo: "demo",
-    });
+    expect(toResolvedRepoSourceMock).toHaveBeenCalled();
   });
 
   it("passes the session id into the shared chat component for session routes", async () => {

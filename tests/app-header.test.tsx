@@ -1,9 +1,16 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const state = vi.hoisted(() => ({
+type MatchState = {
+  loaderData?: unknown;
+  params: Record<string, string>;
+  routeId: string;
+};
+
+const state = vi.hoisted<{ match: MatchState }>(() => ({
   match: {
+    loaderData: undefined,
     params: {
       sessionId: "session-1",
     },
@@ -18,22 +25,13 @@ vi.mock("@tanstack/react-router", () => ({
     to: _to,
     ...props
   }: React.PropsWithChildren<Record<string, unknown>>) => React.createElement("a", props, children),
-  useRouterState: ({
-    select,
-  }: {
-    select: (state: {
-      matches: Array<{
-        params: Record<string, string>;
-        routeId: string;
-      }>;
-    }) => unknown;
-  }) =>
+  useRouterState: ({ select }: { select: (state: { matches: MatchState[] }) => unknown }) =>
     select({
       matches: [state.match],
     }),
 }));
 
-vi.mock("@/hooks/use-selected-session-summary", () => ({
+vi.mock("@gitinspect/pi/hooks/use-selected-session-summary", () => ({
   useSelectedSessionSummary: () => ({
     repoSource: {
       owner: "acme",
@@ -43,39 +41,39 @@ vi.mock("@/hooks/use-selected-session-summary", () => ({
   }),
 }));
 
-vi.mock("@/components/ui/button", () => ({
+vi.mock("@gitinspect/ui/components/button", () => ({
   Button: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) =>
     asChild ? children : React.createElement("button", undefined, children),
 }));
 
-vi.mock("@/components/ui/separator", () => ({
+vi.mock("@gitinspect/ui/components/separator", () => ({
   Separator: () => null,
 }));
 
-vi.mock("@/components/ui/sidebar", () => ({
+vi.mock("@gitinspect/ui/components/sidebar", () => ({
   SidebarTrigger: () => React.createElement("button", { type: "button" }, "Sidebar"),
 }));
 
-vi.mock("@/components/chat-logo", () => ({
+vi.mock("@gitinspect/ui/components/chat-logo", () => ({
   ChatLogo: () => React.createElement("div", undefined, "GitInspect"),
 }));
 
-vi.mock("@/components/github-link", () => ({
+vi.mock("@gitinspect/ui/components/github-link", () => ({
   GitHubLink: () => React.createElement("div", undefined, "GitHub"),
 }));
 
-vi.mock("@/components/theme-toggle", () => ({
+vi.mock("@gitinspect/ui/components/theme-toggle", () => ({
   ThemeToggle: () => React.createElement("button", { type: "button" }, "Theme"),
 }));
 
-vi.mock("@/components/icons", () => ({
+vi.mock("@gitinspect/ui/components/icons", () => ({
   Icons: {
     cog: () => React.createElement("span", undefined, "Cog"),
     x: () => React.createElement("span", undefined, "X"),
   },
 }));
 
-vi.mock("@/components/ui/tooltip", () => ({
+vi.mock("@gitinspect/ui/components/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children),
   TooltipContent: ({ children }: { children: React.ReactNode }) =>
@@ -84,7 +82,7 @@ vi.mock("@/components/ui/tooltip", () => ({
     React.createElement("div", undefined, children),
 }));
 
-vi.mock("@/components/ui/breadcrumb", () => {
+vi.mock("@gitinspect/ui/components/breadcrumb", () => {
   const Passthrough = ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children);
 
@@ -99,12 +97,45 @@ vi.mock("@/components/ui/breadcrumb", () => {
 });
 
 describe("AppHeader", () => {
-  it("shows repo owner and name for repo-backed session routes", async () => {
+  beforeEach(() => {
+    state.match = {
+      loaderData: undefined,
+      params: {
+        sessionId: "session-1",
+      },
+      routeId: "/chat/$sessionId",
+    };
+  });
+
+  it("shows repo owner, name, and ref for repo-backed session routes", async () => {
     const { AppHeader } = await import("@/components/app-header");
 
     render(<AppHeader />);
 
     expect(screen.getByText("acme")).toBeTruthy();
     expect(screen.getByText("demo")).toBeTruthy();
+    expect(screen.getByText("[main]")).toBeTruthy();
+  });
+
+  it("uses loader data so splat routes show the resolved ref", async () => {
+    state.match = {
+      loaderData: {
+        owner: "acme",
+        ref: "feature/foo",
+        repo: "demo",
+      },
+      params: {
+        _splat: "tree/feature/foo/src/lib",
+        owner: "acme",
+        repo: "demo",
+      },
+      routeId: "/$owner/$repo/$",
+    };
+
+    const { AppHeader } = await import("@/components/app-header");
+
+    render(<AppHeader />);
+
+    expect(screen.getByText("[feature/foo]")).toBeTruthy();
   });
 });

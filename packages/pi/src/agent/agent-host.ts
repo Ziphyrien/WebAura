@@ -19,7 +19,7 @@ import { buildInitialAgentState } from "@gitinspect/pi/agent/session-adapter";
 import { resolveApiKeyForProvider } from "@gitinspect/pi/auth/resolve-api-key";
 import { getCanonicalProvider, getModel } from "@gitinspect/pi/models/catalog";
 import { createOptionalRepoRuntime } from "@gitinspect/pi/repo/repo-runtime";
-import { createRepoTools } from "@gitinspect/pi/tools";
+import { createRepoTools } from "@gitinspect/pi/tools/index";
 
 const TURN_IDLE_TIMEOUT_MS = 15 * 60_000;
 const TURN_IDLE_POLL_MS = 30_000;

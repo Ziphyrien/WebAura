@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { resolveRepoIntent } from "@gitinspect/pi/repo/ref-resolver";
 import { Chat } from "@gitinspect/ui/components/chat";
-import { resolveRepoTarget } from "@gitinspect/pi/repo/ref-resolver";
+import { toResolvedRepoSource } from "@gitinspect/pi/repo/path-intent";
 
 type RepoSearch = {
   q?: string;
@@ -8,10 +9,13 @@ type RepoSearch = {
 
 export const Route = createFileRoute("/$owner/$repo/")({
   loader: async ({ params }) =>
-    await resolveRepoTarget({
-      owner: params.owner,
-      repo: params.repo,
-    }),
+    toResolvedRepoSource(
+      await resolveRepoIntent({
+        owner: params.owner,
+        repo: params.repo,
+        type: "repo-root",
+      }),
+    ),
   validateSearch: (search: RepoSearch) => ({
     q: typeof search.q === "string" && search.q.trim().length > 0 ? search.q : undefined,
   }),

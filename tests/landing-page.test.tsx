@@ -1,15 +1,15 @@
 import * as React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const listRepositoriesMock = vi.fn(async () => []);
+const listRepositoriesMock = vi.fn(() => []);
 const navigateMock = vi.fn();
 const useSearchMock = vi.fn(() => ({}));
-const parseRepoQueryMock = vi.fn();
-const resolveRepoTargetMock = vi.fn();
+const parseRepoInputMock = vi.fn();
+const resolveRepoIntentMock = vi.fn();
 
 vi.mock("dexie-react-hooks", () => ({
-  useLiveQuery: (query: () => unknown) => query(),
+  useLiveQuery: () => listRepositoriesMock(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -24,23 +24,32 @@ vi.mock("@/db/schema", () => ({
   listRepositories: () => listRepositoriesMock(),
 }));
 
-vi.mock("@/repo/parse", () => ({
-  parseRepoQuery: (raw: string) => parseRepoQueryMock(raw),
+vi.mock("@/repo/path-parser", () => ({
+  parseRepoInput: (raw: string) => parseRepoInputMock(raw),
 }));
 
 vi.mock("@/repo/ref-resolver", () => ({
-  resolveRepoTarget: (source: unknown) => resolveRepoTargetMock(source),
+  resolveRepoIntent: (source: unknown) => resolveRepoIntentMock(source),
 }));
 
 vi.mock("@/repo/github-fetch", () => ({
   handleGithubError: vi.fn(async () => false),
 }));
 
-vi.mock("@/components/chat-logo", () => ({
+vi.mock("@gitinspect/pi/repo/suggested-repos", () => ({
+  SUGGESTED_REPOS: [
+    { owner: "anomalyco", ref: "dev", refOrigin: "explicit", repo: "opencode" },
+    { owner: "acme", ref: "main", refOrigin: "default", repo: "demo" },
+    { owner: "foo", ref: "main", refOrigin: "default", repo: "bar" },
+    { owner: "baz", ref: "main", refOrigin: "default", repo: "qux" },
+  ],
+}));
+
+vi.mock("@gitinspect/ui/components/chat-logo", () => ({
   ChatLogo: () => <div>logo</div>,
 }));
 
-vi.mock("@/components/github-repo", () => ({
+vi.mock("@gitinspect/ui/components/github-repo", () => ({
   GithubRepo: ({
     owner,
     ref,
@@ -59,7 +68,7 @@ vi.mock("@/components/github-repo", () => ({
   ),
 }));
 
-vi.mock("@/components/ui/input-group", () => ({
+vi.mock("@gitinspect/ui/components/input-group", () => ({
   InputGroup: ({ children, className }: React.ComponentProps<"div">) => (
     <div className={className}>{children}</div>
   ),
@@ -71,14 +80,14 @@ vi.mock("@/components/ui/input-group", () => ({
   InputGroupText: ({ children }: React.ComponentProps<"span">) => <span>{children}</span>,
 }));
 
-vi.mock("@/components/ui/tabs", () => ({
+vi.mock("@gitinspect/ui/components/tabs", () => ({
   Tabs: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TabsContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TabsList: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TabsTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("@/components/icons", () => ({
+vi.mock("@gitinspect/ui/components/icons", () => ({
   Icons: {
     clock: () => <span>clock</span>,
     gitHub: () => <span>github</span>,
@@ -90,8 +99,8 @@ describe("LandingPage", () => {
   beforeEach(() => {
     listRepositoriesMock.mockReset();
     navigateMock.mockReset();
-    parseRepoQueryMock.mockReset();
-    resolveRepoTargetMock.mockReset();
+    parseRepoInputMock.mockReset();
+    resolveRepoIntentMock.mockReset();
     useSearchMock.mockReset();
     useSearchMock.mockReturnValue({});
   });
@@ -107,12 +116,13 @@ describe("LandingPage", () => {
   });
 
   it("navigates using the resolved repo source from the landing form", async () => {
-    parseRepoQueryMock.mockReturnValue({
+    parseRepoInputMock.mockReturnValue({
       owner: "acme",
-      refPathTail: "feature/foo/src/lib",
       repo: "demo",
+      tail: "feature/foo/src/lib",
+      type: "tree-page",
     });
-    resolveRepoTargetMock.mockResolvedValue({
+    resolveRepoIntentMock.mockResolvedValue({
       owner: "acme",
       ref: "feature/foo",
       refOrigin: "explicit",
@@ -123,6 +133,7 @@ describe("LandingPage", () => {
         kind: "branch",
         name: "feature/foo",
       },
+      view: "tree",
     });
 
     const { LandingPage } = await import("@/components/landing-page");
@@ -136,10 +147,11 @@ describe("LandingPage", () => {
       fireEvent.click(screen.getByLabelText("Continue to workspace"));
     });
 
-    expect(resolveRepoTargetMock).toHaveBeenCalledWith({
+    expect(resolveRepoIntentMock).toHaveBeenCalledWith({
       owner: "acme",
-      refPathTail: "feature/foo/src/lib",
       repo: "demo",
+      tail: "feature/foo/src/lib",
+      type: "tree-page",
     });
     expect(navigateMock).toHaveBeenCalledWith({
       search: {

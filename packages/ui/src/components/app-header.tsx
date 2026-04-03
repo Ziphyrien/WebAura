@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import type { RepoTarget, ResolvedRepoSource } from "@gitinspect/db/storage-types";
-import { Button } from "@gitinspect/ui/components/button";
-import { Separator } from "@gitinspect/ui/components/separator";
+import type { ResolvedRepoSource } from "@gitinspect/db/storage-types";
+import { useSelectedSessionSummary } from "@gitinspect/pi/hooks/use-selected-session-summary";
+import { githubOwnerAvatarUrl } from "@gitinspect/pi/repo/url";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,15 +10,65 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@gitinspect/ui/components/breadcrumb";
-import { SidebarTrigger } from "@gitinspect/ui/components/sidebar";
+import { Button } from "@gitinspect/ui/components/button";
 import { ChatLogo } from "@gitinspect/ui/components/chat-logo";
 import { GitHubLink } from "@gitinspect/ui/components/github-link";
-import { ThemeToggle } from "@gitinspect/ui/components/theme-toggle";
 import { Icons } from "@gitinspect/ui/components/icons";
+import { Separator } from "@gitinspect/ui/components/separator";
+import { SidebarTrigger } from "@gitinspect/ui/components/sidebar";
+import { ThemeToggle } from "@gitinspect/ui/components/theme-toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@gitinspect/ui/components/tooltip";
-import { githubOwnerAvatarUrl } from "@gitinspect/pi/repo/url";
-import { useSelectedSessionSummary } from "@gitinspect/pi/hooks/use-selected-session-summary";
 import { cn } from "@gitinspect/ui/lib/utils";
+
+type HeaderRepoSource = Pick<ResolvedRepoSource, "owner" | "repo"> & {
+  ref?: string;
+};
+
+type RouteMatchLike = {
+  loaderData?: unknown;
+  params: Record<string, string | undefined>;
+  routeId: string;
+};
+
+function isHeaderRepoSource(value: unknown): value is HeaderRepoSource {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return typeof candidate.owner === "string" && typeof candidate.repo === "string";
+}
+
+function getHeaderRepoSource(
+  currentMatch: RouteMatchLike,
+  selectedSession: { repoSource?: ResolvedRepoSource } | undefined,
+): HeaderRepoSource | undefined {
+  if (currentMatch.routeId === "/chat/$sessionId") {
+    return selectedSession?.repoSource;
+  }
+
+  if (isHeaderRepoSource(currentMatch.loaderData)) {
+    return currentMatch.loaderData;
+  }
+
+  if (currentMatch.routeId === "/$owner/$repo/") {
+    return {
+      owner: currentMatch.params.owner ?? "",
+      ref: undefined,
+      repo: currentMatch.params.repo ?? "",
+    };
+  }
+
+  if (currentMatch.routeId === "/$owner/$repo/$") {
+    return {
+      owner: currentMatch.params.owner ?? "",
+      ref: currentMatch.params._splat ?? "",
+      repo: currentMatch.params.repo ?? "",
+    };
+  }
+
+  return undefined;
+}
 
 function SquareOwnerAvatar({ owner }: { owner: string }) {
   const [failed, setFailed] = React.useState(false);
@@ -26,8 +76,8 @@ function SquareOwnerAvatar({ owner }: { owner: string }) {
 
   return (
     <div
-      className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted text-[10px] font-semibold text-muted-foreground"
       aria-hidden
+      className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted text-[10px] font-semibold text-muted-foreground"
     >
       {failed ? (
         <span>{initial}</span>
@@ -35,10 +85,10 @@ function SquareOwnerAvatar({ owner }: { owner: string }) {
         <img
           alt=""
           className="size-full object-cover"
-          src={githubOwnerAvatarUrl(owner)}
           onError={() => {
             setFailed(true);
           }}
+          src={githubOwnerAvatarUrl(owner)}
         />
       )}
     </div>
@@ -64,21 +114,7 @@ export function AppHeader() {
   const sessionId =
     currentMatch.routeId === "/chat/$sessionId" ? currentMatch.params.sessionId : undefined;
   const selectedSession = useSelectedSessionSummary(sessionId);
-  const repoSource: ResolvedRepoSource | RepoTarget | undefined =
-    currentMatch.routeId === "/chat/$sessionId"
-      ? selectedSession?.repoSource
-      : currentMatch.routeId === "/$owner/$repo/"
-        ? {
-            owner: currentMatch.params.owner,
-            repo: currentMatch.params.repo,
-          }
-        : currentMatch.routeId === "/$owner/$repo/$"
-          ? {
-              owner: currentMatch.params.owner,
-              ref: currentMatch.params._splat ?? "",
-              repo: currentMatch.params.repo,
-            }
-          : undefined;
+  const repoSource = getHeaderRepoSource(currentMatch as RouteMatchLike, selectedSession);
 
   return (
     <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background">
@@ -104,14 +140,21 @@ export function AppHeader() {
                   <span aria-hidden className="shrink-0 text-muted-foreground">
                     /
                   </span>
-                  <BreadcrumbLink
-                    className={cn(repoLinkClass, "min-w-0 flex-1 truncate text-left")}
-                    href={`https://github.com/${encodeURIComponent(repoSource.owner)}/${encodeURIComponent(repoSource.repo)}`}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {repoSource.repo}
-                  </BreadcrumbLink>
+                  <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                    <BreadcrumbLink
+                      className={cn(repoLinkClass, "min-w-0 shrink truncate text-left")}
+                      href={`https://github.com/${encodeURIComponent(repoSource.owner)}/${encodeURIComponent(repoSource.repo)}`}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      {repoSource.repo}
+                    </BreadcrumbLink>
+                    {repoSource.ref ? (
+                      <span className="shrink-0 truncate font-geist-pixel-square text-sm font-normal tracking-tight text-muted-foreground sm:text-base">
+                        [{repoSource.ref}]
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               </BreadcrumbItem>
             ) : (

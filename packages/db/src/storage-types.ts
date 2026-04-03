@@ -27,16 +27,6 @@ export type ResolvedRepoRef =
       sha: string;
     };
 
-// Raw repository input from URLs, route params, or text input.
-export interface RepoTarget {
-  owner: string;
-  repo: string;
-  ref?: string;
-  refPathTail?: string;
-  token?: string;
-}
-
-// Canonical repository state stored in Dexie and passed to runtime/UI.
 export interface ResolvedRepoSource {
   owner: string;
   repo: string;

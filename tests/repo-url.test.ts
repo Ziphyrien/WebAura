@@ -1,63 +1,126 @@
 import { describe, expect, it } from "vitest";
-import {
-  githubOwnerAvatarUrl,
-  parseRepoPathname,
-  parsedPathToRepoTarget,
-  repoSourceToPath,
-} from "@/repo/url";
+import { parseRepoInput, parseRepoRoutePath } from "@/repo/path-parser";
+import { githubOwnerAvatarUrl, repoSourceToPath } from "@/repo/url";
 
-describe("parseRepoPathname", () => {
-  it("parses owner/repo", () => {
-    expect(parseRepoPathname("/vercel/next.js")).toEqual({
+describe("parseRepoRoutePath", () => {
+  it("parses repo root", () => {
+    expect(parseRepoRoutePath("/vercel/next.js")).toEqual({
       owner: "vercel",
       repo: "next.js",
+      type: "repo-root",
     });
   });
 
-  it("parses owner/repo/ref when ref is a single segment", () => {
-    expect(parseRepoPathname("/vercel/next.js/canary")).toEqual({
+  it("parses shorthand refs", () => {
+    expect(parseRepoRoutePath("/vercel/next.js/canary")).toEqual({
       owner: "vercel",
-      ref: "canary",
+      rawRef: "canary",
       repo: "next.js",
+      type: "shorthand-ref",
     });
   });
 
-  it("parses tree with single ref segment", () => {
-    expect(parseRepoPathname("/vercel/next.js/tree/main")).toEqual({
+  it("parses tree pages with full tails", () => {
+    expect(parseRepoRoutePath("/vercel/next.js/tree/feature/foo/src/lib")).toEqual({
       owner: "vercel",
-      ref: "main",
       repo: "next.js",
+      tail: "feature/foo/src/lib",
+      type: "tree-page",
     });
   });
 
-  it("parses blob with ref", () => {
-    expect(parseRepoPathname("/vercel/next.js/blob/main/README.md")).toEqual({
+  it("parses blob pages with full tails", () => {
+    expect(parseRepoRoutePath("/vercel/next.js/blob/main/README.md")).toEqual({
       owner: "vercel",
-      ref: "main",
       repo: "next.js",
+      tail: "main/README.md",
+      type: "blob-page",
     });
   });
 
-  it("returns repo root for issues", () => {
-    expect(parseRepoPathname("/vercel/next.js/issues/1")).toEqual({
+  it("parses commit pages", () => {
+    expect(
+      parseRepoRoutePath("/vercel/next.js/commit/0123456789abcdef0123456789abcdef01234567"),
+    ).toEqual({
       owner: "vercel",
       repo: "next.js",
+      sha: "0123456789abcdef0123456789abcdef01234567",
+      type: "commit-page",
     });
   });
 
-  it("returns undefined for owner only", () => {
-    expect(parseRepoPathname("/vercel")).toBeUndefined();
-  });
-
-  it("returns undefined for reserved root", () => {
-    expect(parseRepoPathname("/chat")).toBeUndefined();
-  });
-
-  it("keeps the full tree tail when branch names may include slashes", () => {
-    expect(parseRepoPathname("/vercel/next.js/tree/feature/foo/bar")).toEqual({
+  it("classifies unsupported repo pages explicitly", () => {
+    expect(parseRepoRoutePath("/vercel/next.js/issues/1")).toEqual({
       owner: "vercel",
-      refPathTail: "feature/foo/bar",
+      page: "issues",
       repo: "next.js",
+      type: "unsupported-repo-page",
+    });
+  });
+
+  it("returns invalid for missing owner or repo", () => {
+    expect(parseRepoRoutePath("/vercel")).toEqual({
+      reason: "Missing owner/repo",
+      type: "invalid",
+    });
+  });
+
+  it("returns invalid for reserved root paths", () => {
+    expect(parseRepoRoutePath("/chat")).toEqual({
+      reason: "Missing owner/repo",
+      type: "invalid",
+    });
+  });
+
+  it("decodes encoded tails", () => {
+    expect(parseRepoRoutePath("/vercel/next.js/tree/feature%2Ffoo/src%20lib")).toEqual({
+      owner: "vercel",
+      repo: "next.js",
+      tail: "feature/foo/src lib",
+      type: "tree-page",
+    });
+  });
+});
+
+describe("parseRepoInput", () => {
+  it("supports owner/repo shorthand", () => {
+    expect(parseRepoInput("vercel/next.js")).toEqual({
+      owner: "vercel",
+      repo: "next.js",
+      type: "repo-root",
+    });
+  });
+
+  it("supports github.com URLs without a scheme", () => {
+    expect(parseRepoInput("github.com/vercel/next.js/tree/main/packages")).toEqual({
+      owner: "vercel",
+      repo: "next.js",
+      tail: "main/packages",
+      type: "tree-page",
+    });
+  });
+
+  it("supports full GitHub URLs", () => {
+    expect(parseRepoInput("https://github.com/vercel/next.js/blob/main/README.md")).toEqual({
+      owner: "vercel",
+      repo: "next.js",
+      tail: "main/README.md",
+      type: "blob-page",
+    });
+  });
+
+  it("supports .git clone URLs", () => {
+    expect(parseRepoInput("https://github.com/vercel/next.js.git")).toEqual({
+      owner: "vercel",
+      repo: "next.js",
+      type: "repo-root",
+    });
+  });
+
+  it("rejects non-GitHub hosts", () => {
+    expect(parseRepoInput("https://gitlab.com/foo/bar")).toEqual({
+      reason: "Unsupported host: gitlab.com",
+      type: "invalid",
     });
   });
 });
@@ -69,22 +132,6 @@ describe("githubOwnerAvatarUrl", () => {
 
   it("encodes special characters in owner", () => {
     expect(githubOwnerAvatarUrl("foo/bar")).toBe("https://github.com/foo%2Fbar.png");
-  });
-});
-
-describe("parsedPathToRepoTarget", () => {
-  it("converts parsed path shapes into raw repo targets", () => {
-    expect(
-      parsedPathToRepoTarget({
-        owner: "acme",
-        refPathTail: "feature/foo/src/lib",
-        repo: "demo",
-      }),
-    ).toEqual({
-      owner: "acme",
-      refPathTail: "feature/foo/src/lib",
-      repo: "demo",
-    });
   });
 });
 
@@ -100,7 +147,7 @@ describe("repoSourceToPath", () => {
     ).toBe("/acme/demo");
   });
 
-  it("includes explicit branch refs in canonical paths", () => {
+  it("collapses explicit slash refs to shorthand repo-ref routes", () => {
     expect(
       repoSourceToPath({
         owner: "acme",
@@ -109,17 +156,6 @@ describe("repoSourceToPath", () => {
         repo: "demo",
       }),
     ).toBe("/acme/demo/feature/foo");
-  });
-
-  it("includes explicit tag refs in canonical paths", () => {
-    expect(
-      repoSourceToPath({
-        owner: "acme",
-        ref: "v1.2.3",
-        refOrigin: "explicit",
-        repo: "demo",
-      }),
-    ).toBe("/acme/demo/v1.2.3");
   });
 
   it("includes commit refs when they are explicitly selected", () => {

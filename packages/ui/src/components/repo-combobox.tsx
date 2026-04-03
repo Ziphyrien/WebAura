@@ -3,14 +3,13 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import type { ResolvedRepoSource } from "@gitinspect/db/storage-types";
-import { Icons } from "@gitinspect/ui/components/icons";
 import { listRepositories } from "@gitinspect/db/schema";
 import { handleGithubError } from "@gitinspect/pi/repo/github-fetch";
-import { parseRepoQuery } from "@gitinspect/pi/repo/parse";
-import { repoSourceToPath } from "@gitinspect/pi/repo/url";
-import { resolveRepoTarget } from "@gitinspect/pi/repo/ref-resolver";
+import { parseRepoInput } from "@gitinspect/pi/repo/path-parser";
+import { resolveRepoIntent } from "@gitinspect/pi/repo/ref-resolver";
 import { SUGGESTED_REPOS } from "@gitinspect/pi/repo/suggested-repos";
-import { githubOwnerAvatarUrl } from "@gitinspect/pi/repo/url";
+import { githubOwnerAvatarUrl, repoSourceToPath } from "@gitinspect/pi/repo/url";
+import { Icons } from "@gitinspect/ui/components/icons";
 import { cn } from "@gitinspect/ui/lib/utils";
 
 export type RepoComboboxHandle = {
@@ -122,19 +121,21 @@ export const RepoCombobox = React.forwardRef<RepoComboboxHandle, RepoComboboxPro
     const handleSubmit = React.useCallback(async () => {
       if (highlightedIndex >= 0 && highlightedIndex < listItems.length) {
         const item = listItems[highlightedIndex];
-        handleSelect(repoSourceToPath(item));
+        if (item) {
+          handleSelect(repoSourceToPath(item));
+        }
         return;
       }
 
-      const parsed = parseRepoQuery(query);
-      if (!parsed) {
+      const intent = parseRepoInput(query);
+      if (intent.type === "invalid") {
         toast.error("Enter a valid owner/repo or GitHub URL");
         return;
       }
 
       setIsValidating(true);
       try {
-        const resolved = await resolveRepoTarget(parsed);
+        const resolved = await resolveRepoIntent(intent);
         setQuery("");
         setMode("display");
         navigateToRepo(repoSourceToPath(resolved));
@@ -145,7 +146,7 @@ export const RepoCombobox = React.forwardRef<RepoComboboxHandle, RepoComboboxPro
       } finally {
         setIsValidating(false);
       }
-    }, [query, highlightedIndex, listItems, handleSelect, navigateToRepo]);
+    }, [query, highlightedIndex, listItems, handleSelect, navigateToRepo, sessionId]);
 
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent) => {
@@ -170,7 +171,6 @@ export const RepoCombobox = React.forwardRef<RepoComboboxHandle, RepoComboboxPro
         if (e.key === "ArrowUp" && showDropdown) {
           e.preventDefault();
           setHighlightedIndex((i) => (i > 0 ? i - 1 : listItems.length - 1));
-          return;
         }
       },
       [handleSubmit, listItems.length, repoSource, showDropdown],

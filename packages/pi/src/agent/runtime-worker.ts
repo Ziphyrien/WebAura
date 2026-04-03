@@ -21,7 +21,7 @@ import type {
 import { resolveApiKeyForProvider } from "@gitinspect/pi/auth/resolve-api-key";
 import { getCanonicalProvider, getModel } from "@gitinspect/pi/models/catalog";
 import { createOptionalRepoRuntime } from "@gitinspect/pi/repo/repo-runtime";
-import { createRepoTools } from "@gitinspect/pi/tools";
+import { createRepoTools } from "@gitinspect/pi/tools/index";
 import type { ProviderId } from "@gitinspect/pi/types/models";
 import type { SessionData } from "@gitinspect/db/storage-types";
 

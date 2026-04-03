@@ -143,7 +143,6 @@ export function GithubRepo({
   owner,
   repo,
   ref: refName,
-  refOrigin,
   to,
   search,
   className,
@@ -157,9 +156,9 @@ export function GithubRepo({
   const stars = meta.status === "ok" ? meta.stargazers : null;
   const langColor = language != null && language !== "" ? LANGUAGE_DOT[language] : undefined;
 
-  const refSuffix = refName && refOrigin === "explicit" ? `@${refName}` : "";
+  const refBadge = refName ? `[${refName}]` : "";
 
-  const workspaceLabel = `Open ${owner}/${repo}${refSuffix ? ` at ${refName}` : ""} in workspace`;
+  const workspaceLabel = `Open ${owner}/${repo}${refBadge ? ` at ${refName}` : ""} in workspace`;
 
   const sharedClassName = cn(
     "group relative flex min-h-11 w-full flex-nowrap items-center gap-3 border border-sidebar-border bg-sidebar px-3 py-2 text-left shadow-none transition-colors",
@@ -254,8 +253,8 @@ export function GithubRepo({
           <span className="text-foreground">{owner}</span>
           <span className="font-normal text-muted-foreground">/</span>
           <span className="font-bold text-foreground">{repo}</span>
-          {refSuffix ? (
-            <span className="ml-1 font-normal text-muted-foreground">{refSuffix}</span>
+          {refBadge ? (
+            <span className="ml-1 font-normal text-muted-foreground">{refBadge}</span>
           ) : null}
         </div>
       </div>

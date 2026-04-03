@@ -23,12 +23,12 @@ function createCommitResponse(sha: string): Response {
   return createJsonResponse({ sha });
 }
 
-describe("resolveRepoTarget", () => {
+describe("resolveRepoIntent", () => {
   beforeEach(() => {
     githubApiFetchMock.mockReset();
   });
 
-  it("resolves bare owner/repo input to the default branch", async () => {
+  it("resolves repo-root intents to the default branch", async () => {
     githubApiFetchMock.mockImplementation(async (path) => {
       if (path === "/repos/acme/demo") {
         return createJsonResponse({ default_branch: "main" });
@@ -41,12 +41,13 @@ describe("resolveRepoTarget", () => {
       return createNotFoundResponse();
     });
 
-    const { resolveRepoTarget } = await import("@/repo/ref-resolver");
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
 
     await expect(
-      resolveRepoTarget({
+      resolveRepoIntent({
         owner: "acme",
         repo: "demo",
+        type: "repo-root",
       }),
     ).resolves.toEqual({
       owner: "acme",
@@ -60,6 +61,7 @@ describe("resolveRepoTarget", () => {
         name: "main",
       },
       token: undefined,
+      view: "repo",
     });
   });
 
@@ -80,13 +82,14 @@ describe("resolveRepoTarget", () => {
       return createNotFoundResponse();
     });
 
-    const { resolveRepoTarget } = await import("@/repo/ref-resolver");
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
 
     await expect(
-      resolveRepoTarget({
+      resolveRepoIntent({
         owner: "acme",
-        ref: "canary",
+        rawRef: "canary",
         repo: "demo",
+        type: "shorthand-ref",
       }),
     ).resolves.toMatchObject({
       ref: "canary",
@@ -97,6 +100,7 @@ describe("resolveRepoTarget", () => {
         kind: "branch",
         name: "canary",
       },
+      view: "repo",
     });
   });
 
@@ -117,13 +121,14 @@ describe("resolveRepoTarget", () => {
       return createNotFoundResponse();
     });
 
-    const { resolveRepoTarget } = await import("@/repo/ref-resolver");
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
 
     await expect(
-      resolveRepoTarget({
+      resolveRepoIntent({
         owner: "acme",
-        ref: "v1.2.3",
+        rawRef: "v1.2.3",
         repo: "demo",
+        type: "shorthand-ref",
       }),
     ).resolves.toMatchObject({
       ref: "v1.2.3",
@@ -134,10 +139,11 @@ describe("resolveRepoTarget", () => {
         kind: "tag",
         name: "v1.2.3",
       },
+      view: "repo",
     });
   });
 
-  it("resolves commit shas", async () => {
+  it("resolves commit pages", async () => {
     const sha = "0123456789abcdef0123456789abcdef01234567";
 
     githubApiFetchMock.mockImplementation(async (path) => {
@@ -148,13 +154,14 @@ describe("resolveRepoTarget", () => {
       return createNotFoundResponse();
     });
 
-    const { resolveRepoTarget } = await import("@/repo/ref-resolver");
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
 
     await expect(
-      resolveRepoTarget({
+      resolveRepoIntent({
         owner: "acme",
-        ref: sha,
         repo: "demo",
+        sha,
+        type: "commit-page",
       }),
     ).resolves.toMatchObject({
       ref: sha,
@@ -163,10 +170,11 @@ describe("resolveRepoTarget", () => {
         kind: "commit",
         sha,
       },
+      view: "repo",
     });
   });
 
-  it("resolves deep tree URLs with slash refs", async () => {
+  it("resolves tree pages with slash refs and preserves leftover subpath", async () => {
     githubApiFetchMock.mockImplementation(async (path) => {
       if (path === "/repos/acme/demo/commits/heads%2Ffeature%2Ffoo%2Fsrc%2Flib") {
         return createNotFoundResponse();
@@ -191,13 +199,14 @@ describe("resolveRepoTarget", () => {
       return createNotFoundResponse();
     });
 
-    const { resolveRepoTarget } = await import("@/repo/ref-resolver");
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
 
     await expect(
-      resolveRepoTarget({
+      resolveRepoIntent({
         owner: "acme",
-        refPathTail: "feature/foo/src/lib",
         repo: "demo",
+        tail: "feature/foo/src/lib",
+        type: "tree-page",
       }),
     ).resolves.toMatchObject({
       ref: "feature/foo",
@@ -208,10 +217,12 @@ describe("resolveRepoTarget", () => {
         kind: "branch",
         name: "feature/foo",
       },
+      subpath: "src/lib",
+      view: "tree",
     });
   });
 
-  it("resolves deep blob URLs with slash refs", async () => {
+  it("resolves blob pages with slash refs and preserves leftover subpath", async () => {
     githubApiFetchMock.mockImplementation(async (path) => {
       if (path === "/repos/acme/demo/commits/heads%2Frelease%2Fcandidate%2FREADME.md") {
         return createNotFoundResponse();
@@ -228,13 +239,14 @@ describe("resolveRepoTarget", () => {
       return createNotFoundResponse();
     });
 
-    const { resolveRepoTarget } = await import("@/repo/ref-resolver");
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
 
     await expect(
-      resolveRepoTarget({
+      resolveRepoIntent({
         owner: "acme",
-        refPathTail: "release/candidate/README.md",
         repo: "demo",
+        tail: "release/candidate/README.md",
+        type: "blob-page",
       }),
     ).resolves.toMatchObject({
       ref: "release/candidate",
@@ -244,6 +256,99 @@ describe("resolveRepoTarget", () => {
         fullRef: "refs/heads/release/candidate",
         kind: "branch",
         name: "release/candidate",
+      },
+      subpath: "README.md",
+      view: "blob",
+    });
+  });
+
+  it("falls back unsupported repo pages to the repo root", async () => {
+    githubApiFetchMock.mockImplementation(async (path) => {
+      if (path === "/repos/acme/demo") {
+        return createJsonResponse({ default_branch: "main" });
+      }
+
+      if (path === "/repos/acme/demo/commits/heads%2Fmain") {
+        return createCommitResponse("commit-main");
+      }
+
+      return createNotFoundResponse();
+    });
+
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
+
+    await expect(
+      resolveRepoIntent({
+        owner: "acme",
+        page: "issues",
+        repo: "demo",
+        type: "unsupported-repo-page",
+      }),
+    ).resolves.toMatchObject({
+      fallbackReason: "unsupported-page",
+      ref: "main",
+      refOrigin: "default",
+      view: "repo",
+    });
+  });
+
+  it("throws explicit errors for invalid input", async () => {
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
+
+    await expect(
+      resolveRepoIntent({
+        reason: "Empty repository input",
+        type: "invalid",
+      }),
+    ).rejects.toThrow("Empty repository input");
+  });
+
+  it("throws explicit missing-ref errors", async () => {
+    githubApiFetchMock.mockResolvedValue(createNotFoundResponse());
+
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
+
+    await expect(
+      resolveRepoIntent({
+        owner: "acme",
+        rawRef: "does-not-exist",
+        repo: "demo",
+        type: "shorthand-ref",
+      }),
+    ).rejects.toMatchObject({
+      message: "GitHub ref not found: does-not-exist",
+    });
+  });
+
+  it("prefers branches over tags when names collide", async () => {
+    githubApiFetchMock.mockImplementation(async (path) => {
+      if (path === "/repos/acme/demo/commits/heads%2Fstable") {
+        return createCommitResponse("branch-commit");
+      }
+
+      if (path === "/repos/acme/demo/commits/tags%2Fstable") {
+        return createCommitResponse("tag-commit");
+      }
+
+      return createNotFoundResponse();
+    });
+
+    const { resolveRepoIntent } = await import("@/repo/ref-resolver");
+
+    await expect(
+      resolveRepoIntent({
+        owner: "acme",
+        rawRef: "stable",
+        repo: "demo",
+        type: "shorthand-ref",
+      }),
+    ).resolves.toMatchObject({
+      ref: "stable",
+      resolvedRef: {
+        apiRef: "heads/stable",
+        fullRef: "refs/heads/stable",
+        kind: "branch",
+        name: "stable",
       },
     });
   });

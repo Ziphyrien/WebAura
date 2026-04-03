@@ -3,9 +3,14 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ArrowRightIcon } from "@phosphor-icons/react";
 import { listRepositories } from "@gitinspect/db/schema";
-import { GithubRepo } from "@gitinspect/ui/components/github-repo";
+import { handleGithubError } from "@gitinspect/pi/repo/github-fetch";
+import { parseRepoInput } from "@gitinspect/pi/repo/path-parser";
+import { resolveRepoIntent } from "@gitinspect/pi/repo/ref-resolver";
+import { SUGGESTED_REPOS } from "@gitinspect/pi/repo/suggested-repos";
 import { repoSourceToPath } from "@gitinspect/pi/repo/url";
-import { parseRepoQuery } from "@gitinspect/pi/repo/parse";
+import { ChatLogo } from "@gitinspect/ui/components/chat-logo";
+import { GithubRepo } from "@gitinspect/ui/components/github-repo";
+import { Icons } from "@gitinspect/ui/components/icons";
 import {
   InputGroup,
   InputGroupAddon,
@@ -14,12 +19,7 @@ import {
   InputGroupText,
 } from "@gitinspect/ui/components/input-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@gitinspect/ui/components/tabs";
-import { Icons } from "@gitinspect/ui/components/icons";
-import { ChatLogo } from "@gitinspect/ui/components/chat-logo";
 import { cn } from "@gitinspect/ui/lib/utils";
-import { handleGithubError } from "@gitinspect/pi/repo/github-fetch";
-import { resolveRepoTarget } from "@gitinspect/pi/repo/ref-resolver";
-import { SUGGESTED_REPOS } from "@gitinspect/pi/repo/suggested-repos";
 
 function useSuggestedRepos(count: number) {
   return React.useMemo(() => {
@@ -45,9 +45,9 @@ export function LandingPage() {
         <div className="space-y-6 text-center lg:space-y-4">
           <h1 className="sr-only">gitinspect</h1>
           <ChatLogo
+            aria-hidden
             className="[&_.font-geist-pixel-square]:lg:text-7xl [&_.font-geist-pixel-square]:xl:text-8xl"
             size="hero"
-            aria-hidden
           />
           <p className="max-w-md mx-auto text-sm text-muted-foreground">
             GitInspect is an AI coding agent that lives on your browser and can answer questions
@@ -155,12 +155,12 @@ function LandingRepoForm() {
     e.preventDefault();
     if (isValidating) return;
 
-    const parsed = parseRepoQuery(query);
-    if (!parsed) return;
+    const intent = parseRepoInput(query);
+    if (intent.type === "invalid") return;
 
     setIsValidating(true);
     try {
-      const resolved = await resolveRepoTarget(parsed);
+      const resolved = await resolveRepoIntent(intent);
       const path = repoSourceToPath(resolved);
       void navigate({
         search: {
