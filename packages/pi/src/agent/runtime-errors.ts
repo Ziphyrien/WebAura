@@ -1,4 +1,4 @@
-import { GitHubFsError } from "just-github/types";
+import { GitHubFsError } from "@gitinspect/just-github/types";
 import type { SystemMessage } from "@gitinspect/pi/types/chat";
 import {
   BusyRuntimeError,

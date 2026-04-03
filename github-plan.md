@@ -35,7 +35,7 @@
 
 ## Correct fix
 
-### 1) Fix tree loading in `just-github`
+### 1) Fix tree loading in `@gitinspect/just-github`
 
 - Update `packages/just-github/src/github-client.ts` so the commit payload matches the real GitHub shape:
   - use `commit.commit.tree.sha`
@@ -112,7 +112,7 @@ Update mocks so they match the real GitHub API instead of the current simplified
 - [x] Record which failures happen during **ref resolution** vs **tree loading** so the implementation can be verified in layers.
 - [x] Identify the current tests/mocks that incorrectly encode GitHub behavior and need to be rewritten.
 
-### Phase 1 — Fix `just-github` tree loading
+### Phase 1 — Fix `@gitinspect/just-github` tree loading
 
 - [x] Update the commit response type in `packages/just-github/src/github-client.ts` to match the real GitHub payload shape.
 - [x] Change `fetchTree()` to read the tree SHA from the nested commit payload instead of the nonexistent top-level field.
@@ -176,7 +176,7 @@ Update mocks so they match the real GitHub API instead of the current simplified
 
 ### Phase 6 — Final validation and ship criteria
 
-- [x] Run the targeted test files for `just-github`, repo URL parsing, and ref resolution.
+- [x] Run the targeted test files for `@gitinspect/just-github`, repo URL parsing, and ref resolution.
 - [x] Run the full test suite with Bun.
   - Targeted repo/ref suites pass. The broader suite still contains unrelated pre-existing failures outside this GitHub ref-loading scope.
 - [x] Re-check `github-plan.md` against the shipped behavior and remove anything stale if implementation details changed.

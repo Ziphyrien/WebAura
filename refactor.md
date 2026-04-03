@@ -25,7 +25,7 @@ Goal: execute a pure architectural refactor with zero product regression.
 - `root-guard.tsx` stays in `apps/web`.
 - `chat-suggestions.ts` belongs in `packages/ui`.
 - `packages/ui/hooks/` is allowed, including Dexie-backed hooks if needed for parity/migration.
-- `just-github` remains the canonical GitHub implementation for now.
+- `@gitinspect/just-github` remains the canonical GitHub implementation for now.
 - Temporary carryover from old `src/lib/github/*` is allowed freely during migration if needed.
 - No product-auth screens are part of this refactor.
 - Keep `auth-callback-page.tsx` in `apps/web` as dormant web-only code if copied; do not treat it as a required product surface.
@@ -665,7 +665,7 @@ The old app has two related sources of GitHub runtime code:
 
 Current refactor repo already has `packages/just-github/` present.
 
-- [x] Keep `just-github` as the canonical GitHub implementation for now
+- [x] Keep `@gitinspect/just-github` as the canonical GitHub implementation for now
       Notes:
   - do not rename it as part of this refactor plan
   - old `src/lib/github/*` should not remain the long-term source of truth
@@ -677,7 +677,7 @@ Current refactor repo already has `packages/just-github/` present.
   ```
   Notes:
   - do not keep these as the long-term source of truth
-  - `just-github` is the canonical implementation for now
+  - `@gitinspect/just-github` is the canonical implementation for now
   - use this copy only as migration reference if something is still missing during execution
 
 ## 6.4 Auth provider coverage

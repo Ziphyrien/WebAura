@@ -1,5 +1,5 @@
-import { readGitHubErrorMessage, toGitHubFsError } from "just-github/github-http";
-import { GitHubFsError } from "just-github/types";
+import { readGitHubErrorMessage, toGitHubFsError } from "@gitinspect/just-github/github-http";
+import { GitHubFsError } from "@gitinspect/just-github/types";
 import type { ResolvedRepoRef } from "@gitinspect/db/storage-types";
 import { githubApiFetch } from "@gitinspect/pi/repo/github-fetch";
 import type { RepoPathIntent, ResolvedRepoLocation } from "@gitinspect/pi/repo/path-intent";

@@ -1,17 +1,17 @@
-# just-github
+# @gitinspect/just-github
 
 An `fs`-like API for reading files from GitHub repositories — without cloning.
 
 ## Install
 
 ```bash
-npm install just-github
+npm install @gitinspect/just-github
 ```
 
 ## Usage
 
 ```typescript
-import { GitHubFs } from "just-github";
+import { GitHubFs } from "@gitinspect/just-github";
 
 const fs = new GitHubFs({
   owner: "vercel-labs",
@@ -35,7 +35,7 @@ await fs.tree(); // all file paths in the repo
 
 ```typescript
 import { Bash } from "just-bash";
-import { GitHubFs } from "just-github";
+import { GitHubFs } from "@gitinspect/just-github";
 
 const fs = new GitHubFs({ owner: "vercel-labs", repo: "just-bash" });
 const bash = new Bash({ fs, cwd: "/" });

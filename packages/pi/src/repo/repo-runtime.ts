@@ -1,5 +1,5 @@
 import { Bash } from "just-bash/browser";
-import { GitHubFs } from "just-github/github-fs";
+import { GitHubFs } from "@gitinspect/just-github/github-fs";
 import type { RepoExecResult, RepoRuntime } from "@gitinspect/pi/repo/repo-types";
 import type { ResolvedRepoSource } from "@gitinspect/db/storage-types";
 

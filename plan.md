@@ -88,7 +88,7 @@ The repo-entry route only matters until the first message. After that the produc
 
 - [x] Delete dead parse helpers and wrappers.
 - [x] Reduce `packages/pi/src/repo/url.ts` to serialization-only responsibilities.
-- [x] Keep parser semantics out of `just-github`.
+- [x] Keep parser semantics out of `@gitinspect/just-github`.
 - [x] Document final parser/resolver contract in code comments and tests.
 
 ---
@@ -306,9 +306,9 @@ Choose one:
 
 **Chosen: A — unsupported pages fallback to root; explicit missing refs error.**
 
-### 3.3 Keep URL semantics outside `just-github`
+### 3.3 Keep URL semantics outside `@gitinspect/just-github`
 
-`just-github` / `lib/github` should stay filesystem/API only.
+`@gitinspect/just-github` / `lib/github` should stay filesystem/API only.
 
 Path parsing belongs in app/runtime code, not the GitHub FS client.
 
@@ -319,7 +319,7 @@ Choose one:
 - **A. Keep URL parsing/resolution in `packages/pi/src/repo/*`**
   - Pros: clean separation, fewer responsibilities inside GitHub FS layer, easier future replacement.
   - Cons: one extra adapter layer.
-- **B. Move URL semantics into `just-github`-style GitHub layer**
+- **B. Move URL semantics into `@gitinspect/just-github`-style GitHub layer**
   - Pros: fewer top-level files.
   - Cons: mixes product URL semantics with filesystem concerns; harder to reuse.
 
@@ -1384,9 +1384,9 @@ These should not be part of this refactor.
 
 No GitLab/Bitbucket/Gitea support in this change.
 
-### 12.2 `just-github` URL parsing
+### 12.2 `@gitinspect/just-github` URL parsing
 
-Do not move route parsing into `just-github`.
+Do not move route parsing into `@gitinspect/just-github`.
 
 ### 12.3 Dexie schema migration
 
