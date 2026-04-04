@@ -13,6 +13,8 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatIndexRouteImport } from './routes/chat.index'
 import { Route as ChatSessionIdRouteImport } from './routes/chat.$sessionId'
+import { Route as ApiProxyRouteImport } from './routes/api/proxy'
+import { Route as ApiERouteImport } from './routes/api/e'
 import { Route as OwnerRepoIndexRouteImport } from './routes/$owner.$repo.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as OwnerRepoSplatRouteImport } from './routes/$owner.$repo.$'
@@ -37,6 +39,16 @@ const ChatSessionIdRoute = ChatSessionIdRouteImport.update({
   path: '/$sessionId',
   getParentRoute: () => ChatRoute,
 } as any)
+const ApiProxyRoute = ApiProxyRouteImport.update({
+  id: '/api/proxy',
+  path: '/api/proxy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiERoute = ApiERouteImport.update({
+  id: '/api/e',
+  path: '/api/e',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OwnerRepoIndexRoute = OwnerRepoIndexRouteImport.update({
   id: '/$owner/$repo/',
   path: '/$owner/$repo/',
@@ -56,6 +68,8 @@ const OwnerRepoSplatRoute = OwnerRepoSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
+  '/api/e': typeof ApiERoute
+  '/api/proxy': typeof ApiProxyRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat/': typeof ChatIndexRoute
   '/$owner/$repo/$': typeof OwnerRepoSplatRoute
@@ -64,6 +78,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/e': typeof ApiERoute
+  '/api/proxy': typeof ApiProxyRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat': typeof ChatIndexRoute
   '/$owner/$repo/$': typeof OwnerRepoSplatRoute
@@ -74,6 +90,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
+  '/api/e': typeof ApiERoute
+  '/api/proxy': typeof ApiProxyRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat/': typeof ChatIndexRoute
   '/$owner/$repo/$': typeof OwnerRepoSplatRoute
@@ -85,6 +103,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/chat'
+    | '/api/e'
+    | '/api/proxy'
     | '/chat/$sessionId'
     | '/chat/'
     | '/$owner/$repo/$'
@@ -93,6 +113,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/api/e'
+    | '/api/proxy'
     | '/chat/$sessionId'
     | '/chat'
     | '/$owner/$repo/$'
@@ -102,6 +124,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/chat'
+    | '/api/e'
+    | '/api/proxy'
     | '/chat/$sessionId'
     | '/chat/'
     | '/$owner/$repo/$'
@@ -112,6 +136,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChatRoute: typeof ChatRouteWithChildren
+  ApiERoute: typeof ApiERoute
+  ApiProxyRoute: typeof ApiProxyRoute
   OwnerRepoSplatRoute: typeof OwnerRepoSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   OwnerRepoIndexRoute: typeof OwnerRepoIndexRoute
@@ -146,6 +172,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/chat/$sessionId'
       preLoaderRoute: typeof ChatSessionIdRouteImport
       parentRoute: typeof ChatRoute
+    }
+    '/api/proxy': {
+      id: '/api/proxy'
+      path: '/api/proxy'
+      fullPath: '/api/proxy'
+      preLoaderRoute: typeof ApiProxyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/e': {
+      id: '/api/e'
+      path: '/api/e'
+      fullPath: '/api/e'
+      preLoaderRoute: typeof ApiERouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/$owner/$repo/': {
       id: '/$owner/$repo/'
@@ -186,6 +226,8 @@ const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChatRoute: ChatRouteWithChildren,
+  ApiERoute: ApiERoute,
+  ApiProxyRoute: ApiProxyRoute,
   OwnerRepoSplatRoute: OwnerRepoSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   OwnerRepoIndexRoute: OwnerRepoIndexRoute,
