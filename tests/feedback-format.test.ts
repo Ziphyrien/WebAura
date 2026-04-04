@@ -12,7 +12,7 @@ describe("feedback format helpers", () => {
         message: "  Love   the   repo  switcher speed   ",
         sentiment: "happy",
       }),
-    ).toBe("Feedback: [happy] Love the repo switcher speed");
+    ).toBe("Feedback: Love the repo switcher speed");
   });
 
   it("builds labels for negative feedback with diagnostics", () => {

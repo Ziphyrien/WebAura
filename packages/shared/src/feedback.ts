@@ -92,7 +92,7 @@ export function buildFeedbackIssueTitle(
   input: Pick<FeedbackPayload, "message" | "sentiment">,
 ): string {
   const summary = sanitizeInline(input.message, 72) ?? "Untitled feedback";
-  return `Feedback: [${input.sentiment}] ${summary}`;
+  return `Feedback: ${summary}`;
 }
 
 export function buildFeedbackLabels(payload: FeedbackPayload): string[] {
