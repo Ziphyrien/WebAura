@@ -1,4 +1,5 @@
 import * as React from "react";
+import { toast } from "sonner";
 import {
   continuePendingGithubRepoAccessGrant,
   ensureGitHubRepoAccess,
@@ -33,24 +34,31 @@ export function AppAuthProvider(props: { children: React.ReactNode }) {
       return;
     }
 
-    void continuePendingGithubRepoAccessGrant().catch((error) => {
-      console.error("Could not continue GitHub repo access grant", error);
-    });
+    void continuePendingGithubRepoAccessGrant()
+      .then((status) => {
+        if (status === "requested-grant") {
+          toast.info("Step 1 of 2 complete — requesting private repo access…");
+        }
+      })
+      .catch((error) => {
+        console.error("Could not continue GitHub repo access grant", error);
+      });
   }, [sessionState.data]);
 
   const runNoticeIntent = React.useCallback(async (intent: GitHubNoticeCtaIntent) => {
     if (intent === "sign-in") {
-      openAuthDialog();
+      openAuthDialog({
+        mode: "github-only",
+        reason: "settings",
+      });
       return;
     }
 
     if (intent === "connect" || intent === "grant-repo-access") {
-      await ensureGitHubRepoAccess();
-      return;
-    }
-
-    if (intent === "reconnect") {
-      openGithubTokenSettings();
+      openAuthDialog({
+        mode: "full",
+        reason: "private-repo-access",
+      });
       return;
     }
 
@@ -72,10 +80,15 @@ export function AppAuthProvider(props: { children: React.ReactNode }) {
     () => ({
       authState,
       closeAuthDialog,
-      consumeReadyAuthAction: () => consumeReadyAuthAction(Boolean(sessionState.data)),
+      consumeReadyAuthAction: (route: string) =>
+        consumeReadyAuthAction({
+          isSignedIn: Boolean(sessionState.data),
+          route,
+        }),
       continueAsGuest,
       dialogMode: authStore.dialogMode,
       dialogOpen: authStore.dialogOpen,
+      dialogReason: authStore.dialogReason,
       dialogVariant: authStore.dialogVariant,
       ensureRepoAccess: ensureGitHubRepoAccess,
       openAuthDialog,
@@ -88,6 +101,7 @@ export function AppAuthProvider(props: { children: React.ReactNode }) {
       authState,
       authStore.dialogMode,
       authStore.dialogOpen,
+      authStore.dialogReason,
       authStore.dialogVariant,
       runNoticeIntent,
       sessionState.data,

@@ -17,6 +17,7 @@ export function AuthDialogWrapper() {
       }}
       mode={auth.dialogMode}
       open={auth.dialogOpen}
+      reason={auth.dialogReason}
       variant={auth.dialogVariant}
     />
   );

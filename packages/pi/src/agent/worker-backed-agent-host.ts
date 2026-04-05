@@ -7,7 +7,7 @@ import {
 } from "@gitinspect/pi/agent/runtime-worker-client";
 import type { WorkerSnapshotEnvelope } from "@gitinspect/pi/agent/runtime-worker-types";
 import type { SessionRunner } from "@gitinspect/pi/agent/session-runner";
-import { getGithubPersonalAccessToken } from "@gitinspect/pi/repo/github-token";
+import { resolveRegisteredGitHubAccess } from "@gitinspect/pi/repo/github-access";
 import type { MessageRow, SessionData } from "@gitinspect/db/storage-types";
 import type { ProviderGroupId, ThinkingLevel } from "@gitinspect/pi/types/models";
 
@@ -48,9 +48,10 @@ export class WorkerBackedAgentHost implements SessionRunner {
 
     try {
       await this.persistence.beginTurn(turn);
+      const access = await resolveRegisteredGitHubAccess({ requireRepoScope: true });
       await this.worker.startTurn(
         {
-          githubRuntimeToken: await getGithubPersonalAccessToken(),
+          githubRuntimeToken: access.ok ? access.token : undefined,
           messages: this.persistence.getSeedMessages(),
           session: this.persistence.session,
           turn,
@@ -162,9 +163,11 @@ export class WorkerBackedAgentHost implements SessionRunner {
       return;
     }
 
+    const access = await resolveRegisteredGitHubAccess({ requireRepoScope: true });
+
     await this.worker.refreshGithubToken({
       sessionId: this.session.id,
-      token: await getGithubPersonalAccessToken(),
+      token: access.ok ? access.token : undefined,
     });
   }
 

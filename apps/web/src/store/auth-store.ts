@@ -2,21 +2,26 @@ import * as React from "react";
 import { deleteSetting, setSetting } from "@gitinspect/db/schema";
 import type {
   AuthDialogMode,
+  AuthDialogReason,
   AuthDialogVariant,
   PendingAuthAction,
+  ReadyAuthAction,
 } from "@gitinspect/ui/components/github-auth-context";
 
 const PENDING_AUTH_ACTION_KEY = "gitinspect.pending-auth-action";
 const GUEST_ACKNOWLEDGED_SETTING_KEY = "auth.guest-chat-acknowledged";
+const PENDING_AUTH_ACTION_TTL_MS = 1000 * 60 * 15;
 
 type PendingAuthActionState = {
   action: PendingAuthAction;
+  createdAt: number;
   status: "awaiting-auth" | "guest-approved";
 };
 
 type AuthStoreSnapshot = {
   dialogMode: AuthDialogMode;
   dialogOpen: boolean;
+  dialogReason: AuthDialogReason;
   dialogVariant: AuthDialogVariant;
   pendingAction: PendingAuthActionState | null;
 };
@@ -24,6 +29,7 @@ type AuthStoreSnapshot = {
 let snapshot: AuthStoreSnapshot = {
   dialogMode: "full",
   dialogOpen: false,
+  dialogReason: "settings",
   dialogVariant: "default",
   pendingAction: null,
 };
@@ -35,6 +41,21 @@ function emitChange(): void {
   for (const listener of listeners) {
     listener();
   }
+}
+
+function isPendingAuthActionState(value: PendingAuthActionState): boolean {
+  return (
+    value.action.type === "send-first-message" &&
+    typeof value.action.content === "string" &&
+    typeof value.action.route === "string" &&
+    typeof value.createdAt === "number" &&
+    Number.isFinite(value.createdAt) &&
+    (value.status === "awaiting-auth" || value.status === "guest-approved")
+  );
+}
+
+function isPendingActionExpired(value: PendingAuthActionState, now = Date.now()): boolean {
+  return now - value.createdAt > PENDING_AUTH_ACTION_TTL_MS;
 }
 
 function readStoredPendingAction(): PendingAuthActionState | null {
@@ -51,18 +72,12 @@ function readStoredPendingAction(): PendingAuthActionState | null {
   try {
     const parsed = JSON.parse(raw) as PendingAuthActionState;
 
-    if (
-      parsed &&
-      parsed.action &&
-      parsed.action.type === "send-first-message" &&
-      typeof parsed.action.content === "string" &&
-      typeof parsed.action.route === "string" &&
-      (parsed.status === "awaiting-auth" || parsed.status === "guest-approved")
-    ) {
+    if (isPendingAuthActionState(parsed) && !isPendingActionExpired(parsed)) {
       return parsed;
     }
   } catch {
-    // Ignore malformed session storage state.
+    window.sessionStorage.removeItem(PENDING_AUTH_ACTION_KEY);
+    return null;
   }
 
   window.sessionStorage.removeItem(PENDING_AUTH_ACTION_KEY);
@@ -111,6 +126,7 @@ function updateSnapshot(next: Partial<AuthStoreSnapshot>): void {
 export function openAuthDialog(input?: {
   mode?: AuthDialogMode;
   postAuthAction?: PendingAuthAction;
+  reason?: AuthDialogReason;
   variant?: AuthDialogVariant;
 }): void {
   ensurePendingActionLoaded();
@@ -118,18 +134,25 @@ export function openAuthDialog(input?: {
   updateSnapshot({
     dialogMode: input?.mode ?? "full",
     dialogOpen: true,
+    dialogReason: input?.reason ?? "settings",
     dialogVariant: input?.variant ?? "default",
     pendingAction: input?.postAuthAction
       ? {
           action: input.postAuthAction,
+          createdAt: Date.now(),
           status: "awaiting-auth",
         }
-      : snapshot.pendingAction,
+      : null,
   });
 }
 
 export function closeAuthDialog(): void {
-  updateSnapshot({ dialogMode: "full", dialogOpen: false, dialogVariant: "default" });
+  updateSnapshot({
+    dialogMode: "full",
+    dialogOpen: false,
+    dialogReason: "settings",
+    dialogVariant: "default",
+  });
 }
 
 export async function continueAsGuest(): Promise<void> {
@@ -140,6 +163,7 @@ export async function continueAsGuest(): Promise<void> {
   updateSnapshot({
     dialogMode: "full",
     dialogOpen: false,
+    dialogReason: "settings",
     dialogVariant: "default",
     pendingAction: snapshot.pendingAction
       ? {
@@ -150,7 +174,10 @@ export async function continueAsGuest(): Promise<void> {
   });
 }
 
-export function consumeReadyAuthAction(isSignedIn: boolean): PendingAuthAction | null {
+export function consumeReadyAuthAction(input: {
+  isSignedIn: boolean;
+  route: string;
+}): ReadyAuthAction | null {
   ensurePendingActionLoaded();
 
   const pendingAction = snapshot.pendingAction;
@@ -159,14 +186,22 @@ export function consumeReadyAuthAction(isSignedIn: boolean): PendingAuthAction |
     return null;
   }
 
-  const isReady = pendingAction.status === "guest-approved" || isSignedIn;
+  if (isPendingActionExpired(pendingAction) || pendingAction.action.route !== input.route) {
+    updateSnapshot({ pendingAction: null });
+    return null;
+  }
+
+  const isReady = pendingAction.status === "guest-approved" || input.isSignedIn;
 
   if (!isReady) {
     return null;
   }
 
   updateSnapshot({ pendingAction: null });
-  return pendingAction.action;
+  return {
+    action: pendingAction.action,
+    requiresConfirmation: true,
+  };
 }
 
 export function clearPendingAuthAction(): void {

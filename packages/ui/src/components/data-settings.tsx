@@ -145,9 +145,9 @@ export function DataSettings() {
         <ItemContent>
           <ItemTitle>Delete all local data</ItemTitle>
           <ItemDescription>
-            Remove everything stored in this browser: chats, recent repos, provider keys, PAT
-            fallback tokens, app settings, local caches, usage totals, and any secure auth cookies
-            for the product session.
+            Remove everything stored in this browser: chats, recent repos, provider keys, local
+            access tokens, app settings, local caches, usage totals, and any secure account session
+            cookies.
           </ItemDescription>
         </ItemContent>
         <ItemActions>
@@ -167,10 +167,9 @@ export function DataSettings() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete all local data?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This wipes IndexedDB data, clears PAT fallback storage, signs you out of the
-                  cookie-backed Better Auth session, and resets the app to a clean signed-out
-                  baseline. It cannot be undone. Export chat JSON first if you want a transcript
-                  backup.
+                  This wipes IndexedDB data, clears local access token storage, signs you out of the
+                  secure account session cookie, and resets the app to a clean signed-out baseline.
+                  It cannot be undone. Export chat JSON first if you want a transcript backup.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

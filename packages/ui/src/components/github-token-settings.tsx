@@ -11,22 +11,9 @@ import { useGitHubAuthContext } from "@gitinspect/ui/components/github-auth-cont
 import { Button } from "@gitinspect/ui/components/button";
 import { Input } from "@gitinspect/ui/components/input";
 import { Label } from "@gitinspect/ui/components/label";
+import { AUTH_STORAGE_SUMMARY } from "@gitinspect/ui/lib/auth-copy";
+import { getGitHubConnectionSummary } from "@gitinspect/ui/lib/github-auth-summary";
 import { cn } from "@gitinspect/ui/lib/utils";
-
-function getPrimaryButtonLabel(input: {
-  repoAccess: "granted" | "missing" | "unknown";
-  session: "signed-in" | "signed-out";
-}): string {
-  if (input.session === "signed-out") {
-    return "Sign in with GitHub";
-  }
-
-  if (input.repoAccess === "missing") {
-    return "Grant repo access";
-  }
-
-  return "Reconnect GitHub";
-}
 
 export function GithubTokenSettings(props: {
   disabled?: boolean;
@@ -61,77 +48,54 @@ export function GithubTokenSettings(props: {
   }, []);
 
   const authState = auth?.authState;
-  const primaryButtonLabel = getPrimaryButtonLabel({
-    repoAccess: authState?.repoAccess ?? "unknown",
-    session: authState?.session ?? "signed-out",
-  });
+  const summary = authState ? getGitHubConnectionSummary(authState) : null;
+
+  async function handlePrimaryAction(): Promise<void> {
+    if (!auth || !summary || summary.primaryAction === "none") {
+      return;
+    }
+
+    setIsPrimaryActionLoading(true);
+
+    try {
+      if (summary.primaryAction === "sign-in") {
+        await auth.signIn();
+        return;
+      }
+
+      if (summary.primaryAction === "grant-repo-access" || summary.primaryAction === "reconnect") {
+        await auth.ensureRepoAccess();
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Could not start the GitHub flow");
+      setIsPrimaryActionLoading(false);
+    }
+  }
 
   return (
     <div className="space-y-4">
       <div className="rounded-none border border-foreground/10 p-4">
         <div className="space-y-1">
-          <div className="text-sm font-medium">Sign in with GitHub</div>
+          <div className="text-sm font-medium">GitHub</div>
           <p className="text-xs text-muted-foreground">
-            Recommended for free features, better limits, and the future sync, share, and
-            subscription path.
+            Sign in with GitHub to use free models and private repos.
           </p>
         </div>
 
-        <div className="mt-4 rounded-none border border-border/70 bg-muted/20 p-3 text-xs">
-          <div className="font-medium text-foreground">Connection status</div>
-          <div className="mt-2 grid gap-2 text-muted-foreground sm:grid-cols-2">
-            <div>
-              <div className="font-medium text-foreground">Product session</div>
-              <div>{authState?.session === "signed-in" ? "Signed in" : "Signed out"}</div>
-            </div>
-            <div>
-              <div className="font-medium text-foreground">Repo auth source</div>
-              <div>
-                {authState?.preferredSource === "oauth"
-                  ? "OAuth"
-                  : authState?.preferredSource === "pat"
-                    ? "PAT fallback"
-                    : "None"}
-              </div>
-            </div>
-            <div>
-              <div className="font-medium text-foreground">GitHub link</div>
-              <div>{authState?.githubLink ?? "unknown"}</div>
-            </div>
-            <div>
-              <div className="font-medium text-foreground">Repo access</div>
-              <div>{authState?.repoAccess ?? "unknown"}</div>
-            </div>
-          </div>
-        </div>
-
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button
-            disabled={props.disabled || isPrimaryActionLoading || !auth}
-            onClick={async () => {
-              if (!auth) {
-                return;
-              }
-
-              setIsPrimaryActionLoading(true);
-
-              try {
-                if (auth.authState.session === "signed-out") {
-                  await auth.signIn();
-                } else {
-                  await auth.ensureRepoAccess();
-                }
-              } catch (error) {
-                console.error(error);
-                toast.error("Could not start the GitHub flow");
-                setIsPrimaryActionLoading(false);
-              }
-            }}
-            size="sm"
-            type="button"
-          >
-            {isPrimaryActionLoading ? "Working…" : primaryButtonLabel}
-          </Button>
+          {summary?.primaryLabel ? (
+            <Button
+              disabled={props.disabled || isPrimaryActionLoading || !auth}
+              onClick={() => {
+                void handlePrimaryAction();
+              }}
+              size="sm"
+              type="button"
+            >
+              {isPrimaryActionLoading ? "Working…" : summary.primaryLabel}
+            </Button>
+          ) : null}
           {authState?.session === "signed-in" ? (
             <Button
               disabled={props.disabled || isPrimaryActionLoading || !auth}
@@ -144,7 +108,11 @@ export function GithubTokenSettings(props: {
 
                 try {
                   await auth.signOut();
-                  toast.success("Signed out");
+                  toast.success(
+                    hasSavedToken
+                      ? "Signed out. Your Personal Access Token is still saved in this browser."
+                      : "Signed out",
+                  );
                 } catch (error) {
                   console.error(error);
                   toast.error("Could not sign out");
@@ -162,21 +130,15 @@ export function GithubTokenSettings(props: {
         </div>
 
         <div className="mt-4 grid gap-2 text-xs text-muted-foreground">
-          <div>• Product auth unlocks account-linked features and better rate limits.</div>
-          <div>• Repository access is requested only when a repo action actually needs it.</div>
-          <div>
-            • Stateless Better Auth sessions and linked GitHub account data live in secure cookies.
-          </div>
+          <div>{AUTH_STORAGE_SUMMARY}</div>
         </div>
       </div>
 
       <div className="rounded-none border border-dashed border-foreground/15 p-4">
         <div className="space-y-1">
-          <div className="text-sm font-medium">Advanced PAT fallback</div>
+          <div className="text-sm font-medium">Use Personal Access Token instead</div>
           <p className="text-xs text-muted-foreground">
-            Best for privacy-sensitive fallback use. PAT works for direct GitHub API access, but the
-            app still treats PAT-only usage as signed out for free-model perks and future
-            sync/share/subscription features.
+            Optional. Use a GitHub Personal Access Token if you don&apos;t want to sign in.
           </p>
         </div>
 
@@ -191,13 +153,13 @@ export function GithubTokenSettings(props: {
             type="button"
             variant="outline"
           >
-            Generate GitHub Token
+            Generate Personal Access Token
             <ArrowUpRight className="size-3.5 opacity-70" />
           </Button>
         ) : null}
 
         <div className={cn("space-y-2", !isLoading && !hasSavedToken ? "mt-3" : "mt-4")}>
-          <Label htmlFor="github-pat">Access token</Label>
+          <Label htmlFor="github-pat">GitHub Personal Access Token</Label>
           <Input
             autoComplete="off"
             disabled={props.disabled || isLoading || isSaving}
@@ -207,10 +169,8 @@ export function GithubTokenSettings(props: {
             type="password"
             value={token}
           />
-          <p className="text-xs text-muted-foreground">
-            Stored only in this browser. Fine-grained token with read-only contents access is
-            recommended.
-          </p>
+          <p className="text-xs text-muted-foreground">Stored only in this browser.</p>
+          <p className="text-xs text-muted-foreground">Does not unlock free models.</p>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -224,7 +184,7 @@ export function GithubTokenSettings(props: {
                   setToken("");
                   await setGithubPersonalAccessToken(undefined);
                   setHasSavedToken(false);
-                  toast.success("GitHub token cleared");
+                  toast.success("Personal Access Token deleted");
                   await props.onTokenSaved?.();
                   return;
                 }
@@ -237,10 +197,10 @@ export function GithubTokenSettings(props: {
 
                 await setGithubPersonalAccessToken(next);
                 setHasSavedToken(true);
-                toast.success(`GitHub PAT saved for @${result.login}`);
+                toast.success(`Personal Access Token saved for @${result.login}`);
                 await props.onTokenSaved?.();
               } catch {
-                toast.error("Could not save GitHub token");
+                toast.error("Could not save Personal Access Token");
               } finally {
                 setIsSaving(false);
               }
@@ -248,7 +208,7 @@ export function GithubTokenSettings(props: {
             size="sm"
             type="button"
           >
-            Save token
+            Save Personal Access Token
           </Button>
           {!isLoading && hasSavedToken ? (
             <Button
@@ -259,10 +219,10 @@ export function GithubTokenSettings(props: {
                   setToken("");
                   await setGithubPersonalAccessToken(undefined);
                   setHasSavedToken(false);
-                  toast.success("GitHub token deleted");
+                  toast.success("Personal Access Token deleted");
                   await props.onTokenSaved?.();
                 } catch {
-                  toast.error("Could not delete GitHub token");
+                  toast.error("Could not delete Personal Access Token");
                 } finally {
                   setIsSaving(false);
                 }
@@ -271,15 +231,10 @@ export function GithubTokenSettings(props: {
               type="button"
               variant="ghost"
             >
-              Delete token
+              Delete Personal Access Token
             </Button>
           ) : null}
         </div>
-
-        <p className="mt-4 text-xs text-muted-foreground">
-          Public stars and language come from a tiny server endpoint for public repos only. Private
-          repo reads and chat file fetches still happen client-side with your OAuth token or PAT.
-        </p>
       </div>
     </div>
   );

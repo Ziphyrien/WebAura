@@ -135,9 +135,9 @@ export function LandingPage() {
           </a>
         </p>
         <p className="mt-2 max-w-md mx-auto text-[11px] leading-relaxed text-muted-foreground/70">
-          Chats and repo state stay local-first in your browser. If you sign in, the product session
-          uses secure cookies, and public repo cards may fetch stars and language through a tiny
-          public metadata endpoint.
+          Chats and repo data stay local in your browser. If you sign in, gitinspect stores a secure
+          session cookie for your account. Private repo access uses GitHub OAuth or an optional
+          local access token.
         </p>
       </footer>
     </div>

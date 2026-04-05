@@ -24,6 +24,12 @@ type RepoScopeStatus = {
   source: "oauth" | "pat" | "none";
 };
 
+type PendingRepoAccessState = {
+  createdAt: number;
+};
+
+export type RepoAccessContinuationStatus = "none" | "ready" | "requested-grant";
+
 function getCallbackUrl(): string {
   if (typeof window === "undefined") {
     return "/";
@@ -37,15 +43,41 @@ function markPendingRepoAccess(): void {
     return;
   }
 
-  window.sessionStorage.setItem(PENDING_REPO_ACCESS_KEY, "1");
+  const state: PendingRepoAccessState = {
+    createdAt: Date.now(),
+  };
+
+  window.sessionStorage.setItem(PENDING_REPO_ACCESS_KEY, JSON.stringify(state));
+}
+
+function readPendingRepoAccessState(): PendingRepoAccessState | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const raw = window.sessionStorage.getItem(PENDING_REPO_ACCESS_KEY);
+
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as PendingRepoAccessState;
+
+    if (typeof parsed.createdAt === "number" && Number.isFinite(parsed.createdAt)) {
+      return parsed;
+    }
+  } catch {
+    window.sessionStorage.removeItem(PENDING_REPO_ACCESS_KEY);
+    return null;
+  }
+
+  window.sessionStorage.removeItem(PENDING_REPO_ACCESS_KEY);
+  return null;
 }
 
 export function hasPendingRepoAccessGrant(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  return window.sessionStorage.getItem(PENDING_REPO_ACCESS_KEY) === "1";
+  return readPendingRepoAccessState() !== null;
 }
 
 export function clearPendingRepoAccessGrant(): void {
@@ -155,6 +187,7 @@ export async function signInWithGithub(): Promise<void> {
   await authClient.signIn.social({
     callbackURL: getCallbackUrl(),
     provider: "github",
+    scopes: [GITHUB_REPO_SCOPE],
   });
 }
 
@@ -190,22 +223,22 @@ export async function ensureGitHubRepoAccess(): Promise<void> {
   await requestGithubRepoAccess();
 }
 
-export async function continuePendingGithubRepoAccessGrant(): Promise<void> {
+export async function continuePendingGithubRepoAccessGrant(): Promise<RepoAccessContinuationStatus> {
   if (!hasPendingRepoAccessGrant()) {
-    return;
+    return "none";
   }
 
   const access = await resolveGitHubAccess({ requireRepoScope: true });
 
   if (access.ok) {
     clearPendingRepoAccessGrant();
-    return;
+    return "ready";
   }
 
   const session = await getProductSession();
 
   if (!session) {
-    return;
+    return "none";
   }
 
   clearPendingRepoAccessGrant();
@@ -214,6 +247,7 @@ export async function continuePendingGithubRepoAccessGrant(): Promise<void> {
     provider: "github",
     scopes: [GITHUB_REPO_SCOPE],
   });
+  return "requested-grant";
 }
 
 export async function signOutGithubProductSession(): Promise<void> {

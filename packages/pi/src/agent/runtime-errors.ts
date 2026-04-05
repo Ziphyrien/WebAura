@@ -86,7 +86,13 @@ function isUserAbortPlainText(text: string): boolean {
  * User-initiated cancellation (stop button, AbortSignal), not a provider bug.
  */
 export function isUserAbortError(error: unknown): boolean {
-  if (error instanceof Error && error.name === "AbortError") {
+  if (
+    (error instanceof Error && error.name === "AbortError") ||
+    (typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      (error as { name?: unknown }).name === "AbortError")
+  ) {
     return true;
   }
 
@@ -168,9 +174,25 @@ function fingerprintFor(kind: RuntimeErrorKind, message: string, path?: string):
   return path ? `${base}:${path}` : base;
 }
 
-/**
- * Classify thrown errors from repo tools, provider stream, or agent prompt.
- */
+function classifyGitHubFsKind(error: GitHubFsError): GitHubFsError["kind"] {
+  const lower = error.message.toLowerCase();
+
+  if (lower.includes(RATE_LIMIT_SUBSTR) || lower.includes("rate limit exceeded")) {
+    return "rate_limit";
+  }
+
+  if (
+    lower.includes("authentication required") ||
+    lower.includes("requires authentication") ||
+    lower.includes("bad credentials") ||
+    lower.includes("unauthorized")
+  ) {
+    return "auth";
+  }
+
+  return error.kind;
+}
+
 export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
   const rawMessage = normalizeMessage(error);
   const htmlDetail = extractHtmlErrorDetail(rawMessage);
@@ -228,8 +250,9 @@ export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
 
   if (error instanceof GitHubFsError) {
     const path = error.path ?? "";
+    const githubKind = classifyGitHubFsKind(error);
 
-    if (error.kind === "rate_limit") {
+    if (githubKind === "rate_limit") {
       return {
         action: "open-github-settings",
         detailsContext: htmlDetail?.context,
@@ -242,7 +265,7 @@ export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
       };
     }
 
-    if (error.kind === "auth") {
+    if (githubKind === "auth") {
       return {
         action: "open-github-settings",
         detailsContext: htmlDetail?.context,
@@ -255,7 +278,7 @@ export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
       };
     }
 
-    if (error.kind === "not_found" || error.code === "ENOENT") {
+    if (githubKind === "not_found" || error.code === "ENOENT") {
       return {
         detailsContext: htmlDetail?.context,
         detailsHtml: htmlDetail?.html,
@@ -267,7 +290,7 @@ export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
       };
     }
 
-    if (error.kind === "permission") {
+    if (githubKind === "permission") {
       return {
         action: "open-github-settings",
         detailsContext: htmlDetail?.context,
@@ -280,7 +303,7 @@ export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
       };
     }
 
-    if (error.kind === "unsupported" || error.code === "EFBIG" || error.code === "ENOTSUP") {
+    if (githubKind === "unsupported" || error.code === "EFBIG" || error.code === "ENOTSUP") {
       return {
         detailsContext: htmlDetail?.context,
         detailsHtml: htmlDetail?.html,
@@ -292,7 +315,7 @@ export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
       };
     }
 
-    if (error.kind === "network") {
+    if (githubKind === "network") {
       return {
         detailsContext: htmlDetail?.context,
         detailsHtml: htmlDetail?.html,

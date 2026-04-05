@@ -23,6 +23,7 @@ export function useSessionGuard() {
       openAuthDialog({
         mode: input?.mode ?? "full",
         postAuthAction: input?.postAuthAction,
+        reason: "settings",
         variant: input?.variant ?? "default",
       });
       return false;

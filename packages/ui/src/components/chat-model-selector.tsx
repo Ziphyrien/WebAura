@@ -78,7 +78,10 @@ export function ChatModelSelector(props: {
                     key={value}
                     onSelect={() => {
                       if (isLockedGitinspect) {
-                        auth?.openAuthDialog({ mode: "github-only" });
+                        auth?.openAuthDialog({
+                          mode: "github-only",
+                          reason: "free-models",
+                        });
                         setOpen(false);
                         return;
                       }
@@ -95,7 +98,7 @@ export function ChatModelSelector(props: {
                         <span className="text-xs font-normal text-muted-foreground">
                           {gitinspectModelsUnlocked
                             ? "Free (with limits)"
-                            : "Sign in with GitHub to use"}
+                            : "Sign in to unlock free models"}
                         </span>
                       </span>
                     ) : (

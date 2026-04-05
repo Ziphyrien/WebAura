@@ -300,8 +300,8 @@ function showClassifiedGithubToast(
     showGithubActionToast({
       actionLabel: action.label,
       message: retryAt
-        ? `GitHub requests are rate limited until ${retryAt}. Sign in or connect GitHub for better limits.`
-        : "GitHub requests are rate limited right now. Sign in or connect GitHub for better limits.",
+        ? `GitHub requests are rate limited until ${retryAt}. Sign in to raise limits or keep using your local token.`
+        : "GitHub requests are rate limited right now. Sign in to raise limits or keep using your local token.",
       onAction: action.onAction,
       signature,
     });
@@ -313,7 +313,8 @@ function showClassifiedGithubToast(
 
     showGithubActionToast({
       actionLabel: action.label,
-      message: "GitHub authentication failed. Reconnect GitHub or use your PAT fallback.",
+      message:
+        "Your GitHub session needs attention. Fix the connection to keep using private repos, or use your local token.",
       onAction: action.onAction,
       signature,
     });
@@ -325,7 +326,7 @@ function showClassifiedGithubToast(
 
     showGithubActionToast({
       actionLabel: action.label,
-      message: "GitHub denied repository access. Grant repo access or switch to a PAT fallback.",
+      message: "Private repo access is not enabled yet. Approve it in GitHub or use a local token.",
       onAction: action.onAction,
       signature,
     });
@@ -341,7 +342,7 @@ function showClassifiedGithubToast(
 
     showGithubActionToast({
       actionLabel: action.label,
-      message: "GitHub request failed. Review your GitHub connection or fallback token.",
+      message: "GitHub request failed. Check your GitHub connection or switch to your local token.",
       onAction: action.onAction,
       signature,
     });

@@ -86,7 +86,7 @@ export function getGitHubNoticeCta(input: { kind?: string; state: GitHubAuthStat
   if (kind === "github_auth") {
     return {
       intent: "reconnect",
-      label: "Reconnect GitHub",
+      label: "Fix GitHub connection",
     };
   }
 
@@ -100,19 +100,19 @@ export function getGitHubNoticeCta(input: { kind?: string; state: GitHubAuthStat
   if (state.repoAccess === "missing") {
     return {
       intent: "grant-repo-access",
-      label: "Grant repo access",
+      label: "Enable private repos",
     };
   }
 
   if (state.preferredSource === "pat") {
     return {
       intent: "use-pat",
-      label: "Use PAT token instead",
+      label: "Use local token",
     };
   }
 
   return {
     intent: "settings",
-    label: "GitHub settings",
+    label: "Open GitHub settings",
   };
 }

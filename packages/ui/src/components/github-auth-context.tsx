@@ -3,6 +3,7 @@ import type { GitHubAuthState, GitHubNoticeCtaIntent } from "@gitinspect/pi/repo
 
 export type AuthDialogVariant = "default" | "first-message";
 export type AuthDialogMode = "full" | "github-only";
+export type AuthDialogReason = "free-models" | "private-repo-access" | "settings";
 
 export type PendingAuthAction = {
   content: string;
@@ -10,18 +11,25 @@ export type PendingAuthAction = {
   type: "send-first-message";
 };
 
+export type ReadyAuthAction = {
+  action: PendingAuthAction;
+  requiresConfirmation: boolean;
+};
+
 export type GitHubAuthContextValue = {
   authState: GitHubAuthState;
   closeAuthDialog: () => void;
-  consumeReadyAuthAction: () => PendingAuthAction | null;
+  consumeReadyAuthAction: (route: string) => ReadyAuthAction | null;
   continueAsGuest: () => Promise<void>;
   dialogMode: AuthDialogMode;
   dialogOpen: boolean;
+  dialogReason: AuthDialogReason;
   dialogVariant: AuthDialogVariant;
   ensureRepoAccess: () => Promise<void>;
   openAuthDialog: (input?: {
     mode?: AuthDialogMode;
     postAuthAction?: PendingAuthAction;
+    reason?: AuthDialogReason;
     variant?: AuthDialogVariant;
   }) => void;
   openGithubSettings: () => void;
