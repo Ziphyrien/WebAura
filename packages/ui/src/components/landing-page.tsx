@@ -41,7 +41,7 @@ export function LandingPage() {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col items-center overflow-auto p-6 pt-[12vh] lg:justify-between lg:overflow-hidden lg:pt-6 lg:pb-5">
-      <div className="w-full max-w-xl flex-1 space-y-8 lg:min-h-0 lg:flex lg:flex-col lg:justify-center lg:space-y-5">
+      <div className="w-full max-w-xl flex-1 space-y-8 lg:flex lg:min-h-0 lg:flex-col lg:justify-center lg:space-y-5">
         <div className="space-y-6 text-center lg:space-y-4">
           <h1 className="sr-only">gitinspect</h1>
           <ChatLogo
@@ -49,8 +49,8 @@ export function LandingPage() {
             className="[&_.font-geist-pixel-square]:lg:text-7xl [&_.font-geist-pixel-square]:xl:text-8xl"
             size="hero"
           />
-          <p className="max-w-md mx-auto text-sm text-muted-foreground">
-            Gitinspect is an AI coding agent that lives on your browser and can answer questions
+          <p className="mx-auto max-w-md text-sm text-muted-foreground">
+            GitInspect is an AI coding agent that lives on your browser and can answer questions
             about any GitHub repository.
           </p>
         </div>
@@ -126,7 +126,7 @@ export function LandingPage() {
         <p className="text-sm text-muted-foreground">
           Made by{" "}
           <a
-            className="underline underline-offset-2 decoration-muted-foreground/60 hover:text-foreground hover:decoration-foreground/60"
+            className="underline decoration-muted-foreground/60 underline-offset-2 hover:text-foreground hover:decoration-foreground/60"
             href="https://jeremyosih.com/"
             rel="noopener noreferrer"
             target="_blank"
@@ -134,10 +134,8 @@ export function LandingPage() {
             Jeremy Osih
           </a>
         </p>
-        <p className="mt-2 max-w-md mx-auto text-[11px] leading-relaxed text-muted-foreground/70">
-          Chats and repo data stay local in your browser. If you sign in, gitinspect stores a secure
-          session cookie for your account. Private repo access uses GitHub OAuth or an optional
-          local access token.
+        <p className="mx-auto mt-2 max-w-md text-[11px] leading-relaxed text-muted-foreground/70">
+          This page respects your privacy by not collecting personal information.
         </p>
       </footer>
     </div>
@@ -185,7 +183,7 @@ function LandingRepoForm() {
       <InputGroup
         className={cn(
           "h-11 min-h-11 w-full min-w-0 rounded-none border border-foreground/20 bg-sidebar shadow-none",
-          "transition-colors hover:bg-sidebar-accent focus-within:bg-sidebar-accent",
+          "transition-colors focus-within:bg-sidebar-accent hover:bg-sidebar-accent",
           "has-[[data-slot=input-group-control]:focus-visible]:border-foreground/30",
           "has-[[data-slot=input-group-control]:focus-visible]:ring-0",
           "dark:bg-sidebar",

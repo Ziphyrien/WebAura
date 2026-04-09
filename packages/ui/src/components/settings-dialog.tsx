@@ -40,13 +40,13 @@ type SettingsSectionItem = {
 
 const BASE_SETTINGS_SECTIONS: Array<SettingsSectionItem> = [
   {
-    description: "Local provider credentials and OAuth",
+    description: "LLM API keys and OAuth (stored locally)",
     icon: Icons.badgeCheck,
     id: "providers",
     label: "Providers",
   },
   {
-    description: "GitHub API access for repository tools",
+    description: "GitHub token for repo API and rate limits",
     icon: Icons.gitHub,
     id: "github",
     label: "GitHub",
@@ -347,13 +347,81 @@ function AboutPanel() {
       </div>
       */}
 
-      <div className="space-y-4 text-sm leading-relaxed">
+      <div className="space-y-5 text-sm leading-relaxed">
         <p className="text-foreground">
           Ask questions about any GitHub repo from your browser, without cloning. You can replace{" "}
           <span className="font-mono text-[0.9em]">hub</span> with{" "}
           <span className="font-mono text-[0.9em]">inspect</span> in any GitHub URL to open the
-          corresponding digest here.
+          corresponding view here.
         </p>
+
+        <div>
+          <div className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+            Privacy
+          </div>
+          <div className="space-y-2 text-muted-foreground">
+            <p>
+              <span className="font-medium text-foreground">No gitinspect backend for your data.</span>{" "}
+              Chats, sessions, settings, optional GitHub token, provider keys, and usage stay only
+              in this browser (IndexedDB).
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Network:</span>{" "}
+              <span className="font-medium text-foreground">GitHub</span> is called from your
+              browser for repo data. With <span className="font-medium text-foreground">your own</span>{" "}
+              provider keys, chat goes to those APIs (optional proxy in settings). The{" "}
+              <span className="font-medium text-foreground">free tier</span> uses gitinspect&apos;s
+              server proxy for limits and a shared key—not a direct browser-to-provider call like
+              when you add your own keys.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+            Models &amp; GitHub
+          </div>
+          <div className="overflow-x-auto rounded-none border border-border/80 text-xs">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-border/80 bg-muted/30">
+                  <th className="px-3 py-2 font-medium text-foreground">Setting</th>
+                  <th className="px-3 py-2 font-medium text-foreground">What it&apos;s for</th>
+                </tr>
+              </thead>
+              <tbody className="text-muted-foreground">
+                <tr className="border-b border-border/60">
+                  <td className="px-3 py-2 font-medium text-foreground">Providers</td>
+                  <td className="px-3 py-2">LLM API keys and OAuth for the models you use.</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 font-medium text-foreground">GitHub</td>
+                  <td className="px-3 py-2">
+                    Optional PAT (stored only here): higher GitHub API limits and richer repo
+                    metadata.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            With no provider configured, you can still use the free-tier model in the picker
+            (&quot;Free (with limits)&quot;). That traffic goes through gitinspect&apos;s proxy for
+            rate limiting and shared hosting of the API key—not a direct browser-to-provider call
+            like when you add your own keys.
+          </p>
+        </div>
+
+        <div>
+          <div className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+            Analytics
+          </div>
+          <p className="text-muted-foreground">
+            We use Vercel (hosting) and OneDollar Stats for aggregate traffic only. They are not
+            used to read chats or repo content; chat routes are excluded where configured.
+          </p>
+        </div>
+
         <div>
           <div className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
             How it works
@@ -364,36 +432,28 @@ function AboutPanel() {
               repository and chat in natural language; answers are grounded in the code.
             </li>
             <li>
-              <span className="font-medium text-foreground">Stack</span> — Built on pi-mono,
-              read-only shell via just-bash, and a virtual filesystem from the GitHub API.
+              <span className="font-medium text-foreground">Stack</span> — pi-mono, read-only
+              shell via just-bash, virtual filesystem from the GitHub API.
             </li>
             <li>
-              <span className="font-medium text-foreground">Private by design</span> — Chats,
-              settings, provider keys, and usage stay local-first in Dexie / IndexedDB. If you sign
-              in, gitinspect stores a secure session cookie for your account. Private repo access
-              uses GitHub OAuth or an optional local access token, while repo and chat fetches stay
-              client-side.
+              <span className="font-medium text-foreground">Local first</span> — Agent runs in a
+              per-tab dedicated worker; durable state stays on the main thread.
             </li>
             <li>
-              <span className="font-medium text-foreground">Local first</span> — Agent execution
-              runs in a per-tab dedicated worker; durable state stays on the main thread.
+              <span className="font-medium text-foreground">Resilient</span> — Lease ownership,
+              recovery, and interrupted-turn repair on the main thread.
             </li>
             <li>
-              <span className="font-medium text-foreground">Resilient by design</span> — Lease
-              ownership, runtime recovery, and interrupted-turn repair stay on the main thread; the
-              worker improves responsiveness, not hidden-tab guarantees.
+              <span className="font-medium text-foreground">Lazy loading</span> — Nothing
+              prefetched at construction; everything on demand.
             </li>
             <li>
-              <span className="font-medium text-foreground">Lazy loading</span> — Nothing fetched at
-              construction; everything on demand.
+              <span className="font-medium text-foreground">Tree cache</span> — Full repo tree
+              once; stat, exists, readdir from cache.
             </li>
             <li>
-              <span className="font-medium text-foreground">Tree cache</span> — Full repo tree once
-              via Git Trees API; stat, exists, and readdir from cache.
-            </li>
-            <li>
-              <span className="font-medium text-foreground">Content cache</span> — File contents by
-              blob SHA (content-addressable, never stale).
+              <span className="font-medium text-foreground">Content cache</span> — File contents
+              by blob SHA (content-addressable).
             </li>
             <li>
               <span className="font-medium text-foreground">Smart API selection</span> — Contents
@@ -401,11 +461,17 @@ function AboutPanel() {
             </li>
           </ul>
         </div>
+
         <p className="text-xs text-muted-foreground">
-          Public repo cards fetch stars and language through a tiny server endpoint for public
-          metadata only. Private repo trees, file reads, and chat grounding still stay client-side.
           Unauthenticated GitHub API requests are limited to 60/hour; authenticated requests get
-          5,000/hour.
+          5,000/hour. Add a token under GitHub settings to raise limits; the tree cache keeps usage
+          low after the initial load.
+        </p>
+
+        <p className="text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">AI disclosure:</span> This codebase has
+          been built with a lot of support from AI. Very little is hand-written; GPT 5.4 was used
+          to create this repository alongside that small amount of manual code.
         </p>
       </div>
 
