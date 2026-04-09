@@ -1,5 +1,4 @@
 import * as React from "react";
-import { configureDbCloud, syncDb } from "@gitinspect/db";
 import { env } from "@gitinspect/env/web";
 import { type FeedbackSentiment, parseFeedbackSentiment } from "@gitinspect/shared/feedback";
 import {
@@ -20,7 +19,6 @@ import { AuthDialogWrapper } from "@/components/auth-dialog-wrapper";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { PricingSettingsPanel } from "@/components/pricing-settings-panel";
 import { RootGuard } from "@/components/root-guard";
-import { getDexieBootstrap } from "@/functions/get-dexie-bootstrap";
 import { useSubscription } from "@/hooks/use-subscription";
 import { parseSettingsSection } from "@/navigation/search-state";
 import { DataSettings } from "@gitinspect/ui/components/data-settings";
@@ -51,8 +49,6 @@ type RootSearch = {
 };
 
 export const Route = createRootRoute({
-  loader: () => getDexieBootstrap(),
-  staleTime: Infinity,
   validateSearch: (search: RootSearchInput): RootSearch => ({
     feedback: search.feedback === "open" ? "open" : undefined,
     feedbackIncludeDiagnostics: search.feedbackIncludeDiagnostics === "true" ? true : undefined,
@@ -149,40 +145,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function RootLayout() {
-  const { syncEnabled } = Route.useLoaderData();
-
-  configureDbCloud({
-    // Sync is intentionally disabled for now; keep Dexie local-only until we decide to ship paid sync.
-    databaseUrl: undefined,
-    fetchTokens: async (tokenParams) => {
-      const response = await fetch("/api/auth/dexie-cloud/token", {
-        body: JSON.stringify(tokenParams),
-        credentials: "same-origin",
-        headers: {
-          "content-type": "application/json",
-        },
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch Dexie Cloud token.");
-      }
-
-      return await response.json();
-    },
-    syncEnabled,
-  });
-
-  React.useEffect(() => {
-    if (!syncEnabled) {
-      return;
-    }
-
-    void syncDb().catch((error) => {
-      console.error("Could not initialize Dexie sync", error);
-    });
-  }, [syncEnabled]);
-
   return (
     <AppAuthProvider>
       <AutumnProvider

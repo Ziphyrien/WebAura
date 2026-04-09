@@ -98,7 +98,6 @@
         "@gitinspect/env": "workspace:*",
         "better-auth": "catalog:",
         "dotenv": "catalog:",
-        "zod": "catalog:",
       },
       "devDependencies": {
         "@gitinspect/config": "workspace:*",
@@ -151,6 +150,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@gitinspect/db": "workspace:*",
+        "@gitinspect/env": "workspace:*",
         "@gitinspect/just-github": "workspace:*",
         "@mariozechner/pi-agent-core": "^0.62.0",
         "@mariozechner/pi-ai": "^0.62.0",

@@ -10,6 +10,6 @@ export const env = createEnv({
       .optional()
       .transform((value) => value === "true"),
   },
-  runtimeEnv: import.meta.env,
+  runtimeEnv: (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env,
   emptyStringAsUndefined: true,
 });

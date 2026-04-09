@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 import { describe, expect, it } from "vitest";
-import { AppDb } from "@/db/schema";
+import { AppDb } from "@gitinspect/db";
 import { createEmptyUsage } from "@/types/models";
 import type { RepoRefOrigin, ResolvedRepoRef, SessionData } from "@/types/storage";
 import {
@@ -8,7 +8,7 @@ import {
   getCostsByProviderFromAggregates,
   getTotalCostFromAggregates,
   mergeDailyCostAggregate,
-} from "@/db/schema";
+} from "@gitinspect/db";
 
 type LegacyRepositoryRow = {
   lastOpenedAt: string;
@@ -41,6 +41,23 @@ function defineLegacySchema(db: Dexie): void {
     session_runtime: "sessionId, status, ownerTabId, lastProgressAt, updatedAt",
     sessions: "id, updatedAt, createdAt, provider, model, isStreaming",
     settings: "key, updatedAt",
+  });
+}
+
+function defineLegacyShareSchema(db: Dexie): void {
+  db.version(6).stores({
+    daily_costs: "date",
+    messages:
+      "id, sessionId, [sessionId+order], [sessionId+timestamp], [sessionId+status], order, timestamp, status",
+    "provider-keys": "provider, updatedAt",
+    publicMessages: "id, sessionId, [sessionId+order], order, timestamp",
+    publicSessions: "id, publishedAt, updatedAt",
+    repositories: "[owner+repo+ref], lastOpenedAt",
+    session_leases: "sessionId, ownerTabId, heartbeatAt",
+    session_runtime: "sessionId, phase, status, ownerTabId, lastProgressAt, updatedAt",
+    sessions: "id, updatedAt, createdAt, provider, model, isStreaming",
+    settings: "key, updatedAt",
+    shareOwners: "id, ownerUserId, realmId, updatedAt",
   });
 }
 
@@ -247,6 +264,25 @@ describe("db schema helpers", () => {
     expect(await migratedDb.sessions.get("session-ambiguous")).toMatchObject({
       repoSource: undefined,
     });
+
+    migratedDb.close();
+    await Dexie.delete(name);
+  });
+
+  it("drops legacy public share tables in the current schema", async () => {
+    const name = `gitinspect-removed-share-schema-${Date.now()}`;
+    const legacyDb = new Dexie(name);
+
+    defineLegacyShareSchema(legacyDb);
+    await legacyDb.open();
+    legacyDb.close();
+
+    const migratedDb = new AppDb(name);
+    await migratedDb.open();
+
+    expect(migratedDb.tables.map((table) => table.name)).not.toEqual(
+      expect.arrayContaining(["publicMessages", "publicSessions", "shareOwners"]),
+    );
 
     migratedDb.close();
     await Dexie.delete(name);
