@@ -6,12 +6,12 @@ Ask questions to any GitHub repo — from your browser, without cloning.
 
 You can also replace hub with inspect in any GitHub URL to access the corresponding digest.
 
-[website](https://gitinspect.com/) 
+[website](https://gitinspect.com/)
 
 ## How it works
 
 - **Research agent** — Pick a repository, chat in natural language; answers are grounded in the code.
-- **Stack** — [pi-mono](https://github.com/badlogic/pi-mono), read-only shell via [just-bash](https://github.com/vercel-labs/just-bash), virtual FS from the GitHub API ([just-github](https://github.com/ThallesP/just-github)).
+- **Stack** — [pi-mono](https://github.com/badlogic/pi-mono), read-only shell via [just-bash](https://github.com/vercel-labs/just-bash), virtual FS from the GitHub API via the internal `src/lib/github` runtime.
 - **Private by design** — Sessions, settings, provider keys, and usage stay on device ([Dexie](https://github.com/dexie/Dexie.js) / IndexedDB); chat is client-side, no backend for your data.
 - **Local first** — Agent execution runs in a per-tab `DedicatedWorker`; durable state stays in IndexedDB on the main thread.
 - **Resilient by design** — Lease ownership, runtime recovery, and interrupted-turn repair stay on the main thread; the worker improves responsiveness, not hidden-tab guarantees.

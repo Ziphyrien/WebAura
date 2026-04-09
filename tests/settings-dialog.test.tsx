@@ -1,22 +1,17 @@
-import * as React from "react"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { cleanup, render } from "@testing-library/react"
+import * as React from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render } from "@testing-library/react";
 
-const {
-  navigate,
-  state,
-} = vi.hoisted(() => ({
+const { navigate, state } = vi.hoisted(() => ({
   navigate: vi.fn(),
   state: {
-    dialogOnOpenChange: undefined as
-      | ((open: boolean) => void)
-      | undefined,
+    dialogOnOpenChange: undefined as ((open: boolean) => void) | undefined,
     search: {
       settings: "providers",
       tab: "suggested",
     } as Record<string, unknown>,
   },
-}))
+}));
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -24,13 +19,18 @@ vi.mock("@tanstack/react-router", () => ({
     search: _search,
     to: _to,
     ...props
-  }: React.PropsWithChildren<Record<string, unknown>>) =>
-    React.createElement("a", props, children),
+  }: React.PropsWithChildren<Record<string, unknown>>) => React.createElement("a", props, children),
   useNavigate: () => navigate,
   useRouter: () => ({
     invalidate: vi.fn(() => Promise.resolve()),
   }),
-  useRouterState: ({ select }: { select: (state: { matches: Array<{ params: Record<string, string>; routeId: string }> }) => unknown }) =>
+  useRouterState: ({
+    select,
+  }: {
+    select: (state: {
+      matches: Array<{ params: Record<string, string>; routeId: string }>;
+    }) => unknown;
+  }) =>
     select({
       matches: [
         {
@@ -40,36 +40,30 @@ vi.mock("@tanstack/react-router", () => ({
       ],
     }),
   useSearch: () => state.search,
-}))
-
-vi.mock("@/agent/runtime-client", () => ({
-  runtimeClient: {
-    refreshGithubToken: vi.fn(() => Promise.resolve()),
-  },
-}))
+}));
 
 vi.mock("@/hooks/use-selected-session-summary", () => ({
   useSelectedSessionSummary: () => undefined,
-}))
+}));
 
 vi.mock("@/components/provider-settings", () => ({
   ProviderSettings: () => React.createElement("div", undefined, "providers"),
-}))
+}));
 
 vi.mock("@/components/github-token-settings", () => ({
   GithubTokenSettings: () => React.createElement("div", undefined, "github"),
-}))
+}));
 
 vi.mock("@/components/proxy-settings", () => ({
   ProxySettings: () => React.createElement("div", undefined, "proxy"),
-}))
+}));
 
 vi.mock("@/components/costs-panel", () => ({
   CostsPanel: () => React.createElement("div", undefined, "costs"),
-}))
+}));
 
 vi.mock("@/components/icons", () => {
-  const Icon = () => React.createElement("span")
+  const Icon = () => React.createElement("span");
 
   return {
     Icons: {
@@ -80,26 +74,26 @@ vi.mock("@/components/icons", () => {
       gitHub: Icon,
       globe: Icon,
     },
-  }
-})
+  };
+});
 
 vi.mock("@/components/ui/dialog", () => ({
   Dialog: ({
     children,
     onOpenChange,
   }: {
-    children: React.ReactNode
-    onOpenChange?: (open: boolean) => void
-    open?: boolean
+    children: React.ReactNode;
+    onOpenChange?: (open: boolean) => void;
+    open?: boolean;
   }) => {
-    state.dialogOnOpenChange = onOpenChange
-    return React.createElement("div", undefined, children)
+    state.dialogOnOpenChange = onOpenChange;
+    return React.createElement("div", undefined, children);
   },
   DialogContent: ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children),
   DialogTitle: ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children),
-}))
+}));
 
 vi.mock("@/components/ui/tabs", () => ({
   Tabs: ({ children }: { children: React.ReactNode; value?: string }) =>
@@ -112,26 +106,26 @@ vi.mock("@/components/ui/tabs", () => ({
     className,
     value,
   }: {
-    children: React.ReactNode
-    asChild?: boolean
-    className?: string
-    value: string
+    children: React.ReactNode;
+    asChild?: boolean;
+    className?: string;
+    value: string;
   }) =>
     asChild
       ? React.createElement("div", { className, "data-value": value }, children)
       : React.createElement("button", { className, type: "button", "data-value": value }, children),
-}))
+}));
 
 vi.mock("@/components/ui/toggle-group", () => ({
   ToggleGroup: ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children),
   ToggleGroupItem: ({ children }: { children: React.ReactNode }) =>
     React.createElement("button", { type: "button" }, children),
-}))
+}));
 
 vi.mock("@/components/ui/sidebar", () => {
   const Passthrough = ({ children }: { children: React.ReactNode }) =>
-    React.createElement("div", undefined, children)
+    React.createElement("div", undefined, children);
 
   return {
     Sidebar: Passthrough,
@@ -143,31 +137,31 @@ vi.mock("@/components/ui/sidebar", () => {
       children,
       onClick,
     }: {
-      children: React.ReactNode
-      onClick?: () => void
-      isActive?: boolean
+      children: React.ReactNode;
+      onClick?: () => void;
+      isActive?: boolean;
     }) => React.createElement("button", { onClick, type: "button" }, children),
     SidebarMenuItem: Passthrough,
     SidebarProvider: Passthrough,
-  }
-})
+  };
+});
 
 vi.mock("@/components/ui/button", () => ({
   Button: ({
     children,
     onClick,
   }: {
-    children: React.ReactNode
-    onClick?: () => void
-    size?: string
-    variant?: string
-    asChild?: boolean
+    children: React.ReactNode;
+    onClick?: () => void;
+    size?: string;
+    variant?: string;
+    asChild?: boolean;
   }) => React.createElement("button", { onClick, type: "button" }, children),
-}))
+}));
 
 vi.mock("@/components/ui/breadcrumb", () => {
   const Passthrough = ({ children }: { children: React.ReactNode }) =>
-    React.createElement("div", undefined, children)
+    React.createElement("div", undefined, children);
 
   return {
     Breadcrumb: Passthrough,
@@ -175,12 +169,12 @@ vi.mock("@/components/ui/breadcrumb", () => {
     BreadcrumbList: Passthrough,
     BreadcrumbPage: Passthrough,
     BreadcrumbSeparator: Passthrough,
-  }
-})
+  };
+});
 
 vi.mock("@/components/ui/item", () => {
   const Passthrough = ({ children }: { children: React.ReactNode }) =>
-    React.createElement("div", undefined, children)
+    React.createElement("div", undefined, children);
 
   return {
     Item: Passthrough,
@@ -189,29 +183,29 @@ vi.mock("@/components/ui/item", () => {
     ItemDescription: Passthrough,
     ItemMedia: Passthrough,
     ItemTitle: Passthrough,
-  }
-})
+  };
+});
 
 describe("settings dialog", () => {
   beforeEach(() => {
-    state.dialogOnOpenChange = undefined
-    state.search = { settings: "providers", tab: "suggested" }
-    navigate.mockReset()
-  })
+    state.dialogOnOpenChange = undefined;
+    state.search = { settings: "providers", tab: "suggested" };
+    navigate.mockReset();
+  });
 
   afterEach(() => {
-    cleanup()
-  })
+    cleanup();
+  });
 
   it("does not restore the previous section when dialog open state echoes true", async () => {
-    const { AppSettingsDialog } = await import("@/components/settings-dialog")
+    const { AppSettingsDialog } = await import("@/components/settings-dialog");
 
-    render(React.createElement(AppSettingsDialog))
+    render(React.createElement(AppSettingsDialog));
 
-    expect(state.dialogOnOpenChange).toBeTypeOf("function")
+    expect(state.dialogOnOpenChange).toBeTypeOf("function");
 
-    state.dialogOnOpenChange?.(true)
+    state.dialogOnOpenChange?.(true);
 
-    expect(navigate).not.toHaveBeenCalled()
-  })
-})
+    expect(navigate).not.toHaveBeenCalled();
+  });
+});

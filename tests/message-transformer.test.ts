@@ -1,8 +1,5 @@
-import { describe, expect, it } from "vitest"
-import {
-  toOpenAIResponsesInput,
-  webMessageTransformer,
-} from "@/agent/message-transformer"
+import { describe, expect, it } from "vitest";
+import { toOpenAIResponsesInput, webMessageTransformer } from "@/agent/message-transformer";
 
 describe("webMessageTransformer", () => {
   it("forwards only llm-compatible message roles with orphan tool results removed", () => {
@@ -47,10 +44,10 @@ describe("webMessageTransformer", () => {
         label: "ui-only",
         role: "notice",
       } as never,
-    ])
+    ]);
 
-    expect(transformed.map((message) => message.role)).toEqual(["user", "assistant"])
-  })
+    expect(transformed.map((message) => message.role)).toEqual(["user", "assistant"]);
+  });
 
   it("serializes responses input using message and function items", () => {
     const input = toOpenAIResponsesInput([
@@ -98,7 +95,7 @@ describe("webMessageTransformer", () => {
         toolCallId: "call-1|fc-1",
         toolName: "read",
       },
-    ])
+    ]);
 
     expect(input).toEqual([
       {
@@ -123,8 +120,8 @@ describe("webMessageTransformer", () => {
         output: "# gitinspect.com",
         type: "function_call_output",
       },
-    ])
-  })
+    ]);
+  });
 
   it("drops orphan tool results from replay history", () => {
     const transformed = webMessageTransformer([
@@ -164,13 +161,10 @@ describe("webMessageTransformer", () => {
           totalTokens: 0,
         },
       },
-    ])
+    ]);
 
-    expect(transformed.map((message) => message.role)).toEqual([
-      "user",
-      "assistant",
-    ])
-  })
+    expect(transformed.map((message) => message.role)).toEqual(["user", "assistant"]);
+  });
 
   it("never emits function outputs without a matching function call", () => {
     const input = toOpenAIResponsesInput([
@@ -187,7 +181,7 @@ describe("webMessageTransformer", () => {
         toolCallId: "call-1|fc-1",
         toolName: "read",
       },
-    ])
+    ]);
 
     expect(input).toEqual([
       {
@@ -195,6 +189,6 @@ describe("webMessageTransformer", () => {
         role: "user",
         type: "message",
       },
-    ])
-  })
-})
+    ]);
+  });
+});

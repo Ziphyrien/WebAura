@@ -1,7 +1,8 @@
-import * as React from "react"
-import { describe, expect, it, vi } from "vitest"
-import { fireEvent, render, screen } from "@testing-library/react"
-import type { ChatMessage as ChatMessageType } from "@/types/chat"
+import * as React from "react";
+import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { ChatMessage as ChatMessageType } from "@/types/chat";
+import { GitHubAuthProvider } from "@/components/github-auth-context";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -9,9 +10,8 @@ vi.mock("@tanstack/react-router", () => ({
     search: _search,
     to: _to,
     ...props
-  }: React.PropsWithChildren<Record<string, unknown>>) =>
-    React.createElement("a", props, children),
-}))
+  }: React.PropsWithChildren<Record<string, unknown>>) => React.createElement("a", props, children),
+}));
 
 function buildStreamingAssistant(): ChatMessageType & { status: "streaming" } {
   return {
@@ -38,28 +38,26 @@ function buildStreamingAssistant(): ChatMessageType & { status: "streaming" } {
       output: 0,
       totalTokens: 0,
     },
-  } as ChatMessageType & { status: "streaming" }
+  } as ChatMessageType & { status: "streaming" };
 }
 
 describe("ChatMessage", () => {
   it("shows a streaming placeholder before the assistant emits text", async () => {
-    const { ChatMessage } = await import("@/components/chat-message")
+    const { ChatMessage } = await import("@/components/chat-message");
 
     render(
       <ChatMessage
         followingMessages={[]}
         isStreamingReasoning={false}
         message={buildStreamingAssistant()}
-      />
-    )
+      />,
+    );
 
-    expect(screen.getByRole("status").textContent).toContain(
-      "Assistant is streaming..."
-    )
-  })
+    expect(screen.getByRole("status").textContent).toContain("Assistant is streaming...");
+  });
 
   it("renders expandable HTML details for system messages", async () => {
-    const { ChatMessage } = await import("@/components/chat-message")
+    const { ChatMessage } = await import("@/components/chat-message");
 
     render(
       <ChatMessage
@@ -81,26 +79,65 @@ describe("ChatMessage", () => {
             timestamp: 1,
           } satisfies ChatMessageType
         }
-      />
-    )
+      />,
+    );
 
-    expect(screen.getByText("429 — Vercel Security Checkpoint")).toBeTruthy()
+    expect(screen.getByText("429 — Vercel Security Checkpoint")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: /HTML response/i }))
+    fireEvent.click(screen.getByRole("button", { name: /HTML response/i }));
 
+    expect(screen.getByText(/Sandboxed preview for inspection only/i)).toBeTruthy();
     expect(
-      screen.getByText(/Sandboxed preview for inspection only/i)
-    ).toBeTruthy()
-    expect(
-      screen.getByText(
-        /\[fireworks-ai\/accounts\/fireworks\/routers\/kimi-k2p5-turbo/
-      )
-    ).toBeTruthy()
-    expect(
-      screen.getByText(/<title>Vercel Security Checkpoint<\/title>/)
-    ).toBeTruthy()
-    expect(
-      screen.getByTitle("HTML response preview system-1")
-    ).toBeTruthy()
-  })
-})
+      screen.getByText(/\[fireworks-ai\/accounts\/fireworks\/routers\/kimi-k2p5-turbo/),
+    ).toBeTruthy();
+    expect(screen.getByText(/<title>Vercel Security Checkpoint<\/title>/)).toBeTruthy();
+    expect(screen.getByTitle("HTML response preview system-1")).toBeTruthy();
+  });
+
+  it("renders auth-aware GitHub CTAs for signed-out users", async () => {
+    const { ChatMessage } = await import("@/components/chat-message");
+
+    render(
+      <GitHubAuthProvider
+        value={{
+          authState: {
+            fallbackPat: false,
+            githubLink: "unlinked",
+            preferredSource: "none",
+            repoAccess: "missing",
+            session: "signed-out",
+          },
+          closeAuthDialog: () => {},
+          consumeReadyAuthAction: () => null,
+          continueAsGuest: async () => {},
+          dialogOpen: false,
+          dialogVariant: "default",
+          ensureRepoAccess: async () => {},
+          openAuthDialog: () => {},
+          openGithubSettings: () => {},
+          runNoticeIntent: async () => {},
+          signIn: async () => {},
+          signOut: async () => {},
+        }}
+      >
+        <ChatMessage
+          followingMessages={[]}
+          isStreamingReasoning={false}
+          message={{
+            action: "open-github-settings",
+            fingerprint: "github_auth:1",
+            id: "system-auth-1",
+            kind: "github_auth",
+            message: "GitHub authentication failed.",
+            role: "system",
+            severity: "error",
+            source: "github",
+            timestamp: 1,
+          }}
+        />
+      </GitHubAuthProvider>,
+    );
+
+    expect(screen.getByRole("button", { name: "Sign in with GitHub" })).toBeTruthy();
+  });
+});

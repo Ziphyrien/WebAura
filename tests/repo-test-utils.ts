@@ -1,10 +1,10 @@
-import { vi } from "vitest"
+import { vi } from "vitest";
+import type { ResolvedRepoSource } from "@/types/storage";
 
 const mockFileContent = {
   "README.md": {
     content: btoa("# gitinspect.com\nA local agent.\n"),
-    download_url:
-      "https://raw.githubusercontent.com/test-owner/test-repo/main/README.md",
+    download_url: "https://raw.githubusercontent.com/test-owner/test-repo/main/README.md",
     encoding: "base64",
     name: "README.md",
     path: "README.md",
@@ -14,8 +14,7 @@ const mockFileContent = {
   },
   "src/index.ts": {
     content: btoa("export const hello = 'world'\nexport const tool = 'read'\n"),
-    download_url:
-      "https://raw.githubusercontent.com/test-owner/test-repo/main/src/index.ts",
+    download_url: "https://raw.githubusercontent.com/test-owner/test-repo/main/src/index.ts",
     encoding: "base64",
     name: "index.ts",
     path: "src/index.ts",
@@ -25,8 +24,7 @@ const mockFileContent = {
   },
   "src/long.txt": {
     content: btoa(Array.from({ length: 6 }, (_, index) => `line-${index + 1}`).join("\n")),
-    download_url:
-      "https://raw.githubusercontent.com/test-owner/test-repo/main/src/long.txt",
+    download_url: "https://raw.githubusercontent.com/test-owner/test-repo/main/src/long.txt",
     encoding: "base64",
     name: "long.txt",
     path: "src/long.txt",
@@ -34,7 +32,7 @@ const mockFileContent = {
     size: 41,
     type: "file",
   },
-}
+};
 
 const mockTreeResponse = {
   sha: "tree-sha",
@@ -45,52 +43,76 @@ const mockTreeResponse = {
     { mode: "100644", path: "src/long.txt", sha: "long-sha", size: 41, type: "blob" },
   ],
   truncated: false,
-}
+};
 
 const mockDirectoryContent = [
-  { download_url: null, name: "index.ts", path: "src/index.ts", sha: "index-sha", size: 54, type: "file" },
-  { download_url: null, name: "long.txt", path: "src/long.txt", sha: "long-sha", size: 41, type: "file" },
-]
-
-const mockRefResponse = {
-  object: { sha: "commit-sha", type: "commit" },
-}
+  {
+    download_url: null,
+    name: "index.ts",
+    path: "src/index.ts",
+    sha: "index-sha",
+    size: 54,
+    type: "file",
+  },
+  {
+    download_url: null,
+    name: "long.txt",
+    path: "src/long.txt",
+    sha: "long-sha",
+    size: 41,
+    type: "file",
+  },
+];
 
 const mockCommitResponse = {
-  tree: { sha: "tree-sha" },
-}
+  commit: { tree: { sha: "tree-sha" } },
+  sha: "commit-sha",
+};
+
+export const TEST_REPO_SOURCE: ResolvedRepoSource = {
+  owner: "test-owner",
+  ref: "main",
+  refOrigin: "explicit",
+  repo: "test-repo",
+  resolvedRef: {
+    apiRef: "heads/main",
+    fullRef: "refs/heads/main",
+    kind: "branch",
+    name: "main",
+  },
+};
 
 export function installMockRepoFetch() {
   const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-    const url = String(input)
+    const url = String(input);
 
     if (url.includes("git/ref/heads/main")) {
-      return createJsonResponse(mockRefResponse)
+      return createJsonResponse({ object: { sha: "commit-sha", type: "commit" } });
     }
 
-    if (url.includes("git/commits/commit-sha")) {
-      return createJsonResponse(mockCommitResponse)
+    if (url.includes("commits/commit-sha")) {
+      return createJsonResponse(mockCommitResponse);
     }
 
     if (url.includes("git/trees/tree-sha?recursive=1")) {
-      return createJsonResponse(mockTreeResponse)
+      return createJsonResponse(mockTreeResponse);
     }
 
-    if (url.includes("contents/src?ref=")) {
-      return createJsonResponse(mockDirectoryContent)
+    if (url.includes("contents/src?ref=commit-sha")) {
+      return createJsonResponse(mockDirectoryContent);
     }
 
     for (const [path, response] of Object.entries(mockFileContent)) {
       if (url.includes(`contents/${path}`)) {
-        return createJsonResponse(response)
+        return createJsonResponse(response);
       }
     }
 
-    return new Response("Not Found", { status: 404 })
-  })
+    return new Response("Not Found", { status: 404 });
+  });
 
-  vi.stubGlobal("fetch", fetchMock)
-  return fetchMock
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
 }
 
 function createJsonResponse(value: object): Response {
@@ -102,5 +124,5 @@ function createJsonResponse(value: object): Response {
       "x-ratelimit-reset": "1700000000",
     },
     status: 200,
-  })
+  });
 }
