@@ -654,8 +654,8 @@ describe("db schema helpers", () => {
     }
   });
 
-  it("drops legacy public share tables in the current schema", async () => {
-    const name = `gitinspect-removed-share-schema-${Date.now()}`;
+  it("recreates public share tables after schema v9", async () => {
+    const name = `gitinspect-restored-share-schema-${Date.now()}`;
     const legacyDb = new Dexie(name);
 
     defineLegacyShareSchema(legacyDb);
@@ -665,9 +665,9 @@ describe("db schema helpers", () => {
     const migratedDb = new AppDb(name);
     await migratedDb.open();
 
-    expect(migratedDb.tables.map((table) => table.name)).not.toEqual(
-      expect.arrayContaining(["publicMessages", "publicSessions", "shareOwners"]),
-    );
+    const tableNames = migratedDb.tables.map((table) => table.name);
+    expect(tableNames).toEqual(expect.arrayContaining(["publicMessages", "publicSessions"]));
+    expect(tableNames).not.toContain("shareOwners");
 
     migratedDb.close();
     await Dexie.delete(name);
