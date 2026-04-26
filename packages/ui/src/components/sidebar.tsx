@@ -2,21 +2,21 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 
-import { useIsMobile } from "@gitinspect/ui/hooks/use-mobile";
-import { cn } from "@gitinspect/ui/lib/utils";
-import { Button } from "@gitinspect/ui/components/button";
-import { Input } from "@gitinspect/ui/components/input";
-import { Separator } from "@gitinspect/ui/components/separator";
+import { useIsMobile } from "@gitaura/ui/hooks/use-mobile";
+import { cn } from "@gitaura/ui/lib/utils";
+import { Button } from "@gitaura/ui/components/button";
+import { Input } from "@gitaura/ui/components/input";
+import { Separator } from "@gitaura/ui/components/separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@gitinspect/ui/components/sheet";
-import { Skeleton } from "@gitinspect/ui/components/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@gitinspect/ui/components/tooltip";
-import { Icons } from "@gitinspect/ui/components/icons";
+} from "@gitaura/ui/components/sheet";
+import { Skeleton } from "@gitaura/ui/components/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@gitaura/ui/components/tooltip";
+import { Icons } from "@gitaura/ui/components/icons";
 
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
@@ -268,7 +268,6 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
       aria-label="Toggle Sidebar"
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
