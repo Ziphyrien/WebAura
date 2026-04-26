@@ -1,5 +1,5 @@
-import { getIsoNow } from "@gitinspect/pi/lib/dates";
-import type { JsonValue } from "@gitinspect/pi/types/common";
+import { getIsoNow } from "@gitaura/pi/lib/dates";
+import type { JsonValue } from "@gitaura/pi/types/common";
 import { db } from "./db";
 import type { SettingsRow } from "./types";
 

@@ -5,13 +5,6 @@ import { nitro } from "nitro/vite";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite-plus";
 import { comlink } from "vite-plugin-comlink";
-import viteTsConfigPaths from "vite-tsconfig-paths";
-
-function createTsConfigPathsPlugin() {
-  return viteTsConfigPaths({
-    projects: ["./tsconfig.json"],
-  });
-}
 
 function createBrowserNodeZlibAliasPlugin() {
   const replacement = fileURLToPath(new URL("./src/shims/node-zlib.ts", import.meta.url));
@@ -49,23 +42,27 @@ export default defineConfig({
     comlink(),
     createBrowserNodeZlibAliasPlugin(),
     nitro(),
-    createTsConfigPathsPlugin(),
     tailwindcss(),
     tanstackStart(),
     viteReact(),
   ],
   resolve: {
     alias: {
-      "@gitinspect/pi/agent/runtime-worker-client": fileURLToPath(
+      "@gitaura/env/server": fileURLToPath(
+        new URL("../../packages/env/src/server.ts", import.meta.url),
+      ),
+      "@gitaura/env/web": fileURLToPath(new URL("../../packages/env/src/web.ts", import.meta.url)),
+      "@gitaura/pi/agent/runtime-worker-client": fileURLToPath(
         new URL("./src/agent/runtime-worker-client.ts", import.meta.url),
       ),
     },
+    tsconfigPaths: true,
   },
   server: {
     port: 3001,
   },
   worker: {
     format: "es",
-    plugins: () => [createTsConfigPathsPlugin(), createBrowserNodeZlibAliasPlugin(), comlink()],
+    plugins: () => [createBrowserNodeZlibAliasPlugin(), comlink()],
   },
 });

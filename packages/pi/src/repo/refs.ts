@@ -1,4 +1,4 @@
-import type { ResolvedRepoRef } from "@gitinspect/db";
+import type { ResolvedRepoRef } from "@gitaura/db";
 
 export function createBranchRepoRef(name: string): ResolvedRepoRef {
   return {

@@ -2,13 +2,13 @@ import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRightIcon, KeyIcon, StarIcon } from "@phosphor-icons/react";
 
-import { Icons } from "@gitinspect/ui/components/icons";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@gitinspect/ui/components/tooltip";
-import { formatGitHubStarCount } from "@gitinspect/pi/lib/format-github-stars";
-import { githubApiFetch } from "@gitinspect/pi/repo/github-fetch";
-import { cn } from "@gitinspect/ui/lib/utils";
-import { githubOwnerAvatarUrl } from "@gitinspect/pi/repo/url";
-import type { RepoRefOrigin } from "@gitinspect/db";
+import { Icons } from "@gitaura/ui/components/icons";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@gitaura/ui/components/tooltip";
+import { formatGitHubStarCount } from "@gitaura/pi/lib/format-github-stars";
+import { githubApiFetch } from "@gitaura/pi/repo/github-fetch";
+import { cn } from "@gitaura/ui/lib/utils";
+import { githubOwnerAvatarUrl } from "@gitaura/pi/repo/url";
+import type { RepoRefOrigin } from "@gitaura/db";
 
 export type GithubRepoProps = {
   owner: string;

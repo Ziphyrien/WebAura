@@ -91,7 +91,7 @@ export async function loginWithProvider(
           onManualCodeInput: callbacks.onManualCodeInput,
           onProgress: callbacks.onProgress,
           onPrompt: callbacks.onPrompt,
-          originator: "gitinspect",
+          originator: "gitaura",
         }),
       );
     }

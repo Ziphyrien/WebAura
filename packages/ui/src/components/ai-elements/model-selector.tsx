@@ -8,14 +8,9 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@gitinspect/ui/components/command";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@gitinspect/ui/components/dialog";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/command";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@gitaura/ui/components/dialog";
+import { cn } from "@gitaura/ui/lib/utils";
 import type { ComponentProps, ReactNode } from "react";
 
 export type ModelSelectorProps = ComponentProps<typeof Dialog>;
@@ -140,7 +135,7 @@ export type ModelSelectorLogoProps = Omit<ComponentProps<"img">, "src" | "alt"> 
     | "lmstudio"
     | "anthropic"
     | "aihubmix"
-    | "fireworks-ai"
+    | "fireworks"
     | "modelscope"
     | "llama"
     | "scaleway"

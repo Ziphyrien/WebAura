@@ -1,12 +1,8 @@
 "use client";
 
-import { Button } from "@gitinspect/ui/components/button";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@gitinspect/ui/components/hover-card";
-import { cn } from "@gitinspect/ui/lib/utils";
+import { Button } from "@gitaura/ui/components/button";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@gitaura/ui/components/hover-card";
+import { cn } from "@gitaura/ui/lib/utils";
 import type { FileUIPart, SourceDocumentUIPart } from "ai";
 import {
   FileTextIcon,

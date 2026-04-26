@@ -247,7 +247,7 @@ describe("GitHubFs", () => {
 
       await expect(fs.tree()).rejects.toMatchObject({
         code: "ENOTSUP",
-        message: "gitinspect v0 does not support annotated tags that target trees or blobs.",
+        message: "GitAura does not support annotated tags that target trees or blobs.",
       });
     });
 

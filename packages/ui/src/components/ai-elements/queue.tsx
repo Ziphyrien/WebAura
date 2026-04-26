@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@gitinspect/ui/components/button";
+import { Button } from "@gitaura/ui/components/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@gitinspect/ui/components/collapsible";
-import { ScrollArea } from "@gitinspect/ui/components/scroll-area";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/collapsible";
+import { ScrollArea } from "@gitaura/ui/components/scroll-area";
+import { cn } from "@gitaura/ui/lib/utils";
 import { ChevronDownIcon, PaperclipIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 

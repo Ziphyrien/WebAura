@@ -1,13 +1,11 @@
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Button } from "@gitinspect/ui/components/button";
-import { rememberFeedbackTrigger } from "@gitinspect/ui/lib/feedback-trigger";
-import { Icons } from "@gitinspect/ui/components/icons";
-import { SidebarMobileActions } from "@gitinspect/ui/components/sidebar-mobile-actions";
-import { parseSettingsSection } from "@gitinspect/ui/lib/search-state";
+import { Link, useSearch } from "@tanstack/react-router";
+import { Icons } from "@gitaura/ui/components/icons";
+import { SidebarMobileActions } from "@gitaura/ui/components/sidebar-mobile-actions";
+import { parseSettingsSection } from "@gitaura/ui/lib/search-state";
 
-export function ChatFooter({ showGetPro = true }: { showGetPro?: boolean } = {}) {
-  const navigate = useNavigate();
+export function ChatFooter(_props: { showGetPro?: boolean } = {}) {
   const search = useSearch({ strict: false });
+
   return (
     <div className="space-y-1 p-2">
       <Link
@@ -22,39 +20,6 @@ export function ChatFooter({ showGetPro = true }: { showGetPro?: boolean } = {})
         <Icons.home className="h-4 w-4 text-sidebar-foreground" />
         <span>Home</span>
       </Link>
-      {showGetPro ? (
-        <Link
-          className="flex items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:underline"
-          search={(prev) => ({
-            ...prev,
-            settings: "pricing",
-          })}
-          to="."
-        >
-          <Icons.crown className="h-4 w-4 text-sidebar-foreground" />
-          <span>Get Pro</span>
-        </Link>
-      ) : null}
-      <Button
-        className="h-auto w-full justify-start px-3 py-2 text-sm font-normal text-sidebar-foreground shadow-none hover:bg-sidebar-accent"
-        onClick={(event) => {
-          rememberFeedbackTrigger(event.currentTarget);
-          void navigate({
-            search: (prev) => ({
-              ...prev,
-              feedback: "open",
-              feedbackIncludeDiagnostics: undefined,
-              feedbackMessage: undefined,
-              feedbackSentiment: undefined,
-            }),
-            to: ".",
-          });
-        }}
-        variant="ghost"
-      >
-        <Icons.comment className="h-4 w-4 text-sidebar-foreground" />
-        <span>Feedback</span>
-      </Button>
       <SidebarMobileActions />
     </div>
   );

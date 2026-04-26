@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef } from "react";
 
-import { cn } from "@gitinspect/ui/lib/utils";
+import { cn } from "@gitaura/ui/lib/utils";
 
 type IconProps = ComponentPropsWithoutRef<"svg">;
 
@@ -77,9 +77,9 @@ export const Icons = {
       <polygon points="23 6 23 7 13 7 13 1 19 1 19 2 20 2 20 3 21 3 21 4 22 4 22 6 23 6" />
     </IconBase>
   ),
-  Globe: (props: IconProps) => (
-    <IconBase aria-label="Globe" id="globe" viewBox="0 0 24 24" {...props}>
-      <path d="m22,9v-2h-1v-2h-1v-1h-1v-1h-2v-1h-2v-1h-6v1h-2v1h-2v1h-1v1h-1v2h-1v2h-1v7h1v1h1v2h1v1h1v1h2v1h2v1h6v-1h2v-1h2v-1h1v-1h1v-2h1v-2h1v-6h-1Zm-1,1v4h-3v-4h3Zm-5-6h1v1h2v2h1v1h-3v-3h-1v-1Zm-2,14v2h-1v1h-2v-1h-1v-2h-1v-2h6v2h-1Zm2-8v4h-8v-4h8Zm-7-4h1v-2h1v-1h2v1h1v2h1v2h-6v-2Zm-5,1h1v-2h2v-1h1v1h-1v3h-3v-1Zm-1,7v-4h3v4h-3Zm2,5v-2h-1v-1h3v3h1v1h-1v-1h-2Zm14-2v2h-2v1h-1v-1h1v-3h3v1h-1Z" />
+  monitor: (props: IconProps) => (
+    <IconBase aria-label="System theme" id="monitor-solid" viewBox="0 0 24 24" {...props}>
+      <path d="M2 3h20v13H2V3Zm2 2v9h16V5H4Zm6 13h4v2h4v2H6v-2h4v-2Z" />
     </IconBase>
   ),
   globe: (props: IconProps) => (

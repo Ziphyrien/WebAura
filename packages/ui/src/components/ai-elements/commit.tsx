@@ -1,13 +1,13 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@gitinspect/ui/components/avatar";
-import { Button } from "@gitinspect/ui/components/button";
+import { Avatar, AvatarFallback } from "@gitaura/ui/components/avatar";
+import { Button } from "@gitaura/ui/components/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@gitinspect/ui/components/collapsible";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/collapsible";
+import { cn } from "@gitaura/ui/lib/utils";
 import { CheckIcon, CopyIcon, FileIcon, GitCommitIcon, MinusIcon, PlusIcon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";

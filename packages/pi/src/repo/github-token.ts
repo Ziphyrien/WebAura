@@ -1,10 +1,13 @@
-import { deleteSetting, getSetting, setSetting } from "@gitinspect/db";
+import { deleteSetting, getSetting, setSetting } from "@gitaura/db";
 
 const GITHUB_PAT_KEY = "github.pat";
 
-/** Opens GitHub’s new fine-grained PAT form with name, expiry, and repository read access prefilled. */
+/**
+ * Default GitHub token generator for GitAura.
+ * Uses a fine-grained PAT template with repository contents read access and account-level gist access.
+ */
 export const GITHUB_CREATE_PAT_URL =
-  "https://github.com/settings/personal-access-tokens/new?name=gitinspect&expires_in=none&contents=read";
+  "https://github.com/settings/personal-access-tokens/new?name=GitAura&description=Private%20repos%20and%20gist%20sharing&expires_in=none&contents=read&gists=write";
 
 export type GithubTokenValidation = { ok: true; login: string } | { ok: false; message: string };
 

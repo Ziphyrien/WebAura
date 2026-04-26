@@ -11,27 +11,27 @@ export type ParseCliResult =
 
 export function renderTopLevelHelp(): string {
   return [
-    "gitinspect",
+    "gitaura",
     "",
     "Usage:",
-    "  gitinspect login",
-    "  gitinspect login -p <provider>",
+    "  gitaura login",
+    "  gitaura login -p <provider>",
     "",
     "Commands:",
     "  login   Login with an OAuth provider",
     "",
     "Use:",
-    "  gitinspect login --help",
+    "  gitaura login --help",
   ].join("\n");
 }
 
 export function renderLoginHelp(): string {
   return [
-    "gitinspect login",
+    "gitaura login",
     "",
     "Usage:",
-    "  gitinspect login",
-    "  gitinspect login -p <provider>",
+    "  gitaura login",
+    "  gitaura login -p <provider>",
     "",
     "Options:",
     "  -p, --provider <provider>   Provider alias or canonical id",

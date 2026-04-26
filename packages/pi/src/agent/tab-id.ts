@@ -1,6 +1,6 @@
-import { createId } from "@gitinspect/pi/lib/ids";
+import { createId } from "@gitaura/pi/lib/ids";
 
-const TAB_ID_STORAGE_KEY = "gitinspect-tab-id";
+const TAB_ID_STORAGE_KEY = "gitaura-tab-id";
 
 let cachedTabId: string | undefined;
 

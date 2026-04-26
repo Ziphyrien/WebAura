@@ -1,13 +1,13 @@
 import { Type, type Static } from "typebox";
-import type { RepoRuntime } from "@gitinspect/pi/repo/repo-types";
-import { warningMessageToError } from "@gitinspect/pi/tools/repo-warnings";
+import type { RepoRuntime } from "@gitaura/pi/repo/repo-types";
+import { warningMessageToError } from "@gitaura/pi/tools/repo-warnings";
 import {
   DEFAULT_MAX_BYTES,
   DEFAULT_MAX_LINES,
   truncateHead,
   type TruncationResult,
-} from "@gitinspect/pi/tools/truncate";
-import type { AppToolDefinition } from "@gitinspect/pi/tools/types";
+} from "@gitaura/pi/tools/truncate";
+import type { AppToolDefinition } from "@gitaura/pi/tools/types";
 
 const readSchema = Type.Object({
   limit: Type.Optional(

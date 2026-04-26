@@ -1,12 +1,18 @@
-import { db, putSessionRuntime, runConversationTransaction } from "@gitinspect/db";
-import { normalizeSessionRuntime } from "@gitinspect/db/session-runtime";
-import { toMessageRow } from "@gitinspect/pi/agent/session-adapter";
-import { buildSystemMessage, classifyRuntimeError } from "@gitinspect/pi/agent/runtime-errors";
-import { getIsoNow } from "@gitinspect/pi/lib/dates";
-import { createId } from "@gitinspect/pi/lib/ids";
-import { buildPersistedSession } from "@gitinspect/pi/sessions/session-service";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@gitinspect/db";
-import type { AssistantMessage, ToolResultMessage, UserMessage } from "@gitinspect/pi/types/chat";
+import {
+  db,
+  mergeDailyCostAggregate,
+  putSessionRuntime,
+  runConversationTransaction,
+} from "@gitaura/db";
+import { normalizeSessionRuntime } from "@gitaura/db/session-runtime";
+import { toMessageRow } from "@gitaura/pi/agent/session-adapter";
+import { buildSystemMessage, classifyRuntimeError } from "@gitaura/pi/agent/runtime-errors";
+import { getDateKey, getIsoNow } from "@gitaura/pi/lib/dates";
+import { createId } from "@gitaura/pi/lib/ids";
+import { buildPersistedSession } from "@gitaura/pi/sessions/session-service";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@gitaura/db";
+import type { AssistantMessage, ToolResultMessage, UserMessage } from "@gitaura/pi/types/chat";
+import type { ProviderId } from "@gitaura/pi/types/models";
 
 export type TurnEnvelope = {
   turnId: string;
@@ -44,6 +50,10 @@ export type TurnEventEnvelope =
 
 function nextOrder(messages: readonly MessageRow[]): number {
   return messages.reduce((max, message) => Math.max(max, message.order), -1) + 1;
+}
+
+function shouldRecordCost(message: AssistantMessage): boolean {
+  return message.usage.cost.total > 0;
 }
 
 function buildQueuedSession(
@@ -284,6 +294,19 @@ export class TurnEventStore {
         await db.messages.put(assistantRow);
         await db.sessions.put(session);
         await db.sessionRuntime.put(runtime);
+
+        if (shouldRecordCost(message)) {
+          const currentDailyCost = await db.dailyCosts.get(getDateKey(message.timestamp));
+          await db.dailyCosts.put(
+            mergeDailyCostAggregate(
+              currentDailyCost,
+              message.usage,
+              message.provider as ProviderId,
+              message.model,
+              message.timestamp,
+            ),
+          );
+        }
       });
 
       this.currentOrder += 1;

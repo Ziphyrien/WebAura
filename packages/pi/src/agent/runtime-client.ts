@@ -1,12 +1,12 @@
-import type { ProviderGroupId, ThinkingLevel } from "@gitinspect/pi/types/models";
-import type { SessionData } from "@gitinspect/db";
+import type { ProviderGroupId, ThinkingLevel } from "@gitaura/pi/types/models";
+import type { SessionData } from "@gitaura/db";
 import {
   BusyRuntimeError,
   MissingSessionRuntimeError,
-} from "@gitinspect/pi/agent/runtime-command-errors";
-import { getRuntimeWorker } from "@gitinspect/pi/agent/runtime-worker-client";
-import type { SessionRunner } from "@gitinspect/pi/agent/session-runner";
-import { WorkerBackedAgentHost } from "@gitinspect/pi/agent/worker-backed-agent-host";
+} from "@gitaura/pi/agent/runtime-command-errors";
+import { getRuntimeWorker } from "@gitaura/pi/agent/runtime-worker-client";
+import type { SessionRunner } from "@gitaura/pi/agent/session-runner";
+import { WorkerBackedAgentHost } from "@gitaura/pi/agent/worker-backed-agent-host";
 import {
   claimSessionLease,
   LEASE_HEARTBEAT_MS,
@@ -14,15 +14,15 @@ import {
   releaseOwnedSessionLeases,
   releaseSessionLease,
   renewSessionLease,
-} from "@gitinspect/db/session-leases";
-import { loadSession } from "@gitinspect/pi/sessions/session-service";
-import { reconcileInterruptedSession } from "@gitinspect/pi/sessions/session-notices";
-import { loadSessionViewModel } from "@gitinspect/pi/sessions/session-view-model";
+} from "@gitaura/db/session-leases";
+import { loadSession } from "@gitaura/pi/sessions/session-service";
+import { reconcileInterruptedSession } from "@gitaura/pi/sessions/session-notices";
+import { loadSessionViewModel } from "@gitaura/pi/sessions/session-view-model";
 import {
   type ActiveSessionViewState,
   deriveActiveSessionViewState,
   deriveRecoveryIntent,
-} from "@gitinspect/pi/sessions/session-view-state";
+} from "@gitaura/pi/sessions/session-view-state";
 
 export type InterruptedResumeMode = "continue" | "retry";
 
@@ -122,7 +122,7 @@ export class RuntimeClient {
       .waitForTurn()
       .catch((error) => {
         if (error instanceof Error && !isSessionLockedMessage(error)) {
-          console.error("[gitinspect:runtime] turn_watch_failed", {
+          console.error("[gitaura:runtime] turn_watch_failed", {
             error,
             sessionId,
           });

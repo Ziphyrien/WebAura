@@ -1,20 +1,20 @@
 import * as PiAi from "@mariozechner/pi-ai";
 import type { StreamFn } from "@mariozechner/pi-agent-core";
 import type { TSchema } from "typebox";
-import type { AssistantMessage, StopReason, ToolCall } from "@gitinspect/pi/types/chat";
+import type { AssistantMessage, StopReason, ToolCall } from "@gitaura/pi/types/chat";
 import type {
   ModelDefinition,
   ProviderGroupId,
   ProviderId,
   ThinkingLevel,
-} from "@gitinspect/pi/types/models";
-import { SYSTEM_PROMPT } from "@gitinspect/pi/agent/system-prompt";
-import { createProxyAwareStreamFn } from "@gitinspect/pi/agent/provider-proxy";
-import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@gitinspect/pi/agent/runtime-errors";
-import { resolveProviderAuthForProvider } from "@gitinspect/pi/auth/resolve-api-key";
-import { createId } from "@gitinspect/pi/lib/ids";
-import { getModel } from "@gitinspect/pi/models/catalog";
-import { createEmptyUsage } from "@gitinspect/pi/types/models";
+} from "@gitaura/pi/types/models";
+import { SYSTEM_PROMPT } from "@gitaura/pi/agent/system-prompt";
+import { createProxyAwareStreamFn } from "@gitaura/pi/agent/provider-proxy";
+import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@gitaura/pi/agent/runtime-errors";
+import { resolveProviderAuthForProvider } from "@gitaura/pi/auth/resolve-api-key";
+import { createId } from "@gitaura/pi/lib/ids";
+import { getModel } from "@gitaura/pi/models/catalog";
+import { createEmptyUsage } from "@gitaura/pi/types/models";
 
 interface ToolDefinition {
   description: string;
@@ -381,7 +381,7 @@ export async function streamChat(params: StreamChatParams): Promise<StreamChatRe
   const model = getModel(params.provider, params.model);
   const auth =
     params.apiKey === undefined
-      ? await resolveProviderAuthForProvider(params.provider, params.providerGroup)
+      ? await resolveProviderAuthForProvider(params.provider)
       : {
           apiKey: params.apiKey,
           isOAuth: false,

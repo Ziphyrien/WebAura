@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@gitinspect/ui/components/button";
+import { Button } from "@gitaura/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +8,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@gitinspect/ui/components/dropdown-menu";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/dropdown-menu";
+import { cn } from "@gitaura/ui/lib/utils";
 import { ChevronDownIcon, ExternalLinkIcon, MessageCircleIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { createContext, useContext, useMemo } from "react";

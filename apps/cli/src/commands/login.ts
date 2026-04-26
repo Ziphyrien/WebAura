@@ -60,7 +60,7 @@ export async function runLoginCommand(
     } else {
       log.warn("Could not copy the login code to your clipboard.");
     }
-    log.info("Paste the code back inside gitinspect.com");
+    log.info("Paste the code back inside GitAura.");
     write(`\n${payload}\n`);
   } catch (error) {
     bridge.cancelPendingManualCodeInput();

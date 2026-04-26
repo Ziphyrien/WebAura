@@ -1,14 +1,14 @@
-import { readGitHubErrorMessage, toGitHubFsError } from "@gitinspect/just-github/github-http";
-import { GitHubFsError } from "@gitinspect/just-github/types";
-import type { ResolvedRepoRef } from "@gitinspect/db";
-import { githubApiFetch } from "@gitinspect/pi/repo/github-fetch";
-import type { RepoPathIntent, ResolvedRepoLocation } from "@gitinspect/pi/repo/path-intent";
+import { readGitHubErrorMessage, toGitHubFsError } from "@gitaura/just-github/github-http";
+import { GitHubFsError } from "@gitaura/just-github/types";
+import type { ResolvedRepoRef } from "@gitaura/db";
+import { githubApiFetch } from "@gitaura/pi/repo/github-fetch";
+import type { RepoPathIntent, ResolvedRepoLocation } from "@gitaura/pi/repo/path-intent";
 import {
   createBranchRepoRef,
   createCommitRepoRef,
   createTagRepoRef,
   displayResolvedRepoRef,
-} from "@gitinspect/pi/repo/refs";
+} from "@gitaura/pi/repo/refs";
 
 const FULL_COMMIT_SHA_PATTERN = /^[0-9a-f]{40}$/i;
 

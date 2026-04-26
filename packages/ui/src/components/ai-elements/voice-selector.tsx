@@ -1,7 +1,7 @@
 "use client";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import { Button } from "@gitinspect/ui/components/button";
+import { Button } from "@gitaura/ui/components/button";
 import {
   Command,
   CommandDialog,
@@ -12,15 +12,10 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@gitinspect/ui/components/command";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@gitinspect/ui/components/dialog";
-import { Spinner } from "@gitinspect/ui/components/spinner";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/command";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@gitaura/ui/components/dialog";
+import { Spinner } from "@gitaura/ui/components/spinner";
+import { cn } from "@gitaura/ui/lib/utils";
 import {
   CircleSmallIcon,
   MarsIcon,

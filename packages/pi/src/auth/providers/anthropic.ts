@@ -1,7 +1,7 @@
-import { generatePKCE, postTokenRequest } from "@gitinspect/pi/auth/oauth-utils";
-import { runPopupOAuthFlow } from "@gitinspect/pi/auth/popup-flow";
-import type { OAuthCredentials } from "@gitinspect/pi/auth/oauth-types";
-import type { ProxyRequestOptions } from "@gitinspect/pi/auth/oauth-utils";
+import { generatePKCE, postTokenRequest } from "@gitaura/pi/auth/oauth-utils";
+import { runPopupOAuthFlow } from "@gitaura/pi/auth/popup-flow";
+import type { OAuthCredentials } from "@gitaura/pi/auth/oauth-types";
+import type { ProxyRequestOptions } from "@gitaura/pi/auth/oauth-utils";
 
 const decode = (value: string) => atob(value);
 const CLIENT_ID = decode("OWQxYzI1MGEtZTYxYi00NGQ5LTg4ZWQtNTk0NGQxOTYyZjVl");

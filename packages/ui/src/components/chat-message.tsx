@@ -1,14 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { AlertCircle, AlertTriangle, ChevronDown, Info } from "lucide-react";
-import { getGitHubNoticeCta } from "@gitinspect/pi/repo/github-access";
-import { useGitHubAuthContext } from "@gitinspect/ui/components/github-auth-context";
 import {
   deriveAssistantView,
   getUserText,
   isSystemMessage,
   isToolResultMessage,
-} from "@gitinspect/pi/lib/chat-adapter";
-import type { DisplayChatMessage } from "@gitinspect/pi/types/chat";
+} from "@gitaura/pi/lib/chat-adapter";
+import type { DisplayChatMessage } from "@gitaura/pi/types/chat";
 import {
   Message,
   MessageBranch,
@@ -19,21 +17,21 @@ import {
   MessageBranchSelector,
   MessageContent,
   MessageResponse,
-} from "@gitinspect/ui/components/ai-elements/message";
+} from "@gitaura/ui/components/ai-elements/message";
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from "@gitinspect/ui/components/ai-elements/reasoning";
-import { StatusShimmer } from "@gitinspect/ui/components/ai-elements/shimmer";
+} from "@gitaura/ui/components/ai-elements/reasoning";
+import { StatusShimmer } from "@gitaura/ui/components/ai-elements/shimmer";
 import {
   Source,
   Sources,
   SourcesContent,
   SourcesTrigger,
-} from "@gitinspect/ui/components/ai-elements/sources";
-import { ToolExecution } from "@gitinspect/ui/components/tool-execution";
-import { ToolResultBubble } from "@gitinspect/ui/components/tool-result-bubble";
+} from "@gitaura/ui/components/ai-elements/sources";
+import { ToolExecution } from "@gitaura/ui/components/tool-execution";
+import { ToolResultBubble } from "@gitaura/ui/components/tool-result-bubble";
 import {
   Item,
   ItemActions,
@@ -41,14 +39,14 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "@gitinspect/ui/components/item";
-import { Button } from "@gitinspect/ui/components/button";
+} from "@gitaura/ui/components/item";
+import { Button } from "@gitaura/ui/components/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@gitinspect/ui/components/collapsible";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/collapsible";
+import { cn } from "@gitaura/ui/lib/utils";
 
 export function ChatMessage(props: {
   followingMessages?: ReadonlyArray<DisplayChatMessage>;
@@ -56,7 +54,6 @@ export function ChatMessage(props: {
   message: DisplayChatMessage;
 }) {
   const { message } = props;
-  const auth = useGitHubAuthContext();
 
   if (message.role === "user") {
     return (
@@ -92,12 +89,6 @@ export function ChatMessage(props: {
 
     const showGithubCta = message.action === "open-github-settings";
     const showHtmlDetails = Boolean(message.detailsHtml);
-    const githubCta = auth
-      ? getGitHubNoticeCta({
-          kind: message.kind,
-          state: auth.authState,
-        })
-      : null;
 
     return (
       <div className="flex w-full justify-start py-1">
@@ -151,29 +142,17 @@ export function ChatMessage(props: {
           </ItemContent>
           {showGithubCta ? (
             <ItemActions className="shrink-0">
-              {auth && githubCta ? (
-                <Button
-                  onClick={() => {
-                    void auth.runNoticeIntent(githubCta.intent);
-                  }}
-                  size="sm"
-                  variant="outline"
+              <Button asChild size="sm" variant="outline">
+                <Link
+                  search={(prev) => ({
+                    ...prev,
+                    settings: "github",
+                  })}
+                  to="."
                 >
-                  {githubCta.label}
-                </Button>
-              ) : (
-                <Button asChild size="sm" variant="outline">
-                  <Link
-                    search={(prev) => ({
-                      ...prev,
-                      settings: "github",
-                    })}
-                    to="."
-                  >
-                    GitHub settings
-                  </Link>
-                </Button>
-              )}
+                  GitHub settings
+                </Link>
+              </Button>
             </ItemActions>
           ) : null}
         </Item>

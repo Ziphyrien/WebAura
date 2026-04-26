@@ -1,6 +1,6 @@
 {
-  "name": "gitinspect.com",
-  "short_name": "gitinspect",
+  "name": "GitAura",
+  "short_name": "GitAura",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

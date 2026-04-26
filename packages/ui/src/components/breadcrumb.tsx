@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "radix-ui";
 
-import { cn } from "@gitinspect/ui/lib/utils";
+import { cn } from "@gitaura/ui/lib/utils";
 import { CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {

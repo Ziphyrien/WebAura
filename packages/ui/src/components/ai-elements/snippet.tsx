@@ -6,8 +6,8 @@ import {
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
-} from "@gitinspect/ui/components/input-group";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/input-group";
+import { cn } from "@gitaura/ui/lib/utils";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import {
@@ -120,7 +120,6 @@ export const SnippetCopyButton = ({
       className={className}
       onClick={copyToClipboard}
       size="icon-sm"
-      title="Copy"
       {...props}
     >
       {children ?? <Icon className="size-3.5" size={14} />}

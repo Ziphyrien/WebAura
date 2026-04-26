@@ -511,7 +511,7 @@ function unsupportedFileError(path: string, size: number): GitHubFsError {
     githubMessage: `File size: ${size} bytes`,
     isRetryable: false,
     kind: "unsupported",
-    message: `File is too large for gitinspect v0 (${size} bytes): ${path}`,
+    message: `File is too large for GitAura (${size} bytes): ${path}`,
     path,
   });
 }

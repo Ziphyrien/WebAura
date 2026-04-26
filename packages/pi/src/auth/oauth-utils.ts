@@ -1,5 +1,5 @@
-import type { JsonValue } from "@gitinspect/pi/types/common";
-import { buildProxiedUrl } from "@gitinspect/pi/proxy/url";
+import type { JsonValue } from "@gitaura/pi/types/common";
+import { buildProxiedUrl } from "@gitaura/pi/proxy/url";
 
 export interface ProxyRequestOptions {
   proxyUrl?: string;

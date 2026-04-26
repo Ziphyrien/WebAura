@@ -6,8 +6,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@gitinspect/ui/components/card";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/card";
+import { cn } from "@gitaura/ui/lib/utils";
 import { Handle, Position } from "@xyflow/react";
 import type { ComponentProps } from "react";
 

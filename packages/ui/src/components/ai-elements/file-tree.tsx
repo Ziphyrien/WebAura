@@ -4,8 +4,8 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@gitinspect/ui/components/collapsible";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/collapsible";
+import { cn } from "@gitaura/ui/lib/utils";
 import { ChevronRightIcon, FileIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo, useState } from "react";

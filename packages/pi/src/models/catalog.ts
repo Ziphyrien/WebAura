@@ -1,16 +1,7 @@
 // App-facing catalog helpers layered on the shared pi-ai registry.
 import { getModel as getRegistryModel, getModels as getRegistryModels } from "@mariozechner/pi-ai";
-import type {
-  ModelDefinition,
-  ProviderGroupId,
-  ProviderId,
-  Usage,
-} from "@gitinspect/pi/types/models";
-import { isOAuthCredentials, parseOAuthCredentials } from "@gitinspect/pi/auth/oauth-types";
-import {
-  FIREWORKS_KIMI_K25_TURBO,
-  FIREWORKS_KIMI_K25_TURBO_ID,
-} from "@gitinspect/pi/models/builtin-models";
+import type { ModelDefinition, ProviderGroupId, ProviderId, Usage } from "@gitaura/pi/types/models";
+import { isOAuthCredentials, parseOAuthCredentials } from "@gitaura/pi/auth/oauth-types";
 import {
   getAtlasProviderGroups,
   getCanonicalProvider,
@@ -18,7 +9,7 @@ import {
   getProviderGroupMetadata,
   getRuntimeSupportedProviders,
   isProviderGroupId,
-} from "@gitinspect/pi/models/provider-registry";
+} from "@gitaura/pi/models/provider-registry";
 
 const SUPPORTED_PROVIDERS = getRuntimeSupportedProviders();
 
@@ -27,6 +18,30 @@ const OPENAI_SELECTOR_MODEL_IDS = ["gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"] as
 
 function isOpenAiSelectorModelId(modelId: string): boolean {
   return (OPENAI_SELECTOR_MODEL_IDS as readonly string[]).includes(modelId);
+}
+
+function requireProviderGroups(): Array<ProviderGroupId> {
+  const groups = getProviderGroups();
+  if (groups.length === 0) {
+    throw new Error("No providers available");
+  }
+  return groups;
+}
+
+function defaultProviderGroup(): ProviderGroupId {
+  const first = requireProviderGroups()[0];
+  if (!first) {
+    throw new Error("No providers available");
+  }
+  return first;
+}
+
+function normalizeLegacyProviderGroupId(group: string): ProviderGroupId {
+  if (isProviderGroupId(group)) {
+    return group;
+  }
+
+  return defaultProviderGroup();
 }
 
 /**
@@ -62,7 +77,6 @@ function openAiCodexSelectorModels(
 /** Preferred default model ids when registry still exposes them; otherwise first model is used. */
 export const DEFAULT_MODELS: Partial<Record<ProviderId, string>> = {
   anthropic: "claude-sonnet-4-6",
-  "fireworks-ai": FIREWORKS_KIMI_K25_TURBO_ID,
   "github-copilot": "gpt-4o",
   "google-gemini-cli": "gemini-2.5-pro",
   openai: "gpt-5.4",
@@ -70,18 +84,6 @@ export const DEFAULT_MODELS: Partial<Record<ProviderId, string>> = {
   "opencode-go": "glm-5",
   "openai-codex": "gpt-5.4",
 };
-
-const DEFAULT_GROUP_MODELS: Partial<Record<ProviderGroupId, string>> = {
-  "fireworks-free": FIREWORKS_KIMI_K25_TURBO_ID,
-};
-
-/** Dexie may still hold removed `opencode-free`; map before any group lookup. */
-function normalizeLegacyProviderGroupId(group: string): ProviderGroupId {
-  if (group === "opencode-free") {
-    return "fireworks-free";
-  }
-  return group as ProviderGroupId;
-}
 
 export function getProviders(): Array<ProviderId> {
   return SUPPORTED_PROVIDERS;
@@ -95,9 +97,6 @@ function pickOpenAiSelectorModels(models: Array<ModelDefinition>): Array<ModelDe
 }
 
 export function getPiAiModels(provider: ProviderId): ModelDefinition[] {
-  if (provider === "fireworks-ai") {
-    return [FIREWORKS_KIMI_K25_TURBO];
-  }
   const registryModels = getRegistryModels(provider as never) as ModelDefinition[];
   if (provider === "openai") {
     return pickOpenAiSelectorModels(registryModels);
@@ -109,9 +108,6 @@ export function getPiAiModels(provider: ProviderId): ModelDefinition[] {
 }
 
 export function getPiAiModel(provider: ProviderId, modelId: string): ModelDefinition | undefined {
-  if (provider === "fireworks-ai") {
-    return modelId === FIREWORKS_KIMI_K25_TURBO.id ? FIREWORKS_KIMI_K25_TURBO : undefined;
-  }
   const direct = getRegistryModel(provider as never, modelId as never) as
     | ModelDefinition
     | undefined;
@@ -170,7 +166,6 @@ export function getConnectedProviders(
   );
 
   return getProviderGroups()
-    .filter((providerGroup) => providerGroup !== "fireworks-free")
     .map((providerGroup) => getCanonicalProvider(providerGroup))
     .filter((provider, index, providers) => {
       return connectedProviders.has(provider) && providers.indexOf(provider) === index;
@@ -182,13 +177,10 @@ export function getVisibleProviderGroups(
 ): Array<ProviderGroupId> {
   const connectedProviderSet = new Set(connectedProviders);
   const connectedProviderGroups = getProviderGroups().filter((providerGroup) => {
-    return (
-      providerGroup !== "fireworks-free" &&
-      connectedProviderSet.has(getCanonicalProvider(providerGroup))
-    );
+    return connectedProviderSet.has(getCanonicalProvider(providerGroup));
   });
 
-  return ["fireworks-free", ...connectedProviderGroups];
+  return connectedProviderGroups.length > 0 ? connectedProviderGroups : getProviderGroups();
 }
 
 export function getModels(provider: ProviderId): Array<ModelDefinition> {
@@ -220,17 +212,6 @@ export function getModelsForGroup(providerGroup: ProviderGroupId): Array<ModelDe
 
 export function getDefaultModelForGroup(providerGroup: ProviderGroupId): ModelDefinition {
   const group = normalizeLegacyProviderGroupId(providerGroup as string);
-  const preferredModelId = DEFAULT_GROUP_MODELS[group];
-
-  if (preferredModelId) {
-    const provider = getCanonicalProvider(group);
-    const preferredModel = getPiAiModel(provider, preferredModelId);
-
-    if (preferredModel && hasModelForGroup(group, preferredModel.id)) {
-      return preferredModel;
-    }
-  }
-
   const firstModel = getModelsForGroup(group).at(0);
 
   if (firstModel === undefined) {
@@ -274,7 +255,7 @@ export function hasModel(provider: ProviderId, modelId: string): boolean {
 }
 
 export function getPreferredProviderGroup(providersWithAuth: Array<ProviderId>): ProviderGroupId {
-  return getVisibleProviderGroups(providersWithAuth)[0] ?? "fireworks-free";
+  return getVisibleProviderGroups(providersWithAuth)[0] ?? defaultProviderGroup();
 }
 
 export {

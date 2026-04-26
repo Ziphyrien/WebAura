@@ -1,12 +1,12 @@
-import { BusyRuntimeError } from "@gitinspect/pi/agent/runtime-command-errors";
-import { getCurrentTabId } from "@gitinspect/pi/agent/tab-id";
-import { getRuntimeWorker } from "@gitinspect/pi/agent/runtime-worker-client";
-import type { SessionRunner } from "@gitinspect/pi/agent/session-runner";
-import type { TurnEnvelope } from "@gitinspect/pi/agent/turn-event-store";
-import { createId } from "@gitinspect/pi/lib/ids";
-import { getCanonicalProvider } from "@gitinspect/pi/models/catalog";
-import type { SessionData } from "@gitinspect/db";
-import type { ProviderGroupId, ThinkingLevel } from "@gitinspect/pi/types/models";
+import { BusyRuntimeError } from "@gitaura/pi/agent/runtime-command-errors";
+import { getCurrentTabId } from "@gitaura/pi/agent/tab-id";
+import { getRuntimeWorker } from "@gitaura/pi/agent/runtime-worker-client";
+import type { SessionRunner } from "@gitaura/pi/agent/session-runner";
+import type { TurnEnvelope } from "@gitaura/pi/agent/turn-event-store";
+import { createId } from "@gitaura/pi/lib/ids";
+import { getCanonicalProvider } from "@gitaura/pi/models/catalog";
+import type { SessionData } from "@gitaura/db";
+import type { ProviderGroupId, ThinkingLevel } from "@gitaura/pi/types/models";
 
 type HostState = "idle" | "starting" | "running" | "disposing" | "disposed";
 

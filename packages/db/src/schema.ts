@@ -4,8 +4,8 @@ import {
   createCommitRepoRef,
   createTagRepoRef,
   displayResolvedRepoRef,
-} from "@gitinspect/pi/repo/refs";
-import { normalizePersistedSessionState } from "@gitinspect/pi/sessions/session-state-normalization";
+} from "@gitaura/pi/repo/refs";
+import { normalizePersistedSessionState } from "@gitaura/pi/sessions/session-state-normalization";
 import type {
   MessageRow,
   RepoRefOrigin,
@@ -18,7 +18,7 @@ import type {
   SessionRuntimeStatus,
 } from "./types";
 
-export const DB_NAME = "gitinspect-store";
+export const DB_NAME = "gitaura-store";
 
 const FULL_COMMIT_SHA_PATTERN = /^[0-9a-f]{40}$/i;
 

@@ -1,4 +1,4 @@
-import { githubApiFetch } from "@gitinspect/pi/repo/github-fetch";
+import { githubApiFetch } from "@gitaura/pi/repo/github-fetch";
 
 export type GitHubAccountType = "Organization" | "User";
 

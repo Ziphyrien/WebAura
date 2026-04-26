@@ -1,4 +1,4 @@
-import { GitHubFsError } from "@gitinspect/just-github/types";
+import { GitHubFsError } from "@gitaura/just-github/types";
 
 export type RuntimeErrorPayload =
   | {

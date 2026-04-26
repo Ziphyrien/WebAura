@@ -1,6 +1,6 @@
 import type { Message } from "@mariozechner/pi-ai";
-import type { MessageRow } from "@gitinspect/db";
-import type { ChatMessage, ToolCall, ToolResultMessage } from "@gitinspect/pi/types/chat";
+import type { MessageRow } from "@gitaura/db";
+import type { ChatMessage, ToolCall, ToolResultMessage } from "@gitaura/pi/types/chat";
 
 type LinkableAssistantMessage = Extract<
   Message | ChatMessage | MessageRow,

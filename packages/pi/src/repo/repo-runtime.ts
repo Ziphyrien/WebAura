@@ -1,8 +1,8 @@
 import { Bash } from "just-bash/browser";
-import { GitHubFs } from "@gitinspect/just-github/github-fs";
-import type { ResolvedRepoSource } from "@gitinspect/db";
-import { resolveRegisteredGitHubAccess } from "@gitinspect/pi/repo/github-access";
-import type { RepoExecResult, RepoRuntime } from "@gitinspect/pi/repo/repo-types";
+import { GitHubFs } from "@gitaura/just-github/github-fs";
+import type { ResolvedRepoSource } from "@gitaura/db";
+import { resolveRegisteredGitHubAccess } from "@gitaura/pi/repo/github-access";
+import type { RepoExecResult, RepoRuntime } from "@gitaura/pi/repo/repo-types";
 
 async function resolveRuntimeRepoToken(): Promise<string | undefined> {
   const access = await resolveRegisteredGitHubAccess({ requireRepoScope: true });

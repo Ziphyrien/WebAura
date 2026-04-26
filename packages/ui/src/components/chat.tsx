@@ -3,65 +3,49 @@
 import * as React from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCustomer } from "autumn-js/react";
 import { event as trackEvent } from "onedollarstats";
 import { toast } from "sonner";
-import { getFoldedToolResultIds } from "@gitinspect/pi/lib/chat-adapter";
-import {
-  type PendingAuthAction,
-  useGitHubAuthContext,
-} from "@gitinspect/ui/components/github-auth-context";
-import {
-  isGitinspectProviderGroup,
-  useMessageEntitlementGuard,
-  useModelAccessGuard,
-} from "@gitinspect/ui/hooks/use-chat-send-guards";
+import { getFoldedToolResultIds } from "@gitaura/pi/lib/chat-adapter";
 import { ChatComposer } from "./chat-composer";
 import { SessionUtilityActions } from "./session-utility-actions";
-import { ChatUsageNotice } from "./chat-usage-notice";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatMessage as ChatMessageBlock } from "./chat-message";
 import { RepoCombobox } from "./repo-combobox";
 import type { RepoComboboxHandle } from "./repo-combobox";
-import type { ProviderGroupId, ThinkingLevel } from "@gitinspect/pi/types/models";
-import type { AssistantMessage, DisplayChatMessage } from "@gitinspect/pi/types/chat";
-import type { ResolvedRepoSource } from "@gitinspect/db";
+import type { ProviderGroupId, ThinkingLevel } from "@gitaura/pi/types/models";
+import type { AssistantMessage, DisplayChatMessage } from "@gitaura/pi/types/chat";
+import type { ResolvedRepoSource } from "@gitaura/db";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from "@gitinspect/ui/components/ai-elements/conversation";
-import { StatusShimmer } from "@gitinspect/ui/components/ai-elements/shimmer";
-import { ProgressiveBlur } from "@gitinspect/ui/components/progressive-blur";
-import { copySessionToClipboard } from "@gitinspect/pi/lib/copy-session-markdown";
-import {
-  getSessionShareState,
-  publishSessionShare,
-  unshareSession,
-  type SessionShareState,
-} from "@gitinspect/pi/lib/public-share-client";
-import { db, syncDb, touchRepository } from "@gitinspect/db";
-import { runtimeClient } from "@gitinspect/pi/agent/runtime-client";
-import { getRuntimeCommandErrorMessage } from "@gitinspect/pi/agent/runtime-command-errors";
-import { useRuntimeSession } from "@gitinspect/pi/hooks/use-runtime-session";
-import { useSessionOwnership } from "@gitinspect/pi/hooks/use-session-ownership";
+} from "@gitaura/ui/components/ai-elements/conversation";
+import { StatusShimmer } from "@gitaura/ui/components/ai-elements/shimmer";
+import { ProgressiveBlur } from "@gitaura/ui/components/progressive-blur";
+import { copySessionToClipboard } from "@gitaura/pi/lib/copy-session-markdown";
+import { createSessionGistShare, SessionGistShareError } from "@gitaura/pi/lib/session-gist-share";
+import { db, touchRepository } from "@gitaura/db";
+import { runtimeClient } from "@gitaura/pi/agent/runtime-client";
+import { getRuntimeCommandErrorMessage } from "@gitaura/pi/agent/runtime-command-errors";
+import { useRuntimeSession } from "@gitaura/pi/hooks/use-runtime-session";
+import { useSessionOwnership } from "@gitaura/pi/hooks/use-session-ownership";
 import {
   getCanonicalProvider,
   getConnectedProviders,
   getDefaultModelForGroup,
   getDefaultProviderGroup,
   getVisibleProviderGroups,
-} from "@gitinspect/pi/models/catalog";
-import { showGithubSystemNoticeToast } from "@gitinspect/pi/repo/github-fetch";
+} from "@gitaura/pi/models/catalog";
+import { showGithubSystemNoticeToast } from "@gitaura/pi/repo/github-fetch";
 import {
   persistLastUsedSessionSettings,
   resolveProviderDefaults,
-} from "@gitinspect/pi/sessions/session-actions";
-import { reconcileInterruptedSession } from "@gitinspect/pi/sessions/session-notices";
+} from "@gitaura/pi/sessions/session-actions";
+import { reconcileInterruptedSession } from "@gitaura/pi/sessions/session-notices";
 import {
   loadSessionViewModel,
   type SessionViewModel,
-} from "@gitinspect/pi/sessions/session-view-model";
+} from "@gitaura/pi/sessions/session-view-model";
 import {
   deriveActiveSessionViewState,
   deriveBannerState,
@@ -69,9 +53,8 @@ import {
   deriveRecoveryIntent,
   deriveResumeAction,
   shouldDisplayConversationStreaming,
-} from "@gitinspect/pi/sessions/session-view-state";
-import { useAutoRepublish } from "@gitinspect/ui/hooks/use-auto-republish";
-import { useConversationStarter } from "@gitinspect/ui/hooks/use-conversation-starter";
+} from "@gitaura/pi/sessions/session-view-state";
+import { useConversationStarter } from "@gitaura/ui/hooks/use-conversation-starter";
 
 type EmptyChatDraft = {
   model: string;
@@ -104,14 +87,6 @@ function LoadingState({ label }: { label: string }) {
       {label}
     </div>
   );
-}
-
-function getCurrentRoute(): string {
-  if (typeof window === "undefined") {
-    return "/";
-  }
-
-  return `${window.location.pathname}${window.location.search}`;
 }
 
 function getChatPanelMode(input: {
@@ -175,32 +150,6 @@ function getLastAssistantMessage(
     .find((message): message is AssistantMessage => message.role === "assistant");
 }
 
-function isPaidSubscription(autoEnable: boolean | undefined): boolean {
-  return autoEnable !== true;
-}
-
-function hasProSubscription(
-  customer: NonNullable<ReturnType<typeof useCustomer>["data"]>,
-): boolean {
-  const activeSubscription =
-    customer.subscriptions?.find(
-      (subscription) =>
-        !subscription.addOn &&
-        (subscription.status === "active" || subscription.status === "scheduled"),
-    ) ?? customer.subscriptions?.find((subscription) => !subscription.addOn);
-
-  if (activeSubscription) {
-    return isPaidSubscription(activeSubscription.autoEnable);
-  }
-
-  const now = Date.now();
-  return (
-    customer.purchases?.some(
-      (purchase) => purchase.expiresAt === null || purchase.expiresAt > now,
-    ) ?? false
-  );
-}
-
 export function Chat(props: ChatProps) {
   const navigate = useNavigate();
   const search = useSearch({ strict: false });
@@ -236,24 +185,7 @@ export function Chat(props: ChatProps) {
   const providerKeys = Array.isArray(providerKeysResult) ? providerKeysResult : [];
   const [draft, setDraft] = React.useState<EmptyChatDraft | undefined>(undefined);
   const runtime = useRuntimeSession(props.sessionId);
-  const auth = useGitHubAuthContext();
   const { isStartingSession, startNewConversation } = useConversationStarter();
-  const {
-    customer,
-    customerError,
-    customerLoading,
-    ensureMessageEntitlement,
-    refreshMessageEntitlement,
-  } = useMessageEntitlementGuard();
-  const { requireModelAccess } = useModelAccessGuard();
-  const proCustomerState = useCustomer({
-    expand: ["subscriptions.plan", "purchases.plan"],
-    queryOptions: {
-      enabled: auth?.authState.session === "signed-in",
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5,
-    },
-  });
   const ownership = useSessionOwnership(
     loadedSessionState?.kind === "active" ? loadedSessionState.viewModel.session.id : undefined,
   );
@@ -263,12 +195,6 @@ export function Chat(props: ChatProps) {
   const surfacedSystemNoticeFingerprintsRef = React.useRef(new Set<string>());
   const surfacedSystemNoticeSessionIdRef = React.useRef<string | undefined>(undefined);
   const [promptHeight, setPromptHeight] = React.useState(0);
-  const [isSharing, setIsSharing] = React.useState(false);
-  const [shareState, setShareState] = React.useState<SessionShareState>({
-    canUnshare: false,
-    isShared: false,
-    url: null,
-  });
 
   const promptRef = React.useCallback((node: HTMLDivElement | null) => {
     if (observerRef.current) {
@@ -293,59 +219,12 @@ export function Chat(props: ChatProps) {
   const sessionViewModel =
     loadedSessionState?.kind === "active" ? loadedSessionState.viewModel : undefined;
   const activeSession = sessionViewModel?.session;
-
-  useAutoRepublish(shareState.isShared, activeSession, sessionViewModel?.transcriptMessages);
   const sessionRuntime = sessionViewModel?.runtime;
   const displayRepoSource = activeSession?.repoSource ?? props.repoSource;
   const connectedProviders = React.useMemo(
     () => getConnectedProviders(providerKeys),
     [providerKeys],
   );
-  const isPro = React.useMemo(
-    () => (proCustomerState.data ? hasProSubscription(proCustomerState.data) : false),
-    [proCustomerState.data],
-  );
-
-  React.useEffect(() => {
-    let cancelled = false;
-
-    async function loadShareState() {
-      if (!activeSession || auth?.authState.session !== "signed-in") {
-        if (!cancelled) {
-          setShareState({
-            canUnshare: false,
-            isShared: false,
-            url: null,
-          });
-        }
-        return;
-      }
-
-      try {
-        const nextShareState = await getSessionShareState(activeSession.id);
-
-        if (!cancelled) {
-          setShareState(nextShareState);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setShareState({
-            canUnshare: false,
-            isShared: false,
-            url: null,
-          });
-        }
-
-        console.error("Could not load share state", error);
-      }
-    }
-
-    void loadShareState();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [activeSession?.id, auth?.authState.session]);
 
   React.useEffect(() => {
     if (!displayRepoSource) {
@@ -374,7 +253,7 @@ export function Chat(props: ChatProps) {
       return;
     }
 
-    const fallbackProviderGroup = visibleProviderGroups[0] ?? "fireworks-free";
+    const fallbackProviderGroup = visibleProviderGroups[0] ?? draft.providerGroup;
     setDraft((currentDraft) => {
       if (!currentDraft || visibleProviderGroups.includes(currentDraft.providerGroup)) {
         return currentDraft;
@@ -505,14 +384,14 @@ export function Chat(props: ChatProps) {
         });
 
         if (outcome.kind === "reconciled") {
-          console.info("[gitinspect:runtime] interrupted_session_reconciled", {
+          console.info("[gitaura:runtime] interrupted_session_reconciled", {
             lastProgressAt: outcome.lastProgressAt,
             sessionId: activeSession.id,
             trigger,
           });
         }
       } catch (error) {
-        console.error("[gitinspect:runtime] stale_stream_reconcile_failed", {
+        console.error("[gitaura:runtime] stale_stream_reconcile_failed", {
           error,
           sessionId: activeSession.id,
           trigger,
@@ -579,14 +458,13 @@ export function Chat(props: ChatProps) {
   const reportRuntimeFailure = React.useCallback(
     (error: Error) => {
       toast.error(getRuntimeCommandErrorMessage(error));
-      console.error("[gitinspect:runtime] command_failed", {
+      console.error("[gitaura:runtime] command_failed", {
         message: error.message,
         sessionId: activeSession?.id,
       });
     },
     [activeSession?.id],
   );
-  const [readyAuthAction, setReadyAuthAction] = React.useState<PendingAuthAction | null>(null);
 
   const handleFirstSend = React.useCallback(
     async (content: string) => {
@@ -597,11 +475,6 @@ export function Chat(props: ChatProps) {
       await startNewConversation({
         initialPrompt: content,
         model: draft.model,
-        postAuthAction: {
-          content,
-          route: getCurrentRoute(),
-          type: "send-first-message",
-        },
         providerGroup: draft.providerGroup,
         repoSource: props.repoSource,
         sourceUrl: props.sourceUrl,
@@ -611,43 +484,9 @@ export function Chat(props: ChatProps) {
     [draft, props.repoSource, props.sourceUrl, startNewConversation],
   );
 
-  React.useEffect(() => {
-    if (!auth || activeSession || isStartingSession || !draft) {
-      return;
-    }
-
-    const readyAction = auth.consumeReadyAuthAction(getCurrentRoute());
-
-    if (!readyAction || readyAction.action.type !== "send-first-message") {
-      return;
-    }
-
-    if (readyAction.requiresConfirmation) {
-      setReadyAuthAction(readyAction.action);
-      return;
-    }
-
-    void handleFirstSend(readyAction.action.content);
-  }, [activeSession, auth, draft, handleFirstSend, isStartingSession]);
-
-  React.useEffect(() => {
-    if (activeSession && readyAuthAction) {
-      setReadyAuthAction(null);
-    }
-  }, [activeSession, readyAuthAction]);
-
   const handleSend = React.useCallback(
     async (content: string) => {
       if (activeSession) {
-        if (
-          !requireModelAccess({
-            providerGroup:
-              activeSession.providerGroup ?? getDefaultProviderGroup(activeSession.provider),
-          })
-        ) {
-          return;
-        }
-
         if (!activeComposerState?.canSend) {
           if (activeComposerState?.disabledReason) {
             toast.error(activeComposerState.disabledReason);
@@ -655,21 +494,8 @@ export function Chat(props: ChatProps) {
           return;
         }
 
-        if (
-          !(await ensureMessageEntitlement({
-            providerGroup:
-              activeSession.providerGroup ?? getDefaultProviderGroup(activeSession.provider),
-          }))
-        ) {
-          return;
-        }
-
         try {
           await runtime.send(content);
-          await refreshMessageEntitlement({
-            providerGroup:
-              activeSession.providerGroup ?? getDefaultProviderGroup(activeSession.provider),
-          });
           void trackEvent("Message sent", "/chat").catch(() => {
             // Analytics must never interfere with chat sends.
           });
@@ -681,16 +507,7 @@ export function Chat(props: ChatProps) {
 
       await handleFirstSend(content);
     },
-    [
-      activeComposerState,
-      activeSession,
-      ensureMessageEntitlement,
-      handleFirstSend,
-      refreshMessageEntitlement,
-      reportRuntimeFailure,
-      requireModelAccess,
-      runtime,
-    ],
+    [activeComposerState, activeSession, handleFirstSend, reportRuntimeFailure, runtime],
   );
 
   const handleResumeInterrupted = React.useCallback(async () => {
@@ -715,71 +532,51 @@ export function Chat(props: ChatProps) {
     );
   }, [activeSession?.sourceUrl, displayRepoSource, messages, props.sourceUrl]);
 
-  const handleUpgradeToPro = React.useCallback(() => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        settings: "pricing",
-      }),
-      to: ".",
-    });
-  }, [navigate]);
-
-  const handleShareToggle = React.useCallback(async () => {
-    if (!activeSession || !sessionViewModel) {
+  const handleShareSession = React.useCallback(() => {
+    if (!activeSession) {
       return;
     }
 
-    if (!isPro && !(shareState.isShared && shareState.canUnshare)) {
-      handleUpgradeToPro();
-      return;
-    }
+    void createSessionGistShare({
+      messages,
+      session: activeSession,
+      sourceUrl: activeSession.sourceUrl ?? props.sourceUrl,
+    })
+      .then(async ({ url }) => {
+        try {
+          if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(url);
+            toast.success("Secret gist created and copied");
+            return;
+          }
+        } catch {
+          // Fall through to opening the gist directly.
+        }
 
-    setIsSharing(true);
+        window.open(url, "_blank", "noopener,noreferrer");
+        toast.success("Secret gist created");
+      })
+      .catch((error) => {
+        if (
+          error instanceof SessionGistShareError &&
+          (error.code === "insufficient_scope" ||
+            error.code === "invalid_token" ||
+            error.code === "missing_token")
+        ) {
+          void navigate({
+            search: (prev) => ({
+              ...prev,
+              settings: "github",
+            }),
+            to: ".",
+          });
+        }
 
-    try {
-      if (shareState.isShared && shareState.canUnshare) {
-        await unshareSession(activeSession.id);
-        setShareState({
-          canUnshare: false,
-          isShared: false,
-          url: null,
-        });
-        toast.success("Share link removed");
-        return;
-      }
-
-      await syncDb();
-
-      const nextShareState = await publishSessionShare({
-        messages: sessionViewModel.transcriptMessages,
-        session: activeSession,
+        toast.error(
+          error instanceof Error ? error.message : "Could not share this session as a gist.",
+        );
       });
-
-      setShareState(nextShareState);
-
-      if (nextShareState.url) {
-        await navigator.clipboard.writeText(nextShareState.url);
-        toast.success("Share link copied to clipboard");
-      } else {
-        toast.success("Share link created");
-      }
-    } catch (error) {
-      console.error("Could not update share state", error);
-      toast.error(
-        shareState.isShared ? "Could not remove share link" : "Could not create share link",
-      );
-    } finally {
-      setIsSharing(false);
-    }
-  }, [
-    activeSession,
-    handleUpgradeToPro,
-    isPro,
-    sessionViewModel,
-    shareState.canUnshare,
-    shareState.isShared,
-  ]);
+  }, [activeSession, messages, navigate, props.sourceUrl]);
 
   if (loadedSessionState === undefined) {
     return <LoadingState label="Loading session..." />;
@@ -798,10 +595,8 @@ export function Chat(props: ChatProps) {
     activeSession?.providerGroup ??
     (activeSession ? getDefaultProviderGroup(activeSession.provider) : undefined) ??
     draft?.providerGroup ??
-    "fireworks-free";
+    getVisibleProviderGroups(connectedProviders)[0];
   const currentThinkingLevel = activeSession?.thinkingLevel ?? draft?.thinkingLevel ?? "medium";
-  const showUsageNotice = isGitinspectProviderGroup(currentProviderGroup);
-  const messageBalance = showUsageNotice ? customer?.balances?.messages : null;
   const isStreaming =
     activeSession !== undefined ? (activeComposerState?.isStreaming ?? false) : isStartingSession;
   const composerDisabled = !displayRepoSource || activeComposerState?.disabled === true;
@@ -896,15 +691,8 @@ export function Chat(props: ChatProps) {
             />
             {messages.length > 0 ? (
               <SessionUtilityActions
-                canUnshare={shareState.canUnshare}
-                isPro={isPro}
-                isShared={shareState.isShared}
-                isSharing={isSharing}
                 onCopy={handleCopySession}
-                onShareToggle={() => {
-                  void handleShareToggle();
-                }}
-                onUpgradeClick={handleUpgradeToPro}
+                onShare={activeSession ? handleShareSession : undefined}
               />
             ) : null}
           </div>
@@ -912,43 +700,6 @@ export function Chat(props: ChatProps) {
 
         <div className="pointer-events-auto bg-background">
           <div className="mx-auto w-full max-w-4xl px-4 pb-4">
-            {readyAuthAction ? (
-              <div className="mb-3 rounded-md border border-border bg-muted px-3 py-3 text-sm text-foreground">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="font-medium">Resume your draft message?</div>
-                    <div className="text-muted-foreground">
-                      Your draft is still here. Send it now or dismiss it.
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="inline-flex items-center justify-center rounded-sm border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-                      onClick={() => {
-                        const nextAction = readyAuthAction;
-                        setReadyAuthAction(null);
-                        if (!nextAction) {
-                          return;
-                        }
-                        void handleFirstSend(nextAction.content);
-                      }}
-                      type="button"
-                    >
-                      Send draft
-                    </button>
-                    <button
-                      className="inline-flex items-center justify-center rounded-sm border border-transparent px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                      onClick={() => {
-                        setReadyAuthAction(null);
-                      }}
-                      type="button"
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : null}
             {bannerState?.kind === "interrupted" && resumeAction && activeSession ? (
               <div className="mb-3 rounded-md border border-border bg-muted px-3 py-3 text-sm text-foreground">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1006,28 +757,6 @@ export function Chat(props: ChatProps) {
                 }}
                 providerGroup={currentProviderGroup}
                 thinkingLevel={currentThinkingLevel}
-              />
-              <ChatUsageNotice
-                balance={messageBalance}
-                error={customerError}
-                isLoading={customerLoading}
-                isVisible={showUsageNotice}
-                onSignIn={() => {
-                  auth?.openAuthDialog({
-                    mode: "github-only",
-                    reason: "free-models",
-                  });
-                }}
-                onUpgrade={() => {
-                  void navigate({
-                    search: (prev) => ({
-                      ...prev,
-                      settings: "pricing",
-                    }),
-                    to: ".",
-                  });
-                }}
-                session={auth?.authState.session ?? "signed-out"}
               />
             </div>
           </div>

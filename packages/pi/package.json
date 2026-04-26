@@ -1,5 +1,5 @@
 {
-  "name": "@gitinspect/pi",
+  "name": "@gitaura/pi",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,12 +13,11 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@gitinspect/db": "workspace:*",
-    "@gitinspect/env": "workspace:*",
-    "@gitinspect/just-github": "workspace:*",
+    "@gitaura/db": "workspace:*",
+    "@gitaura/env": "workspace:*",
+    "@gitaura/just-github": "workspace:*",
     "@mariozechner/pi-agent-core": "0.70.2",
     "@mariozechner/pi-ai": "0.70.2",
-    "better-auth": "catalog:",
     "comlink": "^4.4.2",
     "dexie-react-hooks": "^4.2.0",
     "just-bash": "^2.14.0",
@@ -27,7 +26,7 @@
     "typebox": "1.1.24"
   },
   "devDependencies": {
-    "@gitinspect/config": "workspace:*",
+    "@gitaura/config": "workspace:*",
     "@types/react": "catalog:",
     "typescript": "^5"
   }

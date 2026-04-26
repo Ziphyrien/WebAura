@@ -1,11 +1,6 @@
-import type { JsonValue } from "@gitinspect/pi/types/common";
-import type { AssistantMessage, ChatMessage } from "@gitinspect/pi/types/chat";
-import type {
-  ProviderGroupId,
-  ProviderId,
-  ThinkingLevel,
-  Usage,
-} from "@gitinspect/pi/types/models";
+import type { JsonValue } from "@gitaura/pi/types/common";
+import type { AssistantMessage, ChatMessage } from "@gitaura/pi/types/chat";
+import type { ProviderGroupId, ProviderId, ThinkingLevel, Usage } from "@gitaura/pi/types/models";
 
 export type RepoRefOrigin = "default" | "explicit";
 

@@ -15,8 +15,8 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@gitinspect/ui/lib/utils",
-    "ui": "@gitinspect/ui/components"
+    "utils": "@gitaura/ui/lib/utils",
+    "ui": "@gitaura/ui/components"
   },
   "menuColor": "default-translucent",
   "menuAccent": "subtle",

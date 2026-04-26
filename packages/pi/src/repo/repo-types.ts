@@ -1,6 +1,6 @@
 import type { Bash, BashExecResult } from "just-bash/browser";
-import type { GitHubFs } from "@gitinspect/just-github/github-fs";
-import type { ResolvedRepoSource } from "@gitinspect/db";
+import type { GitHubFs } from "@gitaura/just-github/github-fs";
+import type { ResolvedRepoSource } from "@gitaura/db";
 
 export interface RepoRuntime {
   bash: Bash;

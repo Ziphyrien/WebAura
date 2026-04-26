@@ -1,5 +1,5 @@
 import * as React from "react";
-import { runtimeClient, type InterruptedResumeMode } from "@gitinspect/pi/agent/runtime-client";
+import { runtimeClient, type InterruptedResumeMode } from "@gitaura/pi/agent/runtime-client";
 
 export function useRuntimeSession(sessionId: string | undefined) {
   const runMutation = React.useEffectEvent(

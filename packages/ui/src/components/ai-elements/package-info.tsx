@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge } from "@gitinspect/ui/components/badge";
-import { cn } from "@gitinspect/ui/lib/utils";
+import { Badge } from "@gitaura/ui/components/badge";
+import { cn } from "@gitaura/ui/lib/utils";
 import { ArrowRightIcon, MinusIcon, PackageIcon, PlusIcon } from "lucide-react";
 import type { HTMLAttributes } from "react";
 import { createContext, useContext, useMemo } from "react";

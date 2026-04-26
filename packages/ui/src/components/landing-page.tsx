@@ -2,24 +2,24 @@ import * as React from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ArrowRightIcon } from "@phosphor-icons/react";
-import { listRepositories } from "@gitinspect/db";
-import { handleGithubError } from "@gitinspect/pi/repo/github-fetch";
-import { parseRepoInput } from "@gitinspect/pi/repo/path-parser";
-import { resolveRepoIntent } from "@gitinspect/pi/repo/ref-resolver";
-import { SUGGESTED_REPOS } from "@gitinspect/pi/repo/suggested-repos";
-import { repoSourceToPath } from "@gitinspect/pi/repo/url";
-import { ChatLogo } from "@gitinspect/ui/components/chat-logo";
-import { GithubRepo } from "@gitinspect/ui/components/github-repo";
-import { Icons } from "@gitinspect/ui/components/icons";
+import { listRepositories } from "@gitaura/db";
+import { handleGithubError } from "@gitaura/pi/repo/github-fetch";
+import { parseRepoInput } from "@gitaura/pi/repo/path-parser";
+import { resolveRepoIntent } from "@gitaura/pi/repo/ref-resolver";
+import { SUGGESTED_REPOS } from "@gitaura/pi/repo/suggested-repos";
+import { repoSourceToPath } from "@gitaura/pi/repo/url";
+import { ChatLogo } from "@gitaura/ui/components/chat-logo";
+import { GithubRepo } from "@gitaura/ui/components/github-repo";
+import { Icons } from "@gitaura/ui/components/icons";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
-} from "@gitinspect/ui/components/input-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@gitinspect/ui/components/tabs";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/input-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@gitaura/ui/components/tabs";
+import { cn } from "@gitaura/ui/lib/utils";
 
 function useSuggestedRepos(count: number) {
   return React.useMemo(() => {
@@ -43,22 +43,22 @@ export function LandingPage() {
     <div className="flex h-full min-h-0 w-full flex-col items-center overflow-auto p-6 pt-[12vh] lg:justify-between lg:overflow-hidden lg:pt-6 lg:pb-5">
       <div className="w-full max-w-xl flex-1 space-y-8 lg:flex lg:min-h-0 lg:flex-col lg:justify-center lg:space-y-5">
         <div className="space-y-6 text-center lg:space-y-4">
-          <h1 className="sr-only">gitinspect</h1>
+          <h1 className="sr-only">GitAura</h1>
           <ChatLogo
             aria-hidden
             className="[&_.font-geist-pixel-square]:lg:text-7xl [&_.font-geist-pixel-square]:xl:text-8xl"
             size="hero"
           />
           <p className="mx-auto max-w-md text-sm text-muted-foreground">
-            GitInspect is an AI coding agent that lives on your browser and can answer questions
-            about any GitHub repository.
+            GitAura is a local-first AI coding agent for reading GitHub repositories directly from
+            your browser.
           </p>
         </div>
 
         <div className="space-y-2 lg:space-y-1.5">
           <LandingRepoForm />
           <p className="text-center text-[11px] text-muted-foreground/60">
-            You can also replace &apos;hub&apos; with &apos;inspect&apos; in any GitHub URL.
+            Paste any GitHub URL or <code>owner/repo</code> to jump into the workspace.
           </p>
         </div>
 
@@ -123,17 +123,7 @@ export function LandingPage() {
       </div>
 
       <footer className="mt-auto w-full max-w-xl shrink-0 pt-16 pb-8 text-center lg:mt-0 lg:pt-4 lg:pb-0">
-        <p className="text-sm text-muted-foreground">
-          Made by{" "}
-          <a
-            className="underline decoration-muted-foreground/60 underline-offset-2 hover:text-foreground hover:decoration-foreground/60"
-            href="https://jeremyosih.com/"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Jeremy Osih
-          </a>
-        </p>
+        <p className="text-sm text-muted-foreground">Made by 𝒁𝒊𝒑𝒉𝒚𝒓𝒊𝒆𝒏</p>
         <p className="mx-auto mt-2 max-w-md text-[11px] leading-relaxed text-muted-foreground/70">
           This page respects your privacy by not collecting personal information.
         </p>

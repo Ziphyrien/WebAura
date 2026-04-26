@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@gitinspect/ui/components/button";
-import { cn } from "@gitinspect/ui/lib/utils";
+import { Button } from "@gitaura/ui/components/button";
+import { cn } from "@gitaura/ui/lib/utils";
 import Ansi from "ansi-to-react";
 import { CheckIcon, CopyIcon, TerminalIcon, Trash2Icon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes } from "react";

@@ -1,4 +1,4 @@
-import type { AssistantContent, ChatMessage, UserContent } from "@gitinspect/pi/types/chat";
+import type { AssistantContent, ChatMessage, UserContent } from "@gitaura/pi/types/chat";
 
 function getTextFromUserContent(content: string | UserContent[]): string {
   if (typeof content === "string") {

@@ -1,4 +1,4 @@
-import { cn } from "@gitinspect/ui/lib/utils";
+import { cn } from "@gitaura/ui/lib/utils";
 import { Panel as PanelPrimitive } from "@xyflow/react";
 import type { ComponentProps } from "react";
 

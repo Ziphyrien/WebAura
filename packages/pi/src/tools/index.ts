@@ -1,7 +1,7 @@
-import type { RepoRuntime } from "@gitinspect/pi/repo/repo-types";
-import { createBashTool } from "@gitinspect/pi/tools/bash";
-import { createReadTool } from "@gitinspect/pi/tools/read";
-import { toAgentTool, toProviderToolDefinition } from "@gitinspect/pi/tools/types";
+import type { RepoRuntime } from "@gitaura/pi/repo/repo-types";
+import { createBashTool } from "@gitaura/pi/tools/bash";
+import { createReadTool } from "@gitaura/pi/tools/read";
+import { toAgentTool, toProviderToolDefinition } from "@gitaura/pi/tools/types";
 
 export function createRepoTools(
   runtime: RepoRuntime,

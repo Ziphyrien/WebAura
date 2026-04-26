@@ -1,12 +1,12 @@
-import { Icons } from "@gitinspect/ui/components/icons";
-import { Button } from "@gitinspect/ui/components/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@gitinspect/ui/components/tooltip";
-import { Skeleton } from "@gitinspect/ui/components/skeleton";
+import { Icons } from "@gitaura/ui/components/icons";
+import { Button } from "@gitaura/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@gitaura/ui/components/tooltip";
+import { Skeleton } from "@gitaura/ui/components/skeleton";
 import {
   GITHUB_APP_REPO,
   useGitHubRepoStargazers,
-} from "@gitinspect/pi/hooks/use-github-repo-stargazers";
-import { formatGitHubStarCount } from "@gitinspect/pi/lib/format-github-stars";
+} from "@gitaura/pi/hooks/use-github-repo-stargazers";
+import { formatGitHubStarCount } from "@gitaura/pi/lib/format-github-stars";
 
 export function GitHubLink() {
   return (

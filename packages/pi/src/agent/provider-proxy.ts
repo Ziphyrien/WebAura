@@ -1,14 +1,10 @@
 import type { Api, Model, SimpleStreamOptions } from "@mariozechner/pi-ai";
+import { getProxyConfig } from "@gitaura/pi/proxy/settings";
+import { buildProxiedUrl } from "@gitaura/pi/proxy/url";
 
 type StreamSimple = (typeof import("@mariozechner/pi-ai"))["streamSimple"];
-import { isFreeTierProxyMarker } from "@gitinspect/pi/auth/public-provider-fallbacks";
-import { getProxyConfig } from "@gitinspect/pi/proxy/settings";
-import { buildProxiedUrl } from "@gitinspect/pi/proxy/url";
 
 export function shouldUseProxyForProvider(provider: string, apiKey: string): boolean {
-  if (isFreeTierProxyMarker(apiKey)) {
-    return provider.toLowerCase() === "fireworks-ai";
-  }
   switch (provider.toLowerCase()) {
     case "anthropic":
       return apiKey.startsWith("sk-ant-oat") || apiKey.startsWith("{");
@@ -54,12 +50,8 @@ export function createProxyAwareStreamFn() {
       return await streamSimple(model, context, options);
     }
 
-    const proxyUrl = isFreeTierProxyMarker(apiKey)
-      ? "/api/proxy"
-      : await (async () => {
-          const proxy = await getProxyConfig();
-          return proxy.enabled ? proxy.url : undefined;
-        })();
+    const proxy = await getProxyConfig();
+    const proxyUrl = proxy.enabled ? proxy.url : undefined;
 
     if (!proxyUrl) {
       return await streamSimple(model, context, options);

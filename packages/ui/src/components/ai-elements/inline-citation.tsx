@@ -1,14 +1,10 @@
 "use client";
 
-import { Badge } from "@gitinspect/ui/components/badge";
-import type { CarouselApi } from "@gitinspect/ui/components/carousel";
-import { Carousel, CarouselContent, CarouselItem } from "@gitinspect/ui/components/carousel";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@gitinspect/ui/components/hover-card";
-import { cn } from "@gitinspect/ui/lib/utils";
+import { Badge } from "@gitaura/ui/components/badge";
+import type { CarouselApi } from "@gitaura/ui/components/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@gitaura/ui/components/carousel";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@gitaura/ui/components/hover-card";
+import { cn } from "@gitaura/ui/lib/utils";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";

@@ -1,6 +1,6 @@
-import { generatePKCE, generateState, postTokenRequest } from "@gitinspect/pi/auth/oauth-utils";
-import { runPopupOAuthFlow } from "@gitinspect/pi/auth/popup-flow";
-import type { OAuthCredentials } from "@gitinspect/pi/auth/oauth-types";
+import { generatePKCE, generateState, postTokenRequest } from "@gitaura/pi/auth/oauth-utils";
+import { runPopupOAuthFlow } from "@gitaura/pi/auth/popup-flow";
+import type { OAuthCredentials } from "@gitaura/pi/auth/oauth-types";
 
 const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
 const AUTHORIZE_URL = "https://auth.openai.com/oauth/authorize";

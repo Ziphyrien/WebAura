@@ -1,10 +1,10 @@
 import { Type, type Static } from "typebox";
-import { GitHubFsError } from "@gitinspect/just-github/types";
-import { execInRepoShell } from "@gitinspect/pi/repo/repo-runtime";
-import type { RepoRuntime } from "@gitinspect/pi/repo/repo-types";
-import { warningMessageToError } from "@gitinspect/pi/tools/repo-warnings";
-import { truncateTail, type TruncationResult } from "@gitinspect/pi/tools/truncate";
-import type { AppToolDefinition } from "@gitinspect/pi/tools/types";
+import { GitHubFsError } from "@gitaura/just-github/types";
+import { execInRepoShell } from "@gitaura/pi/repo/repo-runtime";
+import type { RepoRuntime } from "@gitaura/pi/repo/repo-types";
+import { warningMessageToError } from "@gitaura/pi/tools/repo-warnings";
+import { truncateTail, type TruncationResult } from "@gitaura/pi/tools/truncate";
+import type { AppToolDefinition } from "@gitaura/pi/tools/types";
 
 const bashSchema = Type.Object({
   command: Type.String({

@@ -1,5 +1,5 @@
 {
-  "name": "@gitinspect/ui",
+  "name": "@gitaura/ui",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -17,8 +17,8 @@
     "@base-ui/react": "^1.3.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/inter": "^5.2.8",
-    "@gitinspect/db": "workspace:*",
-    "@gitinspect/pi": "workspace:*",
+    "@gitaura/db": "workspace:*",
+    "@gitaura/pi": "workspace:*",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@rive-app/react-webgl2": "^4.27.2",
@@ -30,7 +30,6 @@
     "@xyflow/react": "^12.10.1",
     "ai": "^6.0.137",
     "ansi-to-react": "^6.2.6",
-    "autumn-js": "^1.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -64,7 +63,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
-    "@gitinspect/config": "workspace:*",
+    "@gitaura/config": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "tailwindcss": "catalog:",

@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@gitinspect/ui/components/button";
-import { Separator } from "@gitinspect/ui/components/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@gitinspect/ui/components/tooltip";
-import { cn } from "@gitinspect/ui/lib/utils";
+import { Button } from "@gitaura/ui/components/button";
+import { Separator } from "@gitaura/ui/components/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@gitaura/ui/components/tooltip";
+import { cn } from "@gitaura/ui/lib/utils";
 import type { LucideProps } from "lucide-react";
 import { BookmarkIcon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes } from "react";

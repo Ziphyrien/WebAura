@@ -1,4 +1,4 @@
-import { env } from "@gitinspect/env/server";
+import { env } from "@gitaura/env/server";
 import { createFileRoute } from "@tanstack/react-router";
 
 const GITHUB_API_BASE_URL = "https://api.github.com";

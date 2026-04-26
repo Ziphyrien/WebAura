@@ -1,6 +1,6 @@
-import { getMessageText } from "@gitinspect/pi/lib/preview";
-import { truncateText } from "@gitinspect/pi/lib/title";
-import type { ChatMessage } from "@gitinspect/pi/types/chat";
+import { getMessageText } from "@gitaura/pi/lib/preview";
+import { truncateText } from "@gitaura/pi/lib/title";
+import type { ChatMessage } from "@gitaura/pi/types/chat";
 
 export function generateTitle(messages: ChatMessage[]): string {
   const firstUser = messages.find((message) => message.role === "user");

@@ -1,22 +1,22 @@
 import * as React from "react";
 import { ChatModelSelector } from "./chat-model-selector";
 import type { ChatStatus } from "ai";
-import type { PromptInputMessage } from "@gitinspect/ui/components/ai-elements/prompt-input";
-import type { ProviderGroupId, ThinkingLevel } from "@gitinspect/pi/types/models";
-import { getModelForGroup } from "@gitinspect/pi/models/catalog";
+import type { PromptInputMessage } from "@gitaura/ui/components/ai-elements/prompt-input";
+import type { ProviderGroupId, ThinkingLevel } from "@gitaura/pi/types/models";
+import { getModelForGroup } from "@gitaura/pi/models/catalog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gitinspect/ui/components/select";
+} from "@gitaura/ui/components/select";
 import {
   Attachment,
   AttachmentPreview,
   AttachmentRemove,
   Attachments,
-} from "@gitinspect/ui/components/ai-elements/attachments";
+} from "@gitaura/ui/components/ai-elements/attachments";
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -33,7 +33,7 @@ import {
   PromptInputTools,
   usePromptInputAttachments,
   usePromptInputController,
-} from "@gitinspect/ui/components/ai-elements/prompt-input";
+} from "@gitaura/ui/components/ai-elements/prompt-input";
 
 const THINKING_LEVELS: Array<{ label: string; value: ThinkingLevel }> = [
   { label: "Off", value: "off" },

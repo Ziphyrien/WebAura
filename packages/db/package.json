@@ -1,5 +1,5 @@
 {
-  "name": "@gitinspect/db",
+  "name": "@gitaura/db",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "dexie-cloud-addon": "^4.4.10"
   },
   "devDependencies": {
-    "@gitinspect/config": "workspace:*",
+    "@gitaura/config": "workspace:*",
     "typescript": "^5"
   }
 }

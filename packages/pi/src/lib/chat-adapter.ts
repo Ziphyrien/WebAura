@@ -1,4 +1,4 @@
-import { linkToolResults } from "@gitinspect/pi/agent/tool-result-linker";
+import { linkToolResults } from "@gitaura/pi/agent/tool-result-linker";
 import type {
   AssistantMessage,
   ChatMessage,
@@ -7,7 +7,7 @@ import type {
   ToolCall,
   ToolResultMessage,
   UserMessage,
-} from "@gitinspect/pi/types/chat";
+} from "@gitaura/pi/types/chat";
 
 export function getUserText(message: UserMessage): string {
   if (typeof message.content === "string") {

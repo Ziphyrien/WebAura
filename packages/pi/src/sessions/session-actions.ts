@@ -1,7 +1,7 @@
-import type { ProviderGroupId, ProviderId } from "@gitinspect/pi/types/models";
-import type { ResolvedRepoSource, SessionData } from "@gitinspect/db";
-import { deleteSession, getSetting, listProviderKeys, setSetting } from "@gitinspect/db";
-import { runtimeClient } from "@gitinspect/pi/agent/runtime-client";
+import type { ProviderGroupId, ProviderId } from "@gitaura/pi/types/models";
+import type { ResolvedRepoSource, SessionData } from "@gitaura/db";
+import { deleteSession, getSetting, listProviderKeys, setSetting } from "@gitaura/db";
+import { runtimeClient } from "@gitaura/pi/agent/runtime-client";
 import {
   getCanonicalProvider,
   getConnectedProviders,
@@ -12,21 +12,29 @@ import {
   getVisibleProviderGroups,
   hasModelForGroup,
   isProviderGroupId,
-} from "@gitinspect/pi/models/catalog";
-import { createSession, persistSessionSnapshot } from "@gitinspect/pi/sessions/session-service";
+} from "@gitaura/pi/models/catalog";
+import { createSession, persistSessionSnapshot } from "@gitaura/pi/sessions/session-service";
 
 function isProviderId(value: string): value is ProviderId {
   return getProviderGroups().includes(value as ProviderGroupId);
+}
+
+function normalizeStoredProviderGroup(value: unknown): ProviderGroupId | undefined {
+  if (typeof value === "string" && isProviderGroupId(value)) {
+    return value;
+  }
+
+  return undefined;
 }
 
 function normalizeVisibleSession(
   session: SessionData,
   visibleProviderGroups: Array<ProviderGroupId>,
 ): SessionData {
-  const fallbackProviderGroup = visibleProviderGroups[0] ?? "fireworks-free";
+  const fallbackProviderGroup =
+    visibleProviderGroups[0] ?? getPreferredProviderGroup([] as Array<ProviderId>);
   const rawGroup = session.providerGroup ?? session.provider;
-  const migratedGroup = (rawGroup as string) === "opencode-free" ? "fireworks-free" : rawGroup;
-  const currentProviderGroup = migratedGroup as ProviderGroupId;
+  const currentProviderGroup = normalizeStoredProviderGroup(rawGroup) ?? fallbackProviderGroup;
   const providerGroup = visibleProviderGroups.includes(currentProviderGroup)
     ? currentProviderGroup
     : fallbackProviderGroup;
@@ -72,14 +80,12 @@ export async function resolveProviderDefaults(): Promise<{
   const connectedProviders = getConnectedProviders(providerKeys);
   const visibleProviderGroups = getVisibleProviderGroups(connectedProviders);
   const fallbackProviderGroup = getPreferredProviderGroup(connectedProviders);
-  const storedProviderGroupRaw = await getSetting("last-used-provider-group");
-  const storedProviderGroup =
-    storedProviderGroupRaw === "opencode-free" ? "fireworks-free" : storedProviderGroupRaw;
+  const storedProviderGroup = normalizeStoredProviderGroup(
+    await getSetting("last-used-provider-group"),
+  );
   const storedProvider = await getSetting("last-used-provider");
   const providerGroup =
-    typeof storedProviderGroup === "string" &&
-    isProviderGroupId(storedProviderGroup) &&
-    visibleProviderGroups.includes(storedProviderGroup)
+    storedProviderGroup && visibleProviderGroups.includes(storedProviderGroup)
       ? storedProviderGroup
       : typeof storedProvider === "string" && isProviderId(storedProvider)
         ? (() => {

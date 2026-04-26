@@ -1,4 +1,4 @@
-import { getIsoNow } from "@gitinspect/pi/lib/dates";
+import { getIsoNow } from "@gitaura/pi/lib/dates";
 import {
   derivePhaseFromStatus,
   deriveStatusFromPhase,

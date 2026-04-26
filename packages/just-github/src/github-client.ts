@@ -295,7 +295,7 @@ export class GitHubClient {
         code: "ENOTSUP",
         isRetryable: false,
         kind: "unsupported",
-        message: "gitinspect v0 does not support annotated tags that target trees or blobs.",
+        message: "GitAura does not support annotated tags that target trees or blobs.",
         path: name,
       });
     }

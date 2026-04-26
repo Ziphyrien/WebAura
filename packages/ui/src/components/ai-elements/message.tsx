@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@gitinspect/ui/components/button";
-import { ButtonGroup, ButtonGroupText } from "@gitinspect/ui/components/button-group";
+import { Button } from "@gitaura/ui/components/button";
+import { ButtonGroup, ButtonGroupText } from "@gitaura/ui/components/button-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@gitinspect/ui/components/tooltip";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/tooltip";
+import { cn } from "@gitaura/ui/lib/utils";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
 import { math } from "@streamdown/math";

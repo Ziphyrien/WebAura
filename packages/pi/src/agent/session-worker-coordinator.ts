@@ -3,13 +3,13 @@ import type { AgentEvent, AgentTool, StreamFn } from "@mariozechner/pi-agent-cor
 import {
   BusyRuntimeError,
   StreamInterruptedRuntimeError,
-} from "@gitinspect/pi/agent/runtime-command-errors";
+} from "@gitaura/pi/agent/runtime-command-errors";
 import {
   normalizeAssistantDraft,
   normalizeMessages,
   buildInitialAgentState,
-} from "@gitinspect/pi/agent/session-adapter";
-import { TurnEventStore } from "@gitinspect/pi/agent/turn-event-store";
+} from "@gitaura/pi/agent/session-adapter";
+import { TurnEventStore } from "@gitaura/pi/agent/turn-event-store";
 import {
   type AppendSessionNoticeInput,
   type ConfigureSessionInput,
@@ -17,24 +17,23 @@ import {
   type SetThinkingLevelInput,
   type StartTurnInput,
   type TurnCompletionResult,
-} from "@gitinspect/pi/agent/runtime-worker-types";
-import { shouldStopStreamingForRuntimeError } from "@gitinspect/pi/agent/runtime-errors";
-import { webMessageTransformer } from "@gitinspect/pi/agent/message-transformer";
-import { streamChatWithPiAgent } from "@gitinspect/pi/agent/provider-stream";
-import { isFreeTierProxyMarker } from "@gitinspect/pi/auth/public-provider-fallbacks";
-import { resolveApiKeyForProvider } from "@gitinspect/pi/auth/resolve-api-key";
-import { putSession } from "@gitinspect/db";
-import { getIsoNow } from "@gitinspect/pi/lib/dates";
-import { getCanonicalProvider, getModel } from "@gitinspect/pi/models/catalog";
-import { createOptionalRepoRuntime } from "@gitinspect/pi/repo/repo-runtime";
+} from "@gitaura/pi/agent/runtime-worker-types";
+import { shouldStopStreamingForRuntimeError } from "@gitaura/pi/agent/runtime-errors";
+import { webMessageTransformer } from "@gitaura/pi/agent/message-transformer";
+import { streamChatWithPiAgent } from "@gitaura/pi/agent/provider-stream";
+import { resolveApiKeyForProvider } from "@gitaura/pi/auth/resolve-api-key";
+import { putSession } from "@gitaura/db";
+import { getIsoNow } from "@gitaura/pi/lib/dates";
+import { getCanonicalProvider, getModel } from "@gitaura/pi/models/catalog";
+import { createOptionalRepoRuntime } from "@gitaura/pi/repo/repo-runtime";
 import {
   loadSessionWithMessages,
   buildPersistedSession,
-} from "@gitinspect/pi/sessions/session-service";
-import { createRepoTools } from "@gitinspect/pi/tools/index";
-import type { ProviderId } from "@gitinspect/pi/types/models";
-import type { AssistantMessage, ToolResultMessage } from "@gitinspect/pi/types/chat";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@gitinspect/db";
+} from "@gitaura/pi/sessions/session-service";
+import { createRepoTools } from "@gitaura/pi/tools/index";
+import type { ProviderId } from "@gitaura/pi/types/models";
+import type { AssistantMessage, ToolResultMessage } from "@gitaura/pi/types/chat";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@gitaura/db";
 
 const TURN_IDLE_TIMEOUT_MS = 15 * 60_000;
 const TURN_IDLE_POLL_MS = 30_000;
@@ -69,7 +68,6 @@ class WorkerAgentRunner {
   private pendingTerminalResult?: TurnCompletionResult;
   private flushTimer?: ReturnType<typeof setTimeout>;
   private latestResult?: TurnCompletionResult;
-  private billFirstProxyRequestForTurn = false;
 
   constructor(store: TurnEventStore) {
     this.store = store;
@@ -77,29 +75,12 @@ class WorkerAgentRunner {
     this.repoRuntime = createOptionalRepoRuntime(store.session.repoSource);
 
     const model = getModel(store.session.provider, store.session.model);
-    const streamFn: StreamFn = (llmModel, context, streamOptions) => {
-      const shouldBillFirstProxyRequest =
-        this.billFirstProxyRequestForTurn && isFreeTierProxyMarker(streamOptions?.apiKey ?? "");
-
-      if (!shouldBillFirstProxyRequest) {
-        return streamChatWithPiAgent(llmModel, context, streamOptions);
-      }
-
-      this.billFirstProxyRequestForTurn = false;
-
-      return streamChatWithPiAgent(llmModel, context, {
-        ...streamOptions,
-        headers: {
-          ...streamOptions?.headers,
-          "x-gitinspect-bill-first": "1",
-        },
-      });
-    };
+    const streamFn: StreamFn = (llmModel, context, streamOptions) =>
+      streamChatWithPiAgent(llmModel, context, streamOptions);
 
     this.agent = new Agent({
       convertToLlm: webMessageTransformer,
-      getApiKey: async (provider) =>
-        await resolveApiKeyForProvider(provider as ProviderId, this.store.session.providerGroup),
+      getApiKey: async (provider) => await resolveApiKeyForProvider(provider as ProviderId),
       initialState: buildInitialAgentState(
         this.store.session,
         this.store.transcriptMessages,
@@ -130,7 +111,6 @@ class WorkerAgentRunner {
 
     this.pendingTerminalResult = undefined;
     this.latestResult = undefined;
-    this.billFirstProxyRequestForTurn = true;
     this.promptPending = true;
     await this.store.beginTurn({
       ownerTabId: input.ownerTabId,

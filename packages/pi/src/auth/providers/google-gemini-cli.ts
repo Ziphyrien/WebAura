@@ -1,6 +1,6 @@
-import { generatePKCE } from "@gitinspect/pi/auth/oauth-utils";
-import { runPopupOAuthFlow } from "@gitinspect/pi/auth/popup-flow";
-import type { OAuthCredentials } from "@gitinspect/pi/auth/oauth-types";
+import { generatePKCE } from "@gitaura/pi/auth/oauth-utils";
+import { runPopupOAuthFlow } from "@gitaura/pi/auth/popup-flow";
+import type { OAuthCredentials } from "@gitaura/pi/auth/oauth-types";
 
 const decode = (value: string) => atob(value);
 const CLIENT_ID = decode(

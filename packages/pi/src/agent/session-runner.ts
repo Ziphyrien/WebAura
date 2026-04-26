@@ -1,4 +1,4 @@
-import type { ProviderGroupId, ThinkingLevel } from "@gitinspect/pi/types/models";
+import type { ProviderGroupId, ThinkingLevel } from "@gitaura/pi/types/models";
 
 export interface SessionRunner {
   abort(): void | Promise<void>;

@@ -1,9 +1,5 @@
-import { AppHeader as BaseAppHeader } from "@gitinspect/ui/components/app-header";
-
-import { useSubscription } from "@/hooks/use-subscription";
+import { AppHeader as BaseAppHeader } from "@gitaura/ui/components/app-header";
 
 export function AppHeader() {
-  const { subscriptionState } = useSubscription();
-
-  return <BaseAppHeader showGetPro={!subscriptionState?.isSubscribed} />;
+  return <BaseAppHeader />;
 }

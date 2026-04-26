@@ -23,12 +23,13 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@gitinspect/ui/*": ["../../packages/ui/src/*"],
-      "@gitinspect/pi/*": ["../../packages/pi/src/*"],
-      "@gitinspect/db": ["../../packages/db/src/index.ts"],
-      "@gitinspect/db/session-leases": ["../../packages/db/src/session-leases.ts"],
-      "@gitinspect/db/session-runtime": ["../../packages/db/src/session-runtime.ts"],
-      "@gitinspect/shared/*": ["../../packages/shared/src/*"]
+      "@gitaura/ui/*": ["../../packages/ui/src/*"],
+      "@gitaura/pi/*": ["../../packages/pi/src/*"],
+      "@gitaura/db": ["../../packages/db/src/index.ts"],
+      "@gitaura/db/session-leases": ["../../packages/db/src/session-leases.ts"],
+      "@gitaura/db/session-runtime": ["../../packages/db/src/session-runtime.ts"],
+      "@gitaura/env/*": ["../../packages/env/src/*"],
+      "@gitaura/shared/*": ["../../packages/shared/src/*"]
     }
   }
 }

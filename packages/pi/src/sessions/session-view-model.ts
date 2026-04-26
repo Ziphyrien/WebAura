@@ -1,12 +1,12 @@
-import { normalizeSessionRuntime } from "@gitinspect/db/session-runtime";
-import { linkToolResults } from "@gitinspect/pi/agent/tool-result-linker";
-import { loadSessionWithMessages } from "@gitinspect/pi/sessions/session-service";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@gitinspect/db";
+import { normalizeSessionRuntime } from "@gitaura/db/session-runtime";
+import { linkToolResults } from "@gitaura/pi/agent/tool-result-linker";
+import { loadSessionWithMessages } from "@gitaura/pi/sessions/session-service";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@gitaura/db";
 import type {
   AssistantMessage,
   DisplayAssistantMessage,
   DisplayChatMessage,
-} from "@gitinspect/pi/types/chat";
+} from "@gitaura/pi/types/chat";
 
 export interface SessionViewModel {
   displayMessages: DisplayChatMessage[];

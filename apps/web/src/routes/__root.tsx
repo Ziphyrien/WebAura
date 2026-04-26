@@ -1,6 +1,5 @@
 import * as React from "react";
-import { env } from "@gitinspect/env/web";
-import { type FeedbackSentiment, parseFeedbackSentiment } from "@gitinspect/shared/feedback";
+import { type FeedbackSentiment, parseFeedbackSentiment } from "@gitaura/shared/feedback";
 import {
   HeadContent,
   Link,
@@ -12,23 +11,15 @@ import {
 } from "@tanstack/react-router";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { Analytics as OneDollarStats } from "@/components/analytics";
-import { AppAuthProvider } from "@/components/app-auth-provider";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
-import { AuthDialogWrapper } from "@/components/auth-dialog-wrapper";
-import { FeedbackDialog } from "@/components/feedback-dialog";
-import { PricingSettingsPanel } from "@/components/pricing-settings-panel";
 import { RootGuard } from "@/components/root-guard";
-import { SyncBootstrapGate } from "@/components/sync-bootstrap-gate";
-import { getAppBootstrap, getSignedOutAppBootstrap } from "@/lib/app-bootstrap";
 import { parseSettingsSection } from "@/navigation/search-state";
-import { DataSettings } from "@gitinspect/ui/components/data-settings";
-import { SidebarInset, SidebarProvider } from "@gitinspect/ui/components/sidebar";
-import { AppSettingsDialog } from "@gitinspect/ui/components/settings-dialog";
-import { ThemeProvider } from "@gitinspect/ui/components/theme-provider";
-import { Toaster } from "@gitinspect/ui/components/sonner";
-import { TooltipProvider } from "@gitinspect/ui/components/tooltip";
-import { AutumnProvider } from "autumn-js/react";
+import { SidebarInset, SidebarProvider } from "@gitaura/ui/components/sidebar";
+import { AppSettingsDialog } from "@gitaura/ui/components/settings-dialog";
+import { ThemeProvider } from "@gitaura/ui/components/theme-provider";
+import { Toaster } from "@gitaura/ui/components/sonner";
+import { TooltipProvider } from "@gitaura/ui/components/tooltip";
 import appCss from "../styles.css?url";
 
 type RootSearchInput = {
@@ -50,14 +41,6 @@ type RootSearch = {
 };
 
 export const Route = createRootRoute({
-  loader: async () => {
-    try {
-      return await getAppBootstrap();
-    } catch (error) {
-      console.error("Could not load app bootstrap", error);
-      return getSignedOutAppBootstrap();
-    }
-  },
   validateSearch: (search: RootSearchInput): RootSearch => ({
     feedback: search.feedback === "open" ? "open" : undefined,
     feedbackIncludeDiagnostics: search.feedbackIncludeDiagnostics === "true" ? true : undefined,
@@ -82,15 +65,15 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "gitinspect.com",
+        title: "GitAura",
       },
       {
         name: "description",
-        content: "Chat with any github repo",
+        content: "Chat with any GitHub repo",
       },
       {
         name: "apple-mobile-web-app-title",
-        content: "gitinspect",
+        content: "GitAura",
       },
     ],
     links: [
@@ -126,7 +109,7 @@ export const Route = createRootRoute({
   }),
   notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
-  component: RootLayout,
+  component: RootAppChrome,
   ssr: false,
 });
 
@@ -153,40 +136,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function RootLayout() {
-  return (
-    <AutumnProvider
-      backendUrl={env.VITE_BETTER_AUTH_URL}
-      includeCredentials
-      pathPrefix="/api/autumn"
-    >
-      <BootstrappedRootApp />
-    </AutumnProvider>
-  );
-}
-
-export function BootstrappedRootApp() {
-  const bootstrap = Route.useLoaderData();
-  const syncEnabled = bootstrap.isSubscribed && Boolean(env.VITE_DEXIE_CLOUD_DB_URL);
-
-  return (
-    <SyncBootstrapGate syncEnabled={syncEnabled}>
-      <AppAuthProvider>
-        <RootAppChrome
-          isSignedIn={bootstrap.isSignedIn}
-          isSubscribed={bootstrap.isSubscribed}
-          syncEnabled={syncEnabled}
-        />
-      </AppAuthProvider>
-    </SyncBootstrapGate>
-  );
-}
-
-function RootAppChrome(props: {
-  isSignedIn: boolean;
-  isSubscribed: boolean;
-  syncEnabled: boolean;
-}) {
+function RootAppChrome() {
   const navigate = useNavigate();
   const search = Route.useSearch();
 
@@ -206,7 +156,7 @@ function RootAppChrome(props: {
           open={search.sidebar === "open"}
         >
           <div className="relative flex h-svh w-full overflow-hidden overscroll-none">
-            <AppSidebar showGetPro={!props.isSubscribed} />
+            <AppSidebar />
             <SidebarInset className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
               <AppHeader />
               <main className="flex min-h-0 flex-1 overflow-hidden">
@@ -214,17 +164,9 @@ function RootAppChrome(props: {
               </main>
             </SidebarInset>
           </div>
-          <AppSettingsDialog
-            dataPanel={
-              <DataSettings canRequestSync={props.isSubscribed} syncEnabled={props.syncEnabled} />
-            }
-            pricingLabel={props.isSignedIn ? "Subscription" : "Get Pro"}
-            pricingPanel={<PricingSettingsPanel />}
-          />
-          <FeedbackDialog />
+          <AppSettingsDialog />
         </SidebarProvider>
       </RootGuard>
-      <AuthDialogWrapper />
       <Toaster position="bottom-right" />
     </>
   );

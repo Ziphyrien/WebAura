@@ -1,13 +1,13 @@
 import type { AgentMessage, AgentState, AgentTool } from "@mariozechner/pi-agent-core";
 import type { Message, Model } from "@mariozechner/pi-ai";
-import { SYSTEM_PROMPT } from "@gitinspect/pi/agent/system-prompt";
+import { SYSTEM_PROMPT } from "@gitaura/pi/agent/system-prompt";
 import type {
   AssistantMessage,
   ChatMessage,
   ToolResultMessage,
   UserMessage,
-} from "@gitinspect/pi/types/chat";
-import type { MessageRow, MessageStatus, SessionData } from "@gitinspect/db";
+} from "@gitaura/pi/types/chat";
+import type { MessageRow, MessageStatus, SessionData } from "@gitaura/db";
 
 function isLlmMessage(message: AgentMessage): message is Message {
   return (

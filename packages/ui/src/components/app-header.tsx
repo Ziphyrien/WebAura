@@ -1,31 +1,24 @@
 import * as React from "react";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import type { ResolvedRepoSource } from "@gitinspect/db";
-import type { PublicSessionSnapshot } from "@gitinspect/pi/lib/public-share-client";
-import { useSelectedSessionSummary } from "@gitinspect/pi/hooks/use-selected-session-summary";
-import { githubOwnerAvatarUrl } from "@gitinspect/pi/repo/url";
+import { Link, useRouterState } from "@tanstack/react-router";
+import type { ResolvedRepoSource } from "@gitaura/db";
+import { useSelectedSessionSummary } from "@gitaura/pi/hooks/use-selected-session-summary";
+import { githubOwnerAvatarUrl } from "@gitaura/pi/repo/url";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-} from "@gitinspect/ui/components/breadcrumb";
-import { AuthStatusChip } from "@gitinspect/ui/components/auth-status-chip";
-import { Button } from "@gitinspect/ui/components/button";
-import { ChatLogo } from "@gitinspect/ui/components/chat-logo";
-import { GitHubLink } from "@gitinspect/ui/components/github-link";
-import { Icons } from "@gitinspect/ui/components/icons";
-import { Separator } from "@gitinspect/ui/components/separator";
-import { SidebarTrigger } from "@gitinspect/ui/components/sidebar";
-import { ThemeToggle } from "@gitinspect/ui/components/theme-toggle";
-import { rememberFeedbackTrigger } from "@gitinspect/ui/lib/feedback-trigger";
-import {
-  getPublicShareHeaderRepo,
-  subscribePublicShareHeaderRepo,
-} from "@gitinspect/ui/lib/public-share-header-bridge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@gitinspect/ui/components/tooltip";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/breadcrumb";
+import { Button } from "@gitaura/ui/components/button";
+import { ChatLogo } from "@gitaura/ui/components/chat-logo";
+import { GitHubLink } from "@gitaura/ui/components/github-link";
+import { Icons } from "@gitaura/ui/components/icons";
+import { Separator } from "@gitaura/ui/components/separator";
+import { SidebarTrigger } from "@gitaura/ui/components/sidebar";
+import { ThemeToggle } from "@gitaura/ui/components/theme-toggle";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@gitaura/ui/components/tooltip";
+import { cn } from "@gitaura/ui/lib/utils";
 
 type HeaderRepoSource = Pick<ResolvedRepoSource, "owner" | "repo"> & {
   ref?: string;
@@ -46,35 +39,12 @@ function isHeaderRepoSource(value: unknown): value is HeaderRepoSource {
   return typeof candidate.owner === "string" && typeof candidate.repo === "string";
 }
 
-function shareSnapshotToHeaderRepo(data: unknown): HeaderRepoSource | undefined {
-  if (typeof data !== "object" || data === null || !("session" in data)) {
-    return undefined;
-  }
-
-  const snapshot = data as PublicSessionSnapshot;
-  const repoSource = snapshot.session.repoSource;
-
-  if (!repoSource) {
-    return undefined;
-  }
-
-  return {
-    owner: repoSource.owner,
-    ref: repoSource.ref,
-    repo: repoSource.repo,
-  };
-}
-
 function getHeaderRepoSource(
   currentMatch: RouteMatchLike,
   selectedSession: { repoSource?: ResolvedRepoSource } | undefined,
 ): HeaderRepoSource | undefined {
   if (currentMatch.routeId === "/chat/$sessionId") {
     return selectedSession?.repoSource;
-  }
-
-  if (currentMatch.routeId === "/share/$sessionId") {
-    return shareSnapshotToHeaderRepo(currentMatch.loaderData);
   }
 
   if (isHeaderRepoSource(currentMatch.loaderData)) {
@@ -142,23 +112,14 @@ function HeaderTooltip({ children, label }: { children: React.ReactElement; labe
 const repoLinkClass =
   "whitespace-nowrap font-geist-pixel-square text-sm font-semibold leading-none tracking-tight text-foreground underline-offset-4 hover:underline sm:text-base";
 
-export function AppHeader({ showGetPro = true }: { showGetPro?: boolean } = {}) {
-  const navigate = useNavigate();
+export function AppHeader() {
   const currentMatch = useRouterState({
     select: (state) => state.matches[state.matches.length - 1],
   });
   const sessionId =
     currentMatch.routeId === "/chat/$sessionId" ? currentMatch.params.sessionId : undefined;
   const selectedSession = useSelectedSessionSummary(sessionId);
-  const isShareRoute = currentMatch.routeId === "/share/$sessionId";
-  const bridgedShareRepo = React.useSyncExternalStore(
-    subscribePublicShareHeaderRepo,
-    getPublicShareHeaderRepo,
-    getPublicShareHeaderRepo,
-  );
-  const repoSource = isShareRoute
-    ? (bridgedShareRepo ?? getHeaderRepoSource(currentMatch as RouteMatchLike, selectedSession))
-    : getHeaderRepoSource(currentMatch as RouteMatchLike, selectedSession);
+  const repoSource = getHeaderRepoSource(currentMatch as RouteMatchLike, selectedSession);
 
   return (
     <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background">
@@ -221,27 +182,6 @@ export function AppHeader({ showGetPro = true }: { showGetPro?: boolean } = {}) 
         </Breadcrumb>
       </div>
       <div className="flex items-center gap-2 px-3 md:hidden">
-        <AuthStatusChip />
-        {showGetPro ? (
-          <Button
-            asChild
-            aria-label="Open get pro"
-            className="h-8 gap-1.5 shadow-none"
-            size="sm"
-            variant="ghost"
-          >
-            <Link
-              search={(prev) => ({
-                ...prev,
-                settings: "pricing",
-              })}
-              to="."
-            >
-              <Icons.crown className="text-foreground" />
-              <span>Get Pro</span>
-            </Link>
-          </Button>
-        ) : null}
         <Button
           asChild
           aria-label="Open settings"
@@ -261,61 +201,8 @@ export function AppHeader({ showGetPro = true }: { showGetPro?: boolean } = {}) 
         </Button>
       </div>
       <div className="hidden items-center gap-2 px-3 md:flex">
-        {showGetPro ? (
-          <>
-            <Separator className="!h-6 !self-center" orientation="vertical" />
-            <HeaderTooltip label="Open get pro">
-              <Button asChild className="h-8 gap-1.5 shadow-none" size="sm" variant="ghost">
-                <Link
-                  search={(prev) => ({
-                    ...prev,
-                    settings: "pricing",
-                  })}
-                  to="."
-                >
-                  <Icons.crown className="text-foreground" />
-                  <span>Get Pro</span>
-                </Link>
-              </Button>
-            </HeaderTooltip>
-          </>
-        ) : null}
         <Separator className="!h-6 !self-center" orientation="vertical" />
         <GitHubLink />
-        <Separator className="!h-6 !self-center" orientation="vertical" />
-        <HeaderTooltip label="Open X">
-          <Button asChild className="h-8 shadow-none" size="sm" variant="ghost">
-            <a href="https://x.com/dinnaiii" rel="noreferrer" target="_blank">
-              <Icons.x className="text-foreground" />
-            </a>
-          </Button>
-        </HeaderTooltip>
-        <Separator className="!h-6 !self-center" orientation="vertical" />
-        <HeaderTooltip label="Send feedback">
-          <Button
-            className="h-8 gap-1.5 shadow-none"
-            onClick={(event) => {
-              rememberFeedbackTrigger(event.currentTarget);
-              void navigate({
-                search: (prev) => ({
-                  ...prev,
-                  feedback: "open",
-                  feedbackIncludeDiagnostics: undefined,
-                  feedbackMessage: undefined,
-                  feedbackSentiment: undefined,
-                }),
-                to: ".",
-              });
-            }}
-            size="sm"
-            variant="ghost"
-          >
-            <Icons.comment className="text-foreground" />
-            <span>Feedback</span>
-          </Button>
-        </HeaderTooltip>
-        <Separator className="!h-6 !self-center" orientation="vertical" />
-        <AuthStatusChip />
         <Separator className="!h-6 !self-center" orientation="vertical" />
         <ThemeToggle />
         <Separator className="!h-6 !self-center" orientation="vertical" />

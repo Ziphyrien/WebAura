@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Chat } from "@gitinspect/ui/components/chat";
+import { Chat } from "@gitaura/ui/components/chat";
 
 export const Route = createFileRoute("/chat/$sessionId")({
   component: SessionChatRoute,

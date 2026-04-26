@@ -1,11 +1,11 @@
 {
-  "extends": "@gitinspect/config/tsconfig.base.json",
+  "extends": "@gitaura/config/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
     "paths": {
-      "@gitinspect/pi/*": ["../pi/src/*"]
+      "@gitaura/pi/*": ["../pi/src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],

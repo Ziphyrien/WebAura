@@ -1,13 +1,12 @@
-import { db, getProviderKey, setProviderKey } from "@gitinspect/db";
-import { oauthRefresh } from "@gitinspect/pi/auth/oauth-refresh";
-import { getPublicApiKeyForProviderGroup } from "@gitinspect/pi/auth/public-provider-fallbacks";
+import { db, getProviderKey, setProviderKey } from "@gitaura/db";
+import { oauthRefresh } from "@gitaura/pi/auth/oauth-refresh";
 import {
   isOAuthCredentials,
   parseOAuthCredentials,
   serializeOAuthCredentials,
-} from "@gitinspect/pi/auth/oauth-types";
-import { getProxyConfig } from "@gitinspect/pi/proxy/settings";
-import type { ProviderGroupId, ProviderId } from "@gitinspect/pi/types/models";
+} from "@gitaura/pi/auth/oauth-types";
+import { getProxyConfig } from "@gitaura/pi/proxy/settings";
+import type { ProviderId } from "@gitaura/pi/types/models";
 
 export interface ResolvedProviderAuth {
   apiKey: string;
@@ -72,32 +71,17 @@ export async function resolveStoredApiKey(
 
 export async function resolveProviderAuthForProvider(
   provider: ProviderId,
-  providerGroup?: ProviderGroupId,
 ): Promise<ResolvedProviderAuth | undefined> {
   const record = await getProviderKey(provider);
 
-  if (record?.value) {
-    return await resolveStoredProviderAuth(record.value, provider);
-  }
-
-  const publicApiKey = getPublicApiKeyForProviderGroup(providerGroup);
-
-  if (!publicApiKey) {
+  if (!record?.value) {
     return undefined;
   }
 
-  return {
-    apiKey: publicApiKey,
-    isOAuth: false,
-    provider,
-    storedValue: publicApiKey,
-  };
+  return await resolveStoredProviderAuth(record.value, provider);
 }
 
-export async function resolveApiKeyForProvider(
-  provider: ProviderId,
-  providerGroup?: ProviderGroupId,
-): Promise<string | undefined> {
-  const resolved = await resolveProviderAuthForProvider(provider, providerGroup);
+export async function resolveApiKeyForProvider(provider: ProviderId): Promise<string | undefined> {
+  const resolved = await resolveProviderAuthForProvider(provider);
   return resolved?.apiKey;
 }

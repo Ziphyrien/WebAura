@@ -1,7 +1,7 @@
 /**
  * Single source for provider groups, UI labels, and Sitegeist-style API-key visibility.
  * Mirrors docs/sitegeist/src/dialogs/ApiKeysOAuthTab.ts for hidden providers, with
- * gitinspect overrides so `opencode` and `opencode-go` stay visible.
+ * GitAura overrides so `opencode` and `opencode-go` stay visible.
  */
 import { getProviders as getRegistryProviders } from "@mariozechner/pi-ai";
 import type {
@@ -9,7 +9,7 @@ import type {
   ProviderGroupDefinition,
   ProviderGroupId,
   ProviderId,
-} from "@gitinspect/pi/types/models";
+} from "@gitaura/pi/types/models";
 
 /** Same denylist as Sitegeist for API-key rows (OAuth-only or not for browser API keys). */
 export const SITEGEIST_HIDDEN_API_KEY_PROVIDERS = new Set<KnownProvider>([
@@ -26,7 +26,7 @@ export const SITEGEIST_HIDDEN_API_KEY_PROVIDERS = new Set<KnownProvider>([
 ]);
 
 /** Always show these in API key settings even though Sitegeist hides them. */
-export const GITINSPECT_FORCE_SHOW_API_KEY_PROVIDERS = new Set<KnownProvider>([
+export const GITAURA_FORCE_SHOW_API_KEY_PROVIDERS = new Set<KnownProvider>([
   "opencode",
   "opencode-go",
 ]);
@@ -39,7 +39,7 @@ export const SUBSCRIPTION_OAUTH_PROVIDER_ORDER: KnownProvider[] = [
   "google-gemini-cli",
 ];
 
-/** OAuth-only: no API-key row (same as previous OAUTH_ONLY_PROVIDERS). */
+/** OAuth-only: no API-key row. */
 export const OAUTH_ONLY_PROVIDERS = new Set<KnownProvider>([
   "openai-codex",
   "github-copilot",
@@ -53,24 +53,17 @@ export const OAUTH_ONLY_PROVIDERS = new Set<KnownProvider>([
 export function getApiKeyProvidersForSettings(): KnownProvider[] {
   const fromRegistry = getRegistryProviders() as KnownProvider[];
   return fromRegistry.filter((provider) => {
-    if (GITINSPECT_FORCE_SHOW_API_KEY_PROVIDERS.has(provider)) {
+    if (GITAURA_FORCE_SHOW_API_KEY_PROVIDERS.has(provider)) {
       return true;
     }
     return !SITEGEIST_HIDDEN_API_KEY_PROVIDERS.has(provider);
   });
 }
 
-/**
- * Providers that participate in model selection / runtime (union of API-key list and
- * subscription-only backends), plus app builtins (e.g. Fireworks free tier).
- */
+/** Providers that participate in model selection and runtime. */
 export function getRuntimeSupportedProviders(): ProviderId[] {
   const apiKeys = getApiKeyProvidersForSettings();
-  const merged = new Set<ProviderId>([
-    ...apiKeys,
-    ...SUBSCRIPTION_OAUTH_PROVIDER_ORDER,
-    "fireworks-ai",
-  ]);
+  const merged = new Set<ProviderId>([...apiKeys, ...SUBSCRIPTION_OAUTH_PROVIDER_ORDER]);
   return [...merged].sort((a, b) => a.localeCompare(b));
 }
 
@@ -112,12 +105,6 @@ export const PROVIDER_GROUPS: Partial<Record<ProviderGroupId, ProviderGroupDefin
     id: "opencode-go",
     label: "OpenCode Go",
   },
-  "fireworks-free": {
-    canonicalProvider: "fireworks-ai",
-    description: "Gitinspect free models",
-    id: "fireworks-free",
-    label: "Gitinspect",
-  },
   "openai-codex": {
     canonicalProvider: "openai-codex",
     description: "ChatGPT subscription OAuth and Codex-compatible responses",
@@ -135,7 +122,6 @@ const PROVIDER_GROUP_BASE_ORDER: readonly ProviderGroupId[] = [
   "openai-codex",
   "opencode",
   "opencode-go",
-  "fireworks-free",
 ] as const;
 
 function prettyProviderLabel(provider: string): string {
@@ -150,12 +136,6 @@ export function getAtlasProviderGroups(): ProviderGroupId[] {
   const ordered: ProviderGroupId[] = [];
 
   for (const id of PROVIDER_GROUP_BASE_ORDER) {
-    if (id === "fireworks-free") {
-      if (supported.has("fireworks-ai")) {
-        ordered.push("fireworks-free");
-      }
-      continue;
-    }
     if (supported.has(id)) {
       ordered.push(id);
     }
@@ -163,7 +143,7 @@ export function getAtlasProviderGroups(): ProviderGroupId[] {
 
   const orderedSet = new Set<string>(ordered);
   const rest = [...supported]
-    .filter((id) => !orderedSet.has(id) && id !== "fireworks-ai")
+    .filter((id) => !orderedSet.has(id))
     .sort((a, b) => a.localeCompare(b));
   ordered.push(...(rest as ProviderGroupId[]));
 
@@ -171,9 +151,6 @@ export function getAtlasProviderGroups(): ProviderGroupId[] {
 }
 
 export function isProviderGroupId(value: string): value is ProviderGroupId {
-  if (value === "fireworks-free") {
-    return true;
-  }
   return (getRegistryProviders() as string[]).includes(value);
 }
 
@@ -192,19 +169,10 @@ export function getProviderGroupMetadata(providerGroup: ProviderGroupId): Provid
 }
 
 export function getCanonicalProvider(providerGroup: ProviderGroupId): ProviderId {
-  if (providerGroup === "fireworks-free") {
-    return "fireworks-ai";
-  }
-  if ((providerGroup as string) === "opencode-free") {
-    return "fireworks-ai";
-  }
   return getProviderGroupMetadata(providerGroup).canonicalProvider;
 }
 
 export function getDefaultProviderGroup(provider: ProviderId): ProviderGroupId {
-  if (provider === "fireworks-ai") {
-    return "fireworks-free";
-  }
   const meta = PROVIDER_GROUPS[provider as ProviderGroupId];
   if (meta) {
     return meta.id;
@@ -213,8 +181,7 @@ export function getDefaultProviderGroup(provider: ProviderId): ProviderGroupId {
 }
 
 /**
- * Common providers first (same order as Sitegeist-style expectations), then the rest
- * A–Z by display label.
+ * Common providers first, then the rest A-Z by display label.
  */
 const API_KEY_SETTINGS_PINNED_ORDER: KnownProvider[] = [
   "anthropic",

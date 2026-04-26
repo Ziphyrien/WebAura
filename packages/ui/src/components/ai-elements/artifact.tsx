@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@gitinspect/ui/components/button";
+import { Button } from "@gitaura/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@gitinspect/ui/components/tooltip";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/tooltip";
+import { cn } from "@gitaura/ui/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import { XIcon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes } from "react";

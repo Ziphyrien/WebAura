@@ -1,18 +1,18 @@
-import { deleteSessionLease } from "@gitinspect/db";
-import { loadSessionLeaseState } from "@gitinspect/db/session-leases";
+import { deleteSessionLease } from "@gitaura/db";
+import { loadSessionLeaseState } from "@gitaura/db/session-leases";
 import {
   getRuntimeWorker,
   getRuntimeWorkerIfAvailable,
-} from "@gitinspect/pi/agent/runtime-worker-client";
-import { StreamInterruptedRuntimeError } from "@gitinspect/pi/agent/runtime-command-errors";
-import { TurnEventStore } from "@gitinspect/pi/agent/turn-event-store";
-import { loadSessionWithMessages } from "@gitinspect/pi/sessions/session-service";
-import { loadSessionViewModel } from "@gitinspect/pi/sessions/session-view-model";
+} from "@gitaura/pi/agent/runtime-worker-client";
+import { StreamInterruptedRuntimeError } from "@gitaura/pi/agent/runtime-command-errors";
+import { TurnEventStore } from "@gitaura/pi/agent/turn-event-store";
+import { loadSessionWithMessages } from "@gitaura/pi/sessions/session-service";
+import { loadSessionViewModel } from "@gitaura/pi/sessions/session-view-model";
 import {
   deriveActiveSessionViewState,
   deriveRecoveryIntent,
   deriveRecoverySkipReason,
-} from "@gitinspect/pi/sessions/session-view-state";
+} from "@gitaura/pi/sessions/session-view-state";
 
 export type InterruptedRecoveryResult =
   | {

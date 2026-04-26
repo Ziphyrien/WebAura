@@ -1,19 +1,19 @@
-import { getIsoNow } from "@gitinspect/pi/lib/dates";
-import { deleteProviderKey, getProviderKey, setProviderKey } from "@gitinspect/db";
-import { loginAnthropic } from "@gitinspect/pi/auth/providers/anthropic";
-import { loginGitHubCopilot } from "@gitinspect/pi/auth/providers/github-copilot";
-import { loginGeminiCli } from "@gitinspect/pi/auth/providers/google-gemini-cli";
-import { loginOpenAICodex } from "@gitinspect/pi/auth/providers/openai-codex";
+import { getIsoNow } from "@gitaura/pi/lib/dates";
+import { deleteProviderKey, getProviderKey, setProviderKey } from "@gitaura/db";
+import { loginAnthropic } from "@gitaura/pi/auth/providers/anthropic";
+import { loginGitHubCopilot } from "@gitaura/pi/auth/providers/github-copilot";
+import { loginGeminiCli } from "@gitaura/pi/auth/providers/google-gemini-cli";
+import { loginOpenAICodex } from "@gitaura/pi/auth/providers/openai-codex";
 import {
   parseImportedOAuthCredentials,
   serializeOAuthCredentials,
   type OAuthCredentials,
-} from "@gitinspect/pi/auth/oauth-types";
-import type { ProxyRequestOptions } from "@gitinspect/pi/auth/oauth-utils";
-import type { ProviderAuthKind, ProviderAuthState } from "@gitinspect/pi/types/auth";
-import type { ProviderId } from "@gitinspect/pi/types/models";
+} from "@gitaura/pi/auth/oauth-types";
+import type { ProxyRequestOptions } from "@gitaura/pi/auth/oauth-utils";
+import type { ProviderAuthKind, ProviderAuthState } from "@gitaura/pi/types/auth";
+import type { ProviderId } from "@gitaura/pi/types/models";
 
-export { oauthRefresh } from "@gitinspect/pi/auth/oauth-refresh";
+export { oauthRefresh } from "@gitaura/pi/auth/oauth-refresh";
 
 export type OAuthProviderId = "anthropic" | "github-copilot" | "google-gemini-cli" | "openai-codex";
 

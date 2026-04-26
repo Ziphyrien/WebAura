@@ -5,9 +5,9 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@gitinspect/ui/components/accordion";
-import { Badge } from "@gitinspect/ui/components/badge";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/accordion";
+import { Badge } from "@gitaura/ui/components/badge";
+import { cn } from "@gitaura/ui/lib/utils";
 import type { Tool } from "ai";
 import { BotIcon } from "lucide-react";
 import type { ComponentProps } from "react";

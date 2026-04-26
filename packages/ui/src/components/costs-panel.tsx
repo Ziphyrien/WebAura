@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { listDailyCosts } from "@gitinspect/db";
-import type { SessionData } from "@gitinspect/db";
+import { listDailyCosts } from "@gitaura/db";
+import type { SessionData } from "@gitaura/db";
 
 export function CostsPanel({ session }: { session?: SessionData }) {
   const dailyCosts = useLiveQuery(async () => await listDailyCosts(), []);

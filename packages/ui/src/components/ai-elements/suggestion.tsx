@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@gitinspect/ui/components/button";
-import { ScrollArea, ScrollBar } from "@gitinspect/ui/components/scroll-area";
-import { cn } from "@gitinspect/ui/lib/utils";
+import { Button } from "@gitaura/ui/components/button";
+import { ScrollArea, ScrollBar } from "@gitaura/ui/components/scroll-area";
+import { cn } from "@gitaura/ui/lib/utils";
 import type { ComponentProps } from "react";
 import { useCallback } from "react";
 

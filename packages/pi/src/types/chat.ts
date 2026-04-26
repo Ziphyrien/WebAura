@@ -6,7 +6,7 @@ import type {
   ToolResultMessage as PiToolResultMessage,
   UserMessage as PiUserMessage,
 } from "@mariozechner/pi-ai";
-import type { JsonValue } from "@gitinspect/pi/types/common";
+import type { JsonValue } from "@gitaura/pi/types/common";
 export type { StopReason } from "@mariozechner/pi-ai";
 
 export type TextContent = PiTextContent;

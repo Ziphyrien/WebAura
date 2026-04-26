@@ -1,5 +1,5 @@
-import { MissingSessionRuntimeError } from "@gitinspect/pi/agent/runtime-command-errors";
-import { SessionWorkerCoordinator } from "@gitinspect/pi/agent/session-worker-coordinator";
+import { MissingSessionRuntimeError } from "@gitaura/pi/agent/runtime-command-errors";
+import { SessionWorkerCoordinator } from "@gitaura/pi/agent/session-worker-coordinator";
 import type {
   AppendSessionNoticeInput,
   ConfigureSessionInput,
@@ -7,8 +7,8 @@ import type {
   SetThinkingLevelInput,
   StartTurnInput,
   TurnCompletionResult,
-} from "@gitinspect/pi/agent/runtime-worker-types";
-import type { SessionData } from "@gitinspect/db";
+} from "@gitaura/pi/agent/runtime-worker-types";
+import type { SessionData } from "@gitaura/db";
 
 const coordinators = new Map<string, SessionWorkerCoordinator>();
 const coordinatorLoads = new Map<string, Promise<SessionWorkerCoordinator | undefined>>();

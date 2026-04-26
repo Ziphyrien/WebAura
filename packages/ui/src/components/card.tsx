@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "@gitinspect/ui/lib/utils";
+import { cn } from "@gitaura/ui/lib/utils";
 
 function Card({
   className,

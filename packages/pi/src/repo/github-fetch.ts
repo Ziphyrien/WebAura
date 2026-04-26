@@ -1,25 +1,22 @@
 import { toast } from "sonner";
-import { env as webEnv } from "@gitinspect/env/web";
+import { env as webEnv } from "@gitaura/env/web";
 import {
   parseGitHubRateLimitInfo,
   type GitHubRateLimitKind,
-} from "@gitinspect/just-github/github-rate-limit";
+} from "@gitaura/just-github/github-rate-limit";
 import {
   readGitHubErrorMessage,
   shouldRetryUnauthenticated,
   stripAuthorization,
-} from "@gitinspect/just-github/github-http";
-import { classifyRuntimeError } from "@gitinspect/pi/agent/runtime-errors";
+} from "@gitaura/just-github/github-http";
+import { classifyRuntimeError } from "@gitaura/pi/agent/runtime-errors";
 import {
-  getGitHubNoticeCta,
   resolveRegisteredGitHubRequestAuth,
-  type GitHubAuthState,
   type GitHubRequestAccess,
   type GitHubResolvedRequestAuth,
-} from "@gitinspect/pi/repo/github-access";
-import { getGitHubAuthUiBridge } from "@gitinspect/pi/repo/github-auth-ui";
-import { appendSessionNotice } from "@gitinspect/pi/sessions/session-notices";
-import type { SystemMessage } from "@gitinspect/pi/types/chat";
+} from "@gitaura/pi/repo/github-access";
+import { appendSessionNotice } from "@gitaura/pi/sessions/session-notices";
+import type { SystemMessage } from "@gitaura/pi/types/chat";
 
 const CACHE_NAME = "github-api";
 const FRESH_MS = 2 * 60 * 1000;
@@ -413,35 +410,14 @@ function showGithubActionToast(input: {
   });
 }
 
-function getFallbackAuthState(): GitHubAuthState {
-  return {
-    fallbackPat: false,
-    githubLink: "unknown",
-    preferredSource: "none",
-    repoAccess: "unknown",
-    session: "signed-out",
-  };
-}
-
-function getGithubToastAction(kind: SystemMessage["kind"]): {
+function getGithubToastAction(_kind: SystemMessage["kind"]): {
   label: string;
   onAction: () => void;
 } {
-  const bridge = getGitHubAuthUiBridge();
-  const cta = getGitHubNoticeCta({
-    kind,
-    state: bridge?.getState() ?? getFallbackAuthState(),
-  });
-
   return {
-    label: cta.label,
+    label: "Open GitHub settings",
     onAction: () => {
-      if (!bridge) {
-        openGithubTokenSettings();
-        return;
-      }
-
-      void bridge.runNoticeIntent(cta.intent);
+      openGithubTokenSettings();
     },
   };
 }
@@ -461,8 +437,8 @@ function showClassifiedGithubToast(
     showGithubActionToast({
       actionLabel: action.label,
       message: retryAt
-        ? `GitHub requests are rate limited until ${retryAt}. Sign in to raise limits or keep using your local token.`
-        : "GitHub requests are rate limited right now. Sign in to raise limits or keep using your local token.",
+        ? `GitHub requests are rate limited until ${retryAt}. Add a local token to raise limits.`
+        : "GitHub requests are rate limited right now. Add a local token to raise limits.",
       onAction: action.onAction,
       signature,
     });
@@ -475,7 +451,7 @@ function showClassifiedGithubToast(
     showGithubActionToast({
       actionLabel: action.label,
       message:
-        "Your GitHub session needs attention. Fix the connection to keep using private repos, or use your local token.",
+        "GitHub access needs attention. Review your local token settings to keep using private repositories.",
       onAction: action.onAction,
       signature,
     });
@@ -487,7 +463,8 @@ function showClassifiedGithubToast(
 
     showGithubActionToast({
       actionLabel: action.label,
-      message: "Private repo access is not enabled yet. Approve it in GitHub or use a local token.",
+      message:
+        "Private repository access is not available yet. Add a local token in GitHub settings.",
       onAction: action.onAction,
       signature,
     });
@@ -503,7 +480,7 @@ function showClassifiedGithubToast(
 
     showGithubActionToast({
       actionLabel: action.label,
-      message: "GitHub request failed. Check your GitHub connection or switch to your local token.",
+      message: "GitHub request failed. Check your GitHub settings or switch to a local token.",
       onAction: action.onAction,
       signature,
     });

@@ -8,34 +8,30 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@gitinspect/ui/components/command";
+} from "@gitaura/ui/components/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@gitinspect/ui/components/dropdown-menu";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@gitinspect/ui/components/hover-card";
+} from "@gitaura/ui/components/dropdown-menu";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@gitaura/ui/components/hover-card";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
-} from "@gitinspect/ui/components/input-group";
+} from "@gitaura/ui/components/input-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@gitinspect/ui/components/select";
-import { Spinner } from "@gitinspect/ui/components/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@gitinspect/ui/components/tooltip";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/select";
+import { Spinner } from "@gitaura/ui/components/spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@gitaura/ui/components/tooltip";
+import { cn } from "@gitaura/ui/lib/utils";
 import type { ChatStatus, FileUIPart, SourceDocumentUIPart } from "ai";
 import { CornerDownLeftIcon, ImageIcon, Monitor, PlusIcon, SquareIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";
@@ -862,7 +858,6 @@ export const PromptInput = ({
         multiple={multiple}
         onChange={handleChange}
         ref={inputRef}
-        title="Upload files"
         type="file"
       />
       <form className={cn("w-full", className)} onSubmit={handleSubmit} ref={formRef} {...props}>

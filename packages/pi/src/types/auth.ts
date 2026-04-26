@@ -1,4 +1,4 @@
-import type { ProviderId } from "@gitinspect/pi/types/models";
+import type { ProviderId } from "@gitaura/pi/types/models";
 
 export type ProviderAuthKind = "api-key" | "none" | "oauth";
 

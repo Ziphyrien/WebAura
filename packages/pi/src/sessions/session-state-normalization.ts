@@ -1,15 +1,15 @@
-import { normalizeSessionRuntime } from "@gitinspect/db/session-runtime-normalization";
-import { linkToolResults } from "@gitinspect/pi/agent/tool-result-linker";
-import { StreamInterruptedRuntimeError } from "@gitinspect/pi/agent/runtime-command-errors";
-import { getCanonicalProvider, getDefaultProviderGroup } from "@gitinspect/pi/models/catalog";
+import { normalizeSessionRuntime } from "@gitaura/db/session-runtime-normalization";
+import { linkToolResults } from "@gitaura/pi/agent/tool-result-linker";
+import { StreamInterruptedRuntimeError } from "@gitaura/pi/agent/runtime-command-errors";
+import { getCanonicalProvider, getDefaultProviderGroup } from "@gitaura/pi/models/catalog";
 import {
   buildPreview,
   generateTitle,
   hasPersistableExchange,
-} from "@gitinspect/pi/sessions/session-metadata";
-import { createEmptyUsage, type Usage } from "@gitinspect/pi/types/models";
-import type { AssistantMessage, ChatMessage } from "@gitinspect/pi/types/chat";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@gitinspect/db";
+} from "@gitaura/pi/sessions/session-metadata";
+import { createEmptyUsage, type Usage } from "@gitaura/pi/types/models";
+import type { AssistantMessage, ChatMessage } from "@gitaura/pi/types/chat";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@gitaura/db";
 
 function mergeUsage(left: Usage, right: Usage): Usage {
   return {

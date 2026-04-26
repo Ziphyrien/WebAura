@@ -1,12 +1,12 @@
-import type { ResolvedRepoSource } from "@gitinspect/db";
+import type { ResolvedRepoSource } from "@gitaura/db";
 import {
   deriveAssistantView,
   getAssistantText,
   getToolResultText,
   getUserText,
-} from "@gitinspect/pi/lib/chat-adapter";
-import { repoSourceToGitHubUrl } from "@gitinspect/pi/repo/url";
-import type { DisplayChatMessage, ToolCall, ToolResultMessage } from "@gitinspect/pi/types/chat";
+} from "@gitaura/pi/lib/chat-adapter";
+import { repoSourceToGitHubUrl } from "@gitaura/pi/repo/url";
+import type { DisplayChatMessage, ToolCall, ToolResultMessage } from "@gitaura/pi/types/chat";
 
 type MarkdownExportOptions = {
   repoSource?: ResolvedRepoSource;

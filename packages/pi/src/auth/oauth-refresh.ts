@@ -1,9 +1,9 @@
-import { refreshAnthropic } from "@gitinspect/pi/auth/providers/anthropic";
-import { refreshGitHubCopilot } from "@gitinspect/pi/auth/providers/github-copilot";
-import { refreshGeminiCli } from "@gitinspect/pi/auth/providers/google-gemini-cli";
-import { refreshOpenAICodex } from "@gitinspect/pi/auth/providers/openai-codex";
-import type { OAuthCredentials } from "@gitinspect/pi/auth/oauth-types";
-import type { ProxyRequestOptions } from "@gitinspect/pi/auth/oauth-utils";
+import { refreshAnthropic } from "@gitaura/pi/auth/providers/anthropic";
+import { refreshGitHubCopilot } from "@gitaura/pi/auth/providers/github-copilot";
+import { refreshGeminiCli } from "@gitaura/pi/auth/providers/google-gemini-cli";
+import { refreshOpenAICodex } from "@gitaura/pi/auth/providers/openai-codex";
+import type { OAuthCredentials } from "@gitaura/pi/auth/oauth-types";
+import type { ProxyRequestOptions } from "@gitaura/pi/auth/oauth-utils";
 
 export async function oauthRefresh(
   credentials: OAuthCredentials,

@@ -4,34 +4,29 @@ import {
   getSessionMessages,
   getSessionRuntime,
   putSession,
-} from "@gitinspect/db";
-import { loadSessionLeaseState } from "@gitinspect/db/session-leases";
-import { normalizeSessionRuntime } from "@gitinspect/db/session-runtime";
-import { getIsoNow } from "@gitinspect/pi/lib/dates";
-import { createId } from "@gitinspect/pi/lib/ids";
-import { getCanonicalProvider } from "@gitinspect/pi/models/catalog";
+} from "@gitaura/db";
+import { loadSessionLeaseState } from "@gitaura/db/session-leases";
+import { normalizeSessionRuntime } from "@gitaura/db/session-runtime";
+import { getIsoNow } from "@gitaura/pi/lib/dates";
+import { createId } from "@gitaura/pi/lib/ids";
+import { getCanonicalProvider } from "@gitaura/pi/models/catalog";
 import {
   normalizePersistedSessionState,
   normalizeSessionProviderGroup,
-} from "@gitinspect/pi/sessions/session-state-normalization";
+} from "@gitaura/pi/sessions/session-state-normalization";
 import {
   createEmptyUsage,
   type ProviderGroupId,
   type ThinkingLevel,
-} from "@gitinspect/pi/types/models";
-import type {
-  MessageRow,
-  ResolvedRepoSource,
-  SessionData,
-  SessionRuntimeRow,
-} from "@gitinspect/db";
+} from "@gitaura/pi/types/models";
+import type { MessageRow, ResolvedRepoSource, SessionData, SessionRuntimeRow } from "@gitaura/db";
 
 export {
   aggregateSessionUsage,
   buildPersistedSession,
   normalizeSessionProviderGroup,
   shouldSaveSession,
-} from "@gitinspect/pi/sessions/session-state-normalization";
+} from "@gitaura/pi/sessions/session-state-normalization";
 
 export function createSession(params: {
   model: string;

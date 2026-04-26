@@ -1,4 +1,4 @@
-import type { RepoRefOrigin, ResolvedRepoRef, ResolvedRepoSource } from "@gitinspect/db";
+import type { RepoRefOrigin, ResolvedRepoRef, ResolvedRepoSource } from "@gitaura/db";
 
 export type RepoPathIntent =
   | {

@@ -4,9 +4,9 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@gitinspect/ui/components/collapsible";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@gitinspect/ui/components/tabs";
-import { cn } from "@gitinspect/ui/lib/utils";
+} from "@gitaura/ui/components/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@gitaura/ui/components/tabs";
+import { cn } from "@gitaura/ui/lib/utils";
 import type { ToolUIPart } from "ai";
 import { ChevronDownIcon, Code } from "lucide-react";
 import type { ComponentProps } from "react";

@@ -1,6 +1,6 @@
-# gitinspect
+# GitAura CLI
 
-Thin `gitinspect` OAuth CLI for generating raw GitInspect-compatible credentials.
+Thin `gitaura` OAuth CLI for generating raw GitAura-compatible credentials.
 
 ## Install dependencies
 
@@ -27,26 +27,26 @@ node dist/index.js --help
 ## Command
 
 ```bash
-gitinspect login
-gitinspect login -p <provider>
-gitinspect login --print-json
+gitaura login
+gitaura login -p <provider>
+gitaura login --print-json
 ```
 
 Provider aliases:
 
-- `codex` → `openai-codex`
-- `claude` → `anthropic`
-- `gemini` → `google-gemini-cli`
-- `copilot` → `github-copilot`
+- `codex` -> `openai-codex`
+- `claude` -> `anthropic`
+- `gemini` -> `google-gemini-cli`
+- `copilot` -> `github-copilot`
 
 Examples:
 
 ```bash
-gitinspect login -p codex
-gitinspect login -p anthropic
-gitinspect login -p gemini
-gitinspect login -p copilot
-gitinspect login -p gemini --print-json
+gitaura login -p codex
+gitaura login -p anthropic
+gitaura login -p gemini
+gitaura login -p copilot
+gitaura login -p gemini --print-json
 ```
 
 ## Output
@@ -54,15 +54,15 @@ gitinspect login -p gemini --print-json
 Default output is a base64url-encoded raw `OAuthCredentials` JSON payload.
 
 ```bash
-gitinspect login -p codex
+gitaura login -p codex
 ```
 
-The CLI copies the sign-in URL to your clipboard when auth starts, then waits for you to press Enter before opening the browser. After success it copies the final login code to your clipboard and tells you to paste the code back inside gitinspect.com. For callback-server providers, the manual redirect/code prompt only appears after a short wait if the browser callback does not finish automatically.
+The CLI copies the sign-in URL to your clipboard when auth starts, then waits for you to press Enter before opening the browser. After success it copies the final login code to your clipboard and tells you to paste the code back inside GitAura. For callback-server providers, the manual redirect/code prompt only appears after a short wait if the browser callback does not finish automatically.
 
 `--print-json` prints the raw `OAuthCredentials` object directly.
 
 ```bash
-gitinspect login -p gemini --print-json
+gitaura login -p gemini --print-json
 ```
 
 ## Scope
@@ -73,17 +73,17 @@ v1 is output-only:
 - no hidden writes
 - no logout or providers command
 
-GitInspect app import is supported separately by pasting the generated login code into the app.
+GitAura app import is supported separately by pasting the generated login code into the app.
 
 ## Packaging
 
-The published npm package is self-contained and does not depend on unpublished workspace packages at runtime. It builds to normal Node-compatible JavaScript in `dist/` and exposes the `gitinspect` binary from the scoped package `@gitinspect/cli`.
+The published npm package is self-contained and does not depend on unpublished workspace packages at runtime. It builds to normal Node-compatible JavaScript in `dist/` and exposes the `gitaura` binary from the scoped package `@gitaura/cli`.
 
 Example:
 
 ```bash
-npx @gitinspect/cli login
-bunx @gitinspect/cli login
+npx @gitaura/cli login
+bunx @gitaura/cli login
 ```
 
 ## Implementation

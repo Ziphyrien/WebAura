@@ -1,10 +1,10 @@
-import { GitHubFsError } from "@gitinspect/just-github/types";
-import type { SystemMessage } from "@gitinspect/pi/types/chat";
+import { GitHubFsError } from "@gitaura/just-github/types";
+import type { SystemMessage } from "@gitaura/pi/types/chat";
 import {
   BusyRuntimeError,
   MissingSessionRuntimeError,
   StreamInterruptedRuntimeError,
-} from "@gitinspect/pi/agent/runtime-command-errors";
+} from "@gitaura/pi/agent/runtime-command-errors";
 
 export type RuntimeErrorKind =
   | "missing_session"
