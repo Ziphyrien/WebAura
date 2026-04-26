@@ -6,9 +6,9 @@ import {
   ToolHeader,
   ToolInput,
   ToolOutput,
-} from "@gitinspect/ui/components/ai-elements/tool";
-import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@gitinspect/pi/agent/runtime-errors";
-import type { ToolCall, ToolResultMessage } from "@gitinspect/pi/types/chat";
+} from "@gitaura/ui/components/ai-elements/tool";
+import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@gitaura/pi/agent/runtime-errors";
+import type { ToolCall, ToolResultMessage } from "@gitaura/pi/types/chat";
 
 interface BashDetails {
   command: string;

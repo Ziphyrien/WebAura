@@ -16,21 +16,13 @@ vi.mock("sonner", () => ({
   },
 }));
 
-vi.mock("@gitinspect/env/web", () => ({
+vi.mock("@gitaura/env/web", () => ({
   env: state.env,
 }));
 
 vi.mock("@/repo/github-access", () => ({
-  getGitHubNoticeCta: () => ({
-    intent: "sign-in" as const,
-    label: "Sign in with GitHub",
-  }),
   resolveRegisteredGitHubRequestAuth: (access?: "public" | "repo") =>
     resolveRegisteredGitHubRequestAuthMock(access),
-}));
-
-vi.mock("@/repo/github-auth-ui", () => ({
-  getGitHubAuthUiBridge: () => undefined,
 }));
 
 vi.mock("@/sessions/session-notices", () => ({
@@ -334,7 +326,7 @@ describe("github-fetch", () => {
       expect.stringContaining("GitHub requests are rate limited"),
       expect.objectContaining({
         action: expect.objectContaining({
-          label: "Sign in with GitHub",
+          label: "Open GitHub settings",
         }),
       }),
     );

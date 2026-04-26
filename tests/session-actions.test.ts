@@ -10,7 +10,7 @@ const persistSessionSnapshot = vi.fn(async () => {});
 const createSession = vi.fn();
 const releaseSessionAndDrain = vi.fn(async () => {});
 
-vi.mock("@gitinspect/db", () => ({
+vi.mock("@gitaura/db", () => ({
   deleteSession,
   getSetting,
   listProviderKeys,
@@ -36,10 +36,10 @@ vi.mock("@/models/catalog", () => ({
   }),
   getDefaultProviderGroup: (provider: string) => provider,
   getPreferredProviderGroup: () => "openai-codex",
-  getProviderGroups: () => ["fireworks-free", "openai-codex"],
-  getVisibleProviderGroups: () => ["fireworks-free", "openai-codex"],
+  getProviderGroups: () => ["anthropic", "openai-codex"],
+  getVisibleProviderGroups: () => ["anthropic", "openai-codex"],
   hasModelForGroup: () => true,
-  isProviderGroupId: (value: string) => value === "fireworks-free" || value === "openai-codex",
+  isProviderGroupId: (value: string) => value === "anthropic" || value === "openai-codex",
 }));
 
 function buildSession(id: string, overrides: Partial<SessionData> = {}): SessionData {

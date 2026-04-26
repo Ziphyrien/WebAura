@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   setSetting: vi.fn(),
 }));
 
-vi.mock("@gitinspect/db", () => ({
+vi.mock("@gitaura/db", () => ({
   deleteSetting: mocks.deleteSetting,
   getSetting: mocks.getSetting,
   setSetting: mocks.setSetting,

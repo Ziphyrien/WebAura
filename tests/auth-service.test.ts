@@ -12,7 +12,7 @@ const refreshGitHubCopilot = vi.fn();
 const refreshGeminiCli = vi.fn();
 const refreshOpenAICodex = vi.fn();
 
-vi.mock("@gitinspect/db", () => ({
+vi.mock("@gitaura/db", () => ({
   deleteProviderKey,
   getProviderKey,
   setProviderKey,

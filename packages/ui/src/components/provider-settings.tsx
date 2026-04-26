@@ -1,36 +1,36 @@
 import * as React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import type { ProviderGroupId, ProviderId } from "@gitinspect/pi/types/models";
+import type { ProviderGroupId, ProviderId } from "@gitaura/pi/types/models";
 import {
   disconnectProvider,
   getOAuthProviderName,
   importOAuthCredentialsForProvider,
   setProviderApiKey,
   type OAuthProviderId,
-} from "@gitinspect/pi/auth/auth-service";
-import { isOAuthCredentials } from "@gitinspect/pi/auth/oauth-types";
-import { db } from "@gitinspect/db";
+} from "@gitaura/pi/auth/auth-service";
+import { isOAuthCredentials } from "@gitaura/pi/auth/oauth-types";
+import { db } from "@gitaura/db";
 import {
   getProviderGroupMetadata,
   getSortedApiKeyProvidersForSettings,
-} from "@gitinspect/pi/models/provider-registry";
+} from "@gitaura/pi/models/provider-registry";
 import {
   DEFAULT_PROXY_URL,
   PROXY_ENABLED_KEY,
   PROXY_URL_KEY,
   proxyConfigFromSettingsRows,
-} from "@gitinspect/pi/proxy/settings";
-import { Button } from "@gitinspect/ui/components/button";
-import { Input } from "@gitinspect/ui/components/input";
+} from "@gitaura/pi/proxy/settings";
+import { Button } from "@gitaura/ui/components/button";
+import { Input } from "@gitaura/ui/components/input";
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
-} from "@gitinspect/ui/components/item";
-import { Textarea } from "@gitinspect/ui/components/textarea";
+} from "@gitaura/ui/components/item";
+import { Textarea } from "@gitaura/ui/components/textarea";
 
 const SUBSCRIPTION_OAUTH_PROVIDERS: OAuthProviderId[] = [
   "anthropic",
@@ -73,7 +73,7 @@ function hasStoredPlainApiKey(
 }
 
 function getCliLoginCommand(provider: OAuthProviderId): string {
-  return `npx @gitinspect/cli login -p ${CLI_PROVIDER_ALIASES[provider]}`;
+  return `npx @gitaura/cli login -p ${CLI_PROVIDER_ALIASES[provider]}`;
 }
 
 async function copyText(value: string): Promise<boolean> {

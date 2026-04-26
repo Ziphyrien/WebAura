@@ -27,7 +27,7 @@ vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: (query: () => unknown) => query(),
 }));
 
-vi.mock("@gitinspect/db", () => ({
+vi.mock("@gitaura/db", () => ({
   db: {
     providerKeys: {
       toArray: () => state.providerKeys,
@@ -42,7 +42,7 @@ vi.mock("@gitinspect/db", () => ({
   },
 }));
 
-vi.mock("@gitinspect/pi/models/provider-registry", () => ({
+vi.mock("@gitaura/pi/models/provider-registry", () => ({
   getProviderGroupMetadata: (provider: string) => ({
     label:
       provider === "anthropic"
@@ -58,7 +58,7 @@ vi.mock("@gitinspect/pi/models/provider-registry", () => ({
   getSortedApiKeyProvidersForSettings: () => [] as string[],
 }));
 
-vi.mock("@gitinspect/pi/proxy/settings", () => ({
+vi.mock("@gitaura/pi/proxy/settings", () => ({
   DEFAULT_PROXY_URL: "https://proxy.example/proxy",
   PROXY_ENABLED_KEY: "proxy-enabled",
   PROXY_URL_KEY: "proxy-url",
@@ -68,11 +68,11 @@ vi.mock("@gitinspect/pi/proxy/settings", () => ({
   }),
 }));
 
-vi.mock("@gitinspect/pi/auth/oauth-types", () => ({
+vi.mock("@gitaura/pi/auth/oauth-types", () => ({
   isOAuthCredentials: (value: string) => value.trim().startsWith("{"),
 }));
 
-vi.mock("@gitinspect/pi/auth/auth-service", () => ({
+vi.mock("@gitaura/pi/auth/auth-service", () => ({
   disconnectProvider: async (provider: string) => {
     state.providerKeys = state.providerKeys.filter((record) => record.provider !== provider);
   },
@@ -126,7 +126,7 @@ vi.mock("@gitinspect/pi/auth/auth-service", () => ({
   setProviderApiKey: vi.fn(),
 }));
 
-vi.mock("@gitinspect/ui/components/button", () => ({
+vi.mock("@gitaura/ui/components/button", () => ({
   Button: ({
     children,
     onClick,
@@ -149,17 +149,17 @@ vi.mock("@gitinspect/ui/components/button", () => ({
     ),
 }));
 
-vi.mock("@gitinspect/ui/components/input", () => ({
+vi.mock("@gitaura/ui/components/input", () => ({
   Input: ({ value, onChange, placeholder, type }: React.ComponentProps<"input">) =>
     React.createElement("input", { onChange, placeholder, type, value }),
 }));
 
-vi.mock("@gitinspect/ui/components/textarea", () => ({
+vi.mock("@gitaura/ui/components/textarea", () => ({
   Textarea: ({ value, onChange, placeholder }: React.ComponentProps<"textarea">) =>
     React.createElement("textarea", { onChange, placeholder, value }),
 }));
 
-vi.mock("@gitinspect/ui/components/item", () => {
+vi.mock("@gitaura/ui/components/item", () => {
   const Passthrough = ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children);
 
@@ -200,13 +200,13 @@ describe("provider settings", () => {
     rerender(React.createElement(ProviderSettings));
 
     expect(screen.getByText("Connect with login code")).toBeTruthy();
-    expect(screen.getByText("npx @gitinspect/cli login -p anthropic")).toBeTruthy();
+    expect(screen.getByText("npx @gitaura/cli login -p anthropic")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Copy command" }));
 
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        "npx @gitinspect/cli login -p anthropic",
+        "npx @gitaura/cli login -p anthropic",
       );
       expect(toastSuccess).toHaveBeenCalledWith("Command copied");
     });
@@ -220,7 +220,7 @@ describe("provider settings", () => {
     rerender(React.createElement(ProviderSettings));
 
     fireEvent.change(
-      screen.getByPlaceholderText("Paste the code from npx @gitinspect/cli login -p copilot"),
+      screen.getByPlaceholderText("Paste the code from npx @gitaura/cli login -p copilot"),
       {
         target: {
           value: JSON.stringify({
@@ -250,7 +250,7 @@ describe("provider settings", () => {
     rerender(React.createElement(ProviderSettings));
 
     fireEvent.change(
-      screen.getByPlaceholderText("Paste the code from npx @gitinspect/cli login -p anthropic"),
+      screen.getByPlaceholderText("Paste the code from npx @gitaura/cli login -p anthropic"),
       {
         target: {
           value: JSON.stringify({

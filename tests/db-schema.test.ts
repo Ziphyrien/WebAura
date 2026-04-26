@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 import { describe, expect, it } from "vite-plus/test";
-import { AppDb } from "@gitinspect/db";
+import { AppDb } from "@gitaura/db";
 import { createEmptyUsage } from "@/types/models";
 import type {
   MessageRow,
@@ -14,7 +14,7 @@ import {
   getCostsByProviderFromAggregates,
   getTotalCostFromAggregates,
   mergeDailyCostAggregate,
-} from "@gitinspect/db";
+} from "@gitaura/db";
 
 type LegacyRepositoryRow = {
   lastOpenedAt: string;
@@ -196,7 +196,7 @@ async function openMigratedCurrentSchemaDb(seed: {
   runtimes?: LegacySessionRuntimeRow[];
   sessions: SessionData[];
 }): Promise<{ migratedDb: AppDb; name: string }> {
-  const name = `gitinspect-session-state-migration-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const name = `gitaura-session-state-migration-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const legacyDb = new Dexie(name);
 
   defineLegacyCurrentSchema(legacyDb);
@@ -279,7 +279,7 @@ describe("db schema helpers", () => {
   });
 
   it("migrates repository rows missing refOrigin", async () => {
-    const name = `gitinspect-migration-${Date.now()}`;
+    const name = `gitaura-migration-${Date.now()}`;
     const legacyDb = new Dexie(name);
 
     defineLegacySchema(legacyDb);
@@ -311,7 +311,7 @@ describe("db schema helpers", () => {
   });
 
   it("migrates deterministic legacy session repo sources and clears ambiguous refs", async () => {
-    const name = `gitinspect-session-migration-${Date.now()}`;
+    const name = `gitaura-session-migration-${Date.now()}`;
     const legacyDb = new Dexie(name);
 
     defineLegacySchema(legacyDb);
@@ -655,7 +655,7 @@ describe("db schema helpers", () => {
   });
 
   it("recreates public share tables after schema v9", async () => {
-    const name = `gitinspect-restored-share-schema-${Date.now()}`;
+    const name = `gitaura-restored-share-schema-${Date.now()}`;
     const legacyDb = new Dexie(name);
 
     defineLegacyShareSchema(legacyDb);

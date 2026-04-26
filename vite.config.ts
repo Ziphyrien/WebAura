@@ -7,7 +7,7 @@ export default defineConfig({
     "*": ["vp lint", "vp fmt --write"],
   },
   fmt: {
-    ignorePatterns: [],
+    ignorePatterns: ["**/routeTree.gen.ts"],
   },
   lint: {
     plugins: ["typescript", "unicorn", "oxc"],

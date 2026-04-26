@@ -136,11 +136,11 @@ export default defineConfig({
       { find: "@/test", replacement: fromRoot("./tests/lib") },
       { find: "@/just-github", replacement: fromRoot("./packages/just-github/src") },
       {
-        find: /^@gitinspect\/db$/,
+        find: /^@gitaura\/db$/,
         replacement: fromRoot("./packages/db/src/index.ts"),
       },
       {
-        find: "@gitinspect/shared/feedback",
+        find: "@gitaura/shared/feedback",
         replacement: fromRoot("./packages/shared/src/feedback.ts"),
       },
     ],

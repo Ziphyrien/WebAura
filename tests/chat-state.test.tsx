@@ -1,7 +1,7 @@
 import * as React from "react";
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { render, screen, waitFor } from "@testing-library/react";
-import { db, deleteAllLocalData, putSession } from "@gitinspect/db";
+import { db, deleteAllLocalData, putSession } from "@gitaura/db";
 import type { MessageRow, SessionData } from "@/types/storage";
 import { createEmptyUsage } from "@/types/models";
 
@@ -117,8 +117,8 @@ vi.mock("@/sessions/session-actions", () => ({
   })),
 }));
 
-vi.mock("@gitinspect/db", async () => {
-  const actual = await vi.importActual<typeof import("@gitinspect/db")>("@gitinspect/db");
+vi.mock("@gitaura/db", async () => {
+  const actual = await vi.importActual<typeof import("@gitaura/db")>("@gitaura/db");
 
   return {
     ...actual,
@@ -136,10 +136,6 @@ vi.mock("@/components/chat-composer", () => ({
 
 vi.mock("@/components/session-utility-actions", () => ({
   SessionUtilityActions: () => null,
-}));
-
-vi.mock("@/components/chat-usage-notice", () => ({
-  ChatUsageNotice: () => null,
 }));
 
 vi.mock("@/components/repo-combobox", () => ({

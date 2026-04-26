@@ -4,16 +4,12 @@ import { serializeOAuthCredentials } from "@/auth/oauth-types";
 import {
   DEFAULT_MODELS,
   calculateCost,
-  getCanonicalProvider,
   getConnectedProviders,
   getDefaultModel,
-  getDefaultModelForGroup,
   getModel,
   getModelsForGroup,
   getProviderGroups,
 } from "@/models/catalog";
-import { FIREWORKS_KIMI_K25_TURBO_ID } from "@/models/builtin-models";
-import type { ProviderGroupId } from "@/types/models";
 
 describe("model catalog", () => {
   it("does not treat a non-OAuth openai-codex key as connected", () => {
@@ -64,23 +60,8 @@ describe("model catalog", () => {
     expect(getModel("github-copilot", "missing-model").id).toBe("gpt-4o");
   });
 
-  it("exposes the Fireworks free group and canonicalizes to fireworks-ai", () => {
-    expect(getProviderGroups()).toEqual(expect.arrayContaining(["opencode", "fireworks-free"]));
-    expect(getCanonicalProvider("fireworks-free")).toBe("fireworks-ai");
-  });
-
-  it("exposes the Fireworks free tier builtin model", () => {
-    const freeModels = getModelsForGroup("fireworks-free");
-    expect(freeModels.map((m) => m.id)).toEqual([FIREWORKS_KIMI_K25_TURBO_ID]);
-    expect(getDefaultModelForGroup("fireworks-free").id).toBe(FIREWORKS_KIMI_K25_TURBO_ID);
-    expect(getDefaultModel("fireworks-ai").id).toBe(FIREWORKS_KIMI_K25_TURBO_ID);
-  });
-
-  it("maps legacy opencode-free persisted group id to Fireworks models", () => {
-    expect(getDefaultModelForGroup("opencode-free" as ProviderGroupId).id).toBe(
-      FIREWORKS_KIMI_K25_TURBO_ID,
-    );
-    expect(getCanonicalProvider("opencode-free" as ProviderGroupId)).toBe("fireworks-ai");
+  it("exposes provider groups from the shared registry", () => {
+    expect(getProviderGroups()).toEqual(expect.arrayContaining(["opencode", "openai-codex"]));
   });
 
   it("calculates per-message cost from usage totals", () => {

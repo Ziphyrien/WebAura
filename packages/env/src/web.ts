@@ -4,8 +4,6 @@ import { z } from "zod";
 export const env = createEnv({
   clientPrefix: "VITE_",
   client: {
-    VITE_BETTER_AUTH_URL: z.url().optional(),
-    VITE_DEXIE_CLOUD_DB_URL: z.url().optional(),
     VITE_GITHUB_PROXY_ENABLED: z
       .enum(["true", "false"])
       .optional()

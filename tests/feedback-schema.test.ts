@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import { feedbackSchema, normalizeFeedbackPayload } from "@gitinspect/shared/feedback";
+import { feedbackSchema, normalizeFeedbackPayload } from "@gitaura/shared/feedback";
 
 describe("feedback schema", () => {
   it("accepts bounded payloads and trims message fields", () => {

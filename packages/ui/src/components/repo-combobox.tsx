@@ -2,15 +2,15 @@ import * as React from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import type { ResolvedRepoSource } from "@gitinspect/db";
-import { listRepositories } from "@gitinspect/db";
-import { handleGithubError } from "@gitinspect/pi/repo/github-fetch";
-import { parseRepoInput } from "@gitinspect/pi/repo/path-parser";
-import { resolveRepoIntent } from "@gitinspect/pi/repo/ref-resolver";
-import { SUGGESTED_REPOS } from "@gitinspect/pi/repo/suggested-repos";
-import { githubOwnerAvatarUrl, repoSourceToPath } from "@gitinspect/pi/repo/url";
-import { Icons } from "@gitinspect/ui/components/icons";
-import { cn } from "@gitinspect/ui/lib/utils";
+import type { ResolvedRepoSource } from "@gitaura/db";
+import { listRepositories } from "@gitaura/db";
+import { handleGithubError } from "@gitaura/pi/repo/github-fetch";
+import { parseRepoInput } from "@gitaura/pi/repo/path-parser";
+import { resolveRepoIntent } from "@gitaura/pi/repo/ref-resolver";
+import { SUGGESTED_REPOS } from "@gitaura/pi/repo/suggested-repos";
+import { githubOwnerAvatarUrl, repoSourceToPath } from "@gitaura/pi/repo/url";
+import { Icons } from "@gitaura/ui/components/icons";
+import { cn } from "@gitaura/ui/lib/utils";
 
 export type RepoComboboxHandle = {
   focusAndClear: () => void;

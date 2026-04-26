@@ -1,4 +1,4 @@
-import type { GitHubAuthState } from "@gitinspect/pi/repo/github-access";
+import type { GitHubAuthState } from "@gitaura/pi/repo/github-access";
 
 export type GitHubConnectionSummary = {
   accountStatus: string;

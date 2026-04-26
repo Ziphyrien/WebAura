@@ -10,26 +10,6 @@ const useSearchMock = vi.fn(() => ({}));
 const startInitialTurnMock = vi.fn(async () => {});
 const createSessionForRepoMock = vi.fn();
 const persistLastUsedSessionSettingsMock = vi.fn(async () => {});
-const authContextState = {
-  value: null as {
-    authState: {
-      fallbackPat: boolean;
-      githubLink: "linked" | "unlinked" | "unknown";
-      preferredSource: "oauth" | "pat" | "none";
-      repoAccess: "granted" | "missing" | "unknown";
-      session: "signed-in" | "signed-out";
-    };
-    consumeReadyAuthAction: () => {
-      content: string;
-      route: string;
-      type: "send-first-message";
-    } | null;
-    openAuthDialog: (input?: {
-      postAuthAction?: { content: string; route: string; type: "send-first-message" };
-      variant?: "default" | "first-message";
-    }) => void;
-  } | null,
-};
 
 vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: useLiveQueryMock,
@@ -74,16 +54,12 @@ vi.mock("@/sessions/session-actions", () => ({
   })),
 }));
 
-vi.mock("@gitinspect/db", () => ({
+vi.mock("@gitaura/db", () => ({
   touchRepository: vi.fn(async () => {}),
 }));
 
 vi.mock("@/components/chat-empty-state", () => ({
   ChatEmptyState: () => <div data-testid="empty-state">empty</div>,
-}));
-
-vi.mock("@gitinspect/ui/components/github-auth-context", () => ({
-  useGitHubAuthContext: () => authContextState.value,
 }));
 
 vi.mock("@/components/chat-composer", () => ({
@@ -110,6 +86,10 @@ vi.mock("@/components/ui/progressive-blur", () => ({
 
 vi.mock("@/components/chat-message", () => ({
   ChatMessage: () => null,
+}));
+
+vi.mock("@/components/session-utility-actions", () => ({
+  SessionUtilityActions: () => null,
 }));
 
 vi.mock("@/components/chat-adapter", () => ({
@@ -169,7 +149,6 @@ function mockChatQueries(options: {
     providerGroup: string;
     thinkingLevel: string;
   };
-  guestChatAcknowledged?: boolean;
   loadedSessionState:
     | { kind: "none" | "missing" }
     | {
@@ -200,7 +179,6 @@ function mockChatQueries(options: {
 
 describe("Chat first send", () => {
   beforeEach(() => {
-    authContextState.value = null;
     createSessionForRepoMock.mockReset();
     navigateMock.mockReset();
     persistLastUsedSessionSettingsMock.mockReset();
@@ -277,97 +255,6 @@ describe("Chat first send", () => {
     settingsWrite.resolve();
     await act(async () => {
       await settingsWrite.promise;
-    });
-  });
-
-  it("opens the auth dialog before the first guest send when acknowledgement is missing", async () => {
-    const openAuthDialog = vi.fn();
-    authContextState.value = {
-      authState: {
-        fallbackPat: false,
-        githubLink: "unlinked",
-        preferredSource: "none",
-        repoAccess: "missing",
-        session: "signed-out",
-      },
-      consumeReadyAuthAction: () => null,
-      openAuthDialog,
-    };
-    mockChatQueries({
-      defaults: {
-        model: "gpt-5.1-codex-mini",
-        providerGroup: "openai-codex",
-        thinkingLevel: "medium",
-      },
-      guestChatAcknowledged: false,
-      loadedSessionState: { kind: "none" },
-    });
-
-    const { Chat } = await import("@/components/chat");
-
-    render(<Chat repoSource={buildRepoSource()} />);
-
-    await act(async () => {
-      fireEvent.click(screen.getByText("Send"));
-    });
-
-    expect(openAuthDialog).toHaveBeenCalledWith(
-      expect.objectContaining({
-        postAuthAction: expect.objectContaining({
-          content: "hello",
-          type: "send-first-message",
-        }),
-        variant: "first-message",
-      }),
-    );
-    expect(startInitialTurnMock).not.toHaveBeenCalled();
-  });
-
-  it("auto-sends the drafted first message after sign-in", async () => {
-    const session = buildSession();
-    createSessionForRepoMock.mockResolvedValue(session);
-    authContextState.value = {
-      authState: {
-        fallbackPat: false,
-        githubLink: "linked",
-        preferredSource: "oauth",
-        repoAccess: "granted",
-        session: "signed-in",
-      },
-      consumeReadyAuthAction: vi
-        .fn<
-          () => {
-            action: { content: string; route: string; type: "send-first-message" };
-            requiresConfirmation: boolean;
-          } | null
-        >()
-        .mockReturnValueOnce({
-          action: {
-            content: "hello after auth",
-            route: "/chat",
-            type: "send-first-message",
-          },
-          requiresConfirmation: false,
-        })
-        .mockReturnValue(null),
-      openAuthDialog: vi.fn(),
-    };
-    mockChatQueries({
-      defaults: {
-        model: "gpt-5.1-codex-mini",
-        providerGroup: "openai-codex",
-        thinkingLevel: "medium",
-      },
-      guestChatAcknowledged: true,
-      loadedSessionState: { kind: "none" },
-    });
-
-    const { Chat } = await import("@/components/chat");
-
-    render(<Chat repoSource={buildRepoSource()} />);
-
-    await vi.waitFor(() => {
-      expect(startInitialTurnMock).toHaveBeenCalledWith(session, "hello after auth");
     });
   });
 });

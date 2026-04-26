@@ -1,5 +1,5 @@
-import type { ToolResultMessage } from "@gitinspect/pi/types/chat";
-import { Badge } from "@gitinspect/ui/components/badge";
+import type { ToolResultMessage } from "@gitaura/pi/types/chat";
+import { Badge } from "@gitaura/ui/components/badge";
 
 interface BashDetails {
   command: string;

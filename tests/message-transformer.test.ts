@@ -88,7 +88,7 @@ describe("webMessageTransformer", () => {
         },
       },
       {
-        content: [{ text: "# gitinspect.com", type: "text" }],
+        content: [{ text: "# GitAura", type: "text" }],
         isError: false,
         role: "toolResult",
         timestamp: 3,
@@ -117,7 +117,7 @@ describe("webMessageTransformer", () => {
       },
       {
         call_id: "call-1",
-        output: "# gitinspect.com",
+        output: "# GitAura",
         type: "function_call_output",
       },
     ]);
@@ -174,7 +174,7 @@ describe("webMessageTransformer", () => {
         timestamp: 1,
       },
       {
-        content: [{ text: "# gitinspect.com", type: "text" }],
+        content: [{ text: "# GitAura", type: "text" }],
         isError: false,
         role: "toolResult",
         timestamp: 2,

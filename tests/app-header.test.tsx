@@ -32,7 +32,7 @@ vi.mock("@tanstack/react-router", () => ({
     }),
 }));
 
-vi.mock("@gitinspect/pi/hooks/use-selected-session-summary", () => ({
+vi.mock("@gitaura/pi/hooks/use-selected-session-summary", () => ({
   useSelectedSessionSummary: () => ({
     repoSource: {
       owner: "acme",
@@ -42,44 +42,32 @@ vi.mock("@gitinspect/pi/hooks/use-selected-session-summary", () => ({
   }),
 }));
 
-vi.mock("@/hooks/use-subscription", () => ({
-  useSubscription: () => ({
-    subscriptionState: {
-      isSubscribed: false,
-    },
-  }),
-}));
-
-vi.mock("@gitinspect/ui/components/button", () => ({
+vi.mock("@gitaura/ui/components/button", () => ({
   Button: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) =>
     asChild ? children : React.createElement("button", undefined, children),
 }));
 
-vi.mock("@gitinspect/ui/components/separator", () => ({
+vi.mock("@gitaura/ui/components/separator", () => ({
   Separator: () => null,
 }));
 
-vi.mock("@gitinspect/ui/components/sidebar", () => ({
+vi.mock("@gitaura/ui/components/sidebar", () => ({
   SidebarTrigger: () => React.createElement("button", { type: "button" }, "Sidebar"),
 }));
 
-vi.mock("@gitinspect/ui/components/chat-logo", () => ({
-  ChatLogo: () => React.createElement("div", undefined, "GitInspect"),
+vi.mock("@gitaura/ui/components/chat-logo", () => ({
+  ChatLogo: () => React.createElement("div", undefined, "GitAura"),
 }));
 
-vi.mock("@gitinspect/ui/components/github-link", () => ({
+vi.mock("@gitaura/ui/components/github-link", () => ({
   GitHubLink: () => React.createElement("div", undefined, "GitHub"),
 }));
 
-vi.mock("@gitinspect/ui/components/theme-toggle", () => ({
+vi.mock("@gitaura/ui/components/theme-toggle", () => ({
   ThemeToggle: () => React.createElement("button", { type: "button" }, "Theme"),
 }));
 
-vi.mock("@gitinspect/ui/lib/feedback-trigger", () => ({
-  rememberFeedbackTrigger: vi.fn(),
-}));
-
-vi.mock("@gitinspect/ui/components/icons", () => ({
+vi.mock("@gitaura/ui/components/icons", () => ({
   Icons: {
     cog: () => React.createElement("span", undefined, "Cog"),
     comment: () => React.createElement("span", undefined, "Comment"),
@@ -88,7 +76,7 @@ vi.mock("@gitinspect/ui/components/icons", () => ({
   },
 }));
 
-vi.mock("@gitinspect/ui/components/tooltip", () => ({
+vi.mock("@gitaura/ui/components/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children),
   TooltipContent: ({ children }: { children: React.ReactNode }) =>
@@ -97,7 +85,7 @@ vi.mock("@gitinspect/ui/components/tooltip", () => ({
     React.createElement("div", undefined, children),
 }));
 
-vi.mock("@gitinspect/ui/components/breadcrumb", () => {
+vi.mock("@gitaura/ui/components/breadcrumb", () => {
   const Passthrough = ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children);
 
@@ -130,7 +118,7 @@ describe("AppHeader", () => {
     expect(screen.getByText("acme")).toBeTruthy();
     expect(screen.getByText("demo")).toBeTruthy();
     expect(screen.getByText("[main]")).toBeTruthy();
-    expect(screen.getByText("Feedback")).toBeTruthy();
+    expect(screen.getByText("GitHub")).toBeTruthy();
   });
 
   it("uses loader data so splat routes show the resolved ref", async () => {

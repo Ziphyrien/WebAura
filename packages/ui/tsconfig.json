@@ -1,5 +1,5 @@
 {
-  "extends": "@gitinspect/config/tsconfig.base.json",
+  "extends": "@gitaura/config/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "jsx": "react-jsx",
@@ -8,11 +8,11 @@
     "noImplicitAny": false,
     "noUncheckedIndexedAccess": false,
     "paths": {
-      "@gitinspect/ui/*": ["./src/*"],
-      "@gitinspect/pi/*": ["../pi/src/*"],
-      "@gitinspect/db": ["../db/src/index.ts"],
-      "@gitinspect/db/session-leases": ["../db/src/session-leases.ts"],
-      "@gitinspect/db/session-runtime": ["../db/src/session-runtime.ts"],
+      "@gitaura/ui/*": ["./src/*"],
+      "@gitaura/pi/*": ["../pi/src/*"],
+      "@gitaura/db": ["../db/src/index.ts"],
+      "@gitaura/db/session-leases": ["../db/src/session-leases.ts"],
+      "@gitaura/db/session-runtime": ["../db/src/session-runtime.ts"],
       "@/navigation/*": ["../../apps/web/src/navigation/*"]
     }
   },

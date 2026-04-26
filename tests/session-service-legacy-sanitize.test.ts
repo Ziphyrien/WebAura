@@ -6,7 +6,7 @@ import {
   getSessionMessages,
   getSessionRuntime,
   putSession,
-} from "@gitinspect/db";
+} from "@gitaura/db";
 import type { MessageRow, SessionData } from "@/types/storage";
 import { createEmptyUsage } from "@/types/models";
 

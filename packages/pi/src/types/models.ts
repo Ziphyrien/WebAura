@@ -2,10 +2,10 @@ import type { Api, KnownProvider, Model, Usage as PiUsage } from "@mariozechner/
 
 export type { KnownProvider };
 
-/** Canonical provider id from the shared pi-ai registry plus app builtins. */
-export type ProviderId = KnownProvider | "fireworks-ai";
+/** Canonical provider ids come directly from the shared pi-ai registry. */
+export type ProviderId = KnownProvider;
 
-export type ProviderGroupId = KnownProvider | "fireworks-free";
+export type ProviderGroupId = KnownProvider;
 
 export interface ProviderGroupDefinition {
   canonicalProvider: ProviderId;

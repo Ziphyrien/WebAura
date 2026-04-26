@@ -57,9 +57,7 @@ describe("classifyRuntimeError", () => {
 
   it("detects provider api failures from provider diagnostics", () => {
     const classified = classifyRuntimeError(
-      new Error(
-        "Boom [fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo → https://api.fireworks.ai/inference/v1]",
-      ),
+      new Error("Boom [opencode/gpt-5-nano → https://opencode.ai/zen/v1]"),
     );
 
     expect(classified.kind).toBe("provider_api");
@@ -69,9 +67,7 @@ describe("classifyRuntimeError", () => {
 
   it("treats manual stop / abort signals as a single user notice, not provider_api", () => {
     const abortedFetch = classifyRuntimeError(
-      new Error(
-        "Request was aborted. [fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo → https://api.fireworks.ai/inference/v1]",
-      ),
+      new Error("Request was aborted. [opencode/gpt-5-nano → https://opencode.ai/zen/v1]"),
     );
     expect(abortedFetch.kind).toBe("stream_interrupted");
     expect(abortedFetch.message).toBe(USER_ABORT_NOTICE_MESSAGE);
@@ -86,16 +82,14 @@ describe("classifyRuntimeError", () => {
   it("extracts HTML payloads into structured system message details", () => {
     const classified = classifyRuntimeError(
       new Error(
-        "429 <!DOCTYPE html><html><head><title>Vercel Security Checkpoint</title></head><body><p>We're verifying your browser</p></body></html> [fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo → https://api.fireworks.ai/inference/v1]",
+        "429 <!DOCTYPE html><html><head><title>Vercel Security Checkpoint</title></head><body><p>We're verifying your browser</p></body></html> [opencode/gpt-5-nano → https://opencode.ai/zen/v1]",
       ),
     );
     const message = buildSystemMessage(classified, "system-html", 456);
 
     expect(classified.kind).toBe("provider_rate_limit");
     expect(classified.message).toBe("429 — Vercel Security Checkpoint");
-    expect(message.detailsContext).toBe(
-      "[fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo → https://api.fireworks.ai/inference/v1]",
-    );
+    expect(message.detailsContext).toBe("[opencode/gpt-5-nano → https://opencode.ai/zen/v1]");
     expect(message.detailsHtml).toContain("<title>Vercel Security Checkpoint</title>");
   });
 });

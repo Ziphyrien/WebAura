@@ -3,7 +3,7 @@ import {
   buildFeedbackIssueBody,
   buildFeedbackIssueTitle,
   buildFeedbackLabels,
-} from "@gitinspect/shared/feedback";
+} from "@gitaura/shared/feedback";
 
 describe("feedback format helpers", () => {
   it("builds a bounded title with normalized whitespace", () => {
@@ -54,7 +54,7 @@ describe("feedback format helpers", () => {
           sentiment: "sad",
           website: "",
         },
-        referer: "https://gitinspect.com/chat/session-1",
+        referer: "https://gitaura.test/chat/session-1",
         submittedAt: "2026-04-02T18:20:00.000Z",
         userAgent: "Mozilla/5.0",
       }),
@@ -68,7 +68,7 @@ describe("feedback format helpers", () => {
           sentiment: "happy",
           website: "",
         },
-        referer: "https://gitinspect.com/",
+        referer: "https://gitaura.test/",
         submittedAt: "2026-04-02T18:20:00.000Z",
         userAgent: "Mozilla/5.0",
       }),

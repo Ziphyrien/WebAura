@@ -1,18 +1,7 @@
 import "fake-indexeddb/auto";
 import { cleanup } from "@testing-library/react";
-import { afterAll, afterEach, vi } from "vite-plus/test";
-import { db } from "@gitinspect/db";
-
-vi.mock("autumn-js/react", () => ({
-  AutumnProvider: ({ children }: { children: unknown }) => children,
-  useCustomer: () => ({
-    check: () => ({ allowed: true }),
-    data: {},
-    error: null,
-    isLoading: false,
-    refetch: vi.fn(async () => undefined),
-  }),
-}));
+import { afterAll, afterEach } from "vite-plus/test";
+import { db } from "@gitaura/db";
 
 Object.defineProperty(window, "matchMedia", {
   configurable: true,

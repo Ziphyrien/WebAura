@@ -249,11 +249,11 @@ describe("provider stream", () => {
     resolveProviderAuthForProvider.mockResolvedValue({
       apiKey: "api-key",
       isOAuth: false,
-      provider: "fireworks-ai",
+      provider: "opencode",
       storedValue: "api-key",
     });
     getProxyConfig.mockResolvedValue({
-      enabled: true,
+      enabled: false,
       url: "https://proxy.example/proxy",
     });
     streamSimple.mockImplementation((model) =>
@@ -289,20 +289,17 @@ describe("provider stream", () => {
     await expect(
       streamChat({
         messages: [],
-        model: "accounts/fireworks/routers/kimi-k2p5-turbo",
+        model: "gpt-5-nano",
         onTextDelta(delta) {
           deltas.push(delta);
         },
-        provider: "fireworks-ai",
-        providerGroup: "fireworks-free",
+        provider: "opencode",
         sessionId: "session-error",
         signal: new AbortController().signal,
         thinkingLevel: "medium",
         tools: [],
       }),
-    ).rejects.toThrow(
-      "Boom [fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo → https://api.fireworks.ai/inference/v1]",
-    );
+    ).rejects.toThrow("Boom [opencode/gpt-5-nano → https://opencode.ai/zen/v1]");
 
     expect(deltas).toEqual(["Partial"]);
   });

@@ -3,8 +3,8 @@ import { parseCliArgs, renderLoginHelp, renderTopLevelHelp } from "../apps/cli/s
 
 describe("cli args", () => {
   it("renders compact top-level help", () => {
-    expect(renderTopLevelHelp()).toContain("gitinspect login");
-    expect(renderTopLevelHelp()).toContain("gitinspect login --help");
+    expect(renderTopLevelHelp()).toContain("gitaura login");
+    expect(renderTopLevelHelp()).toContain("gitaura login --help");
   });
 
   it("renders compact login help", () => {
