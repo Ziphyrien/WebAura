@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it } from "vite-plus/test";
 import { TurnEventStore } from "@/agent/turn-event-store";
-import { deleteAllLocalData, getSessionMessages, getSessionRuntime } from "@gitinspect/db";
+import {
+  deleteAllLocalData,
+  getDailyCost,
+  getSessionMessages,
+  getSessionRuntime,
+} from "@gitaura/db";
 import type { AssistantMessage, ToolResultMessage } from "@/types/chat";
 import type { SessionData, SessionRuntimeRow } from "@/types/storage";
 import { createEmptyUsage } from "@/types/models";
@@ -42,6 +47,7 @@ function createAssistantMessage(params: {
   text?: string;
   timestamp: number;
   toolCallIds?: string[];
+  usage?: AssistantMessage["usage"];
 }): AssistantMessage {
   return {
     api: "openai-responses",
@@ -60,7 +66,7 @@ function createAssistantMessage(params: {
     role: "assistant",
     stopReason: params.stopReason ?? "stop",
     timestamp: params.timestamp,
-    usage: createEmptyUsage(),
+    usage: params.usage ?? createEmptyUsage(),
   };
 }
 
@@ -176,6 +182,46 @@ describe("TurnEventStore", () => {
       status: "streaming",
       streamMessage: undefined,
       turnId: "turn-1",
+    });
+  });
+
+  it("records assistant message costs into daily totals", async () => {
+    const session = createSession();
+    const store = new TurnEventStore({
+      runtime: undefined,
+      session,
+      transcriptMessages: [],
+    });
+    const usage = createEmptyUsage();
+    usage.cost.input = 0.42;
+    usage.cost.total = 0.42;
+    usage.input = 1_000;
+    usage.totalTokens = 1_000;
+
+    await store.beginTurn({
+      ownerTabId: "tab-1",
+      turn: createTurn(),
+    });
+    await store.applyEnvelope({
+      kind: "message-end",
+      message: createAssistantMessage({
+        id: "assistant-cost",
+        text: "cost",
+        timestamp: Date.parse("2026-03-24T12:30:00.000Z"),
+        usage,
+      }),
+      sessionId: session.id,
+      turnId: "turn-1",
+    });
+
+    expect(await getDailyCost("2026-03-24")).toMatchObject({
+      byProvider: {
+        "openai-codex": {
+          "gpt-5.4": 0.42,
+        },
+      },
+      date: "2026-03-24",
+      total: 0.42,
     });
   });
 
