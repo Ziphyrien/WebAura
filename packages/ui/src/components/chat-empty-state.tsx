@@ -1,4 +1,4 @@
-import { ArrowRightIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, SparkleIcon } from "@phosphor-icons/react";
 import { GithubRepo } from "@gitaura/ui/components/github-repo";
 import { CHAT_SUGGESTIONS } from "@gitaura/ui/components/chat-suggestions";
 import { repoSourceToPath } from "@gitaura/pi/repo/url";
@@ -11,15 +11,7 @@ export function LetsInspectHeading() {
         <h2 className="font-geist-pixel-square text-2xl font-semibold tracking-tight text-foreground">
           Read the Repo.
         </h2>
-        <img
-          alt=""
-          aria-hidden
-          className="size-5 shrink-0 object-contain"
-          decoding="async"
-          height={32}
-          src="/favicon.svg"
-          width={32}
-        />
+        <SparkleIcon className="size-6 shrink-0 text-muted-foreground" weight="fill" />
         <h2 className="font-geist-pixel-square text-2xl font-semibold tracking-tight text-muted-foreground">
           Catch the Aura.
         </h2>

@@ -19,9 +19,26 @@ function IconBase({ children, className, ...props }: IconProps & { children: Rea
 
 export const Icons = {
   logo: (props: IconProps) => (
-    <IconBase aria-label="Logo" id="search-solid" viewBox="0 0 24 24" {...props}>
-      <polygon points="16 17 15 17 15 18 13 18 13 19 7 19 7 18 5 18 5 17 4 17 4 16 3 16 3 15 2 15 2 13 1 13 1 7 2 7 2 5 3 5 3 4 4 4 4 3 5 3 5 2 7 2 7 1 13 1 13 2 15 2 15 3 16 3 16 4 17 4 17 5 18 5 18 7 19 7 19 13 18 13 18 15 17 15 17 16 16 16 16 17" />
-      <polygon points="23 20 23 22 22 22 22 23 20 23 20 22 19 22 19 21 18 21 18 20 17 20 17 19 16 19 16 18 17 18 17 17 18 17 18 16 19 16 19 17 20 17 20 18 21 18 21 19 22 19 22 20 23 20" />
+    <IconBase aria-label="Logo" id="logo" viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        d="M13 5H6C4.89543 5 4 5.89543 4 7V17C4 18.1046 4.89543 19 6 19H16C17.1046 19 18 18.1046 18 17V11"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <line
+        x1="4"
+        y1="9"
+        x2="11"
+        y2="9"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M18 2C18 4.76142 20.2386 7 23 7C20.2386 7 18 9.23858 18 12C18 9.23858 15.7614 7 13 7C15.7614 7 18 4.76142 18 2Z"
+        fill="currentColor"
+      />
     </IconBase>
   ),
   cog: (props: IconProps) => (
