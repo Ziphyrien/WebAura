@@ -21,6 +21,7 @@ import {
 import { shouldStopStreamingForRuntimeError } from "@gitaura/pi/agent/runtime-errors";
 import { webMessageTransformer } from "@gitaura/pi/agent/message-transformer";
 import { streamChatWithPiAgent } from "@gitaura/pi/agent/provider-stream";
+import { clampThinkingLevel } from "@gitaura/pi/agent/thinking-levels";
 import { resolveApiKeyForProvider } from "@gitaura/pi/auth/resolve-api-key";
 import { putSession } from "@gitaura/db";
 import { getIsoNow } from "@gitaura/pi/lib/dates";
@@ -147,12 +148,16 @@ class WorkerAgentRunner {
     const provider = getCanonicalProvider(providerGroup);
     const model = getModel(provider, modelId);
 
+    const thinkingLevel = clampThinkingLevel(this.agent.state.thinkingLevel, model);
+
     this.agent.state.model = model;
+    this.agent.state.thinkingLevel = thinkingLevel;
     this.agent.sessionId = this.sessionId;
     await persistSessionSettings(this.store, {
       model: modelId,
       provider,
       providerGroup,
+      thinkingLevel,
     });
   }
 
@@ -161,9 +166,10 @@ class WorkerAgentRunner {
       return;
     }
 
-    this.agent.state.thinkingLevel = thinkingLevel;
+    const nextThinkingLevel = clampThinkingLevel(thinkingLevel, this.agent.state.model);
+    this.agent.state.thinkingLevel = nextThinkingLevel;
     await persistSessionSettings(this.store, {
-      thinkingLevel,
+      thinkingLevel: nextThinkingLevel,
     });
   }
 

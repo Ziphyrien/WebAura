@@ -1,45 +1,13 @@
 import * as PiAi from "@mariozechner/pi-ai";
 import type { StreamFn } from "@mariozechner/pi-agent-core";
-import type { TSchema } from "typebox";
 import type { AssistantMessage, StopReason, ToolCall } from "@gitaura/pi/types/chat";
-import type {
-  ModelDefinition,
-  ProviderGroupId,
-  ProviderId,
-  ThinkingLevel,
-} from "@gitaura/pi/types/models";
+import type { ModelDefinition, ProviderId } from "@gitaura/pi/types/models";
 import { SYSTEM_PROMPT } from "@gitaura/pi/agent/system-prompt";
 import { createProxyAwareStreamFn } from "@gitaura/pi/agent/provider-proxy";
 import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@gitaura/pi/agent/runtime-errors";
-import { resolveProviderAuthForProvider } from "@gitaura/pi/auth/resolve-api-key";
 import { createId } from "@gitaura/pi/lib/ids";
 import { getModel } from "@gitaura/pi/models/catalog";
 import { createEmptyUsage } from "@gitaura/pi/types/models";
-
-interface ToolDefinition {
-  description: string;
-  name: string;
-  parameters: TSchema;
-}
-
-interface StreamChatParams {
-  apiKey?: string;
-  assistantId?: string;
-  assistantTimestamp?: number;
-  messages: PiAi.Message[];
-  model: string;
-  onTextDelta: (delta: string) => void;
-  provider: ProviderId;
-  providerGroup?: ProviderGroupId;
-  sessionId: string;
-  signal: AbortSignal;
-  thinkingLevel: ThinkingLevel;
-  tools: ToolDefinition[];
-}
-
-interface StreamChatResult {
-  assistantMessage: AssistantMessage;
-}
 
 function createAssistantDraft(
   model: ModelDefinition,
@@ -181,25 +149,6 @@ function toSuccessStopReason(
   }
 
   return reason === "toolUse" ? "toolUse" : "stop";
-}
-
-function normalizeReasoning(
-  thinkingLevel: StreamChatParams["thinkingLevel"],
-): PiAi.SimpleStreamOptions["reasoning"] {
-  return thinkingLevel === "off" ? undefined : thinkingLevel;
-}
-
-function ensureAssistantMessageId(
-  message: PiAi.AssistantMessage | AssistantMessage,
-): AssistantMessage {
-  if ("id" in message && typeof message.id === "string") {
-    return message;
-  }
-
-  return {
-    ...message,
-    id: createId(),
-  };
 }
 
 function isEmptyAssistantPlaceholder(message: PiAi.Message): boolean {
@@ -377,66 +326,8 @@ async function createAppStream(
   return wrapAssistantMessageEventStream(model, upstream, assistantId, timestamp, options?.signal);
 }
 
-export async function streamChat(params: StreamChatParams): Promise<StreamChatResult> {
-  const model = getModel(params.provider, params.model);
-  const auth =
-    params.apiKey === undefined
-      ? await resolveProviderAuthForProvider(params.provider)
-      : {
-          apiKey: params.apiKey,
-          isOAuth: false,
-          provider: params.provider,
-          storedValue: params.apiKey,
-        };
-
-  if (!auth) {
-    throw new Error(`No credentials stored for ${params.provider}`);
-  }
-
-  const stream = await createAppStream(
-    model,
-    {
-      messages: params.messages,
-      systemPrompt: SYSTEM_PROMPT,
-      tools: params.tools,
-    },
-    {
-      apiKey: auth.apiKey,
-      reasoning: normalizeReasoning(params.thinkingLevel),
-      sessionId: params.sessionId,
-      signal: params.signal,
-    },
-    params.assistantId,
-    params.assistantTimestamp,
-  );
-
-  let assistantMessage: AssistantMessage | undefined;
-
-  for await (const event of stream) {
-    if (event.type === "text_delta") {
-      params.onTextDelta(event.delta);
-      continue;
-    }
-
-    if (event.type === "done") {
-      assistantMessage = ensureAssistantMessageId(event.message);
-      continue;
-    }
-
-    if (event.type === "error") {
-      throw new Error(event.error.errorMessage ?? "Request failed");
-    }
-  }
-
-  if (!assistantMessage) {
-    throw new Error("Stream ended without a final assistant message");
-  }
-
-  return { assistantMessage };
-}
-
 export const streamChatWithPiAgent: StreamFn = async (model, context, options) => {
-  const modelDefinition = getModel(model.provider as StreamChatParams["provider"], model.id);
+  const modelDefinition = getModel(model.provider as ProviderId, model.id);
 
   try {
     return await createAppStream(modelDefinition, context, options);

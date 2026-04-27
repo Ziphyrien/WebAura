@@ -4,7 +4,8 @@ import { getRuntimeWorker } from "@gitaura/pi/agent/runtime-worker-client";
 import type { SessionRunner } from "@gitaura/pi/agent/session-runner";
 import type { TurnEnvelope } from "@gitaura/pi/agent/turn-event-store";
 import { createId } from "@gitaura/pi/lib/ids";
-import { getCanonicalProvider } from "@gitaura/pi/models/catalog";
+import { clampThinkingLevel } from "@gitaura/pi/agent/thinking-levels";
+import { getCanonicalProvider, getModel } from "@gitaura/pi/models/catalog";
 import type { SessionData } from "@gitaura/db";
 import type { ProviderGroupId, ThinkingLevel } from "@gitaura/pi/types/models";
 
@@ -111,11 +112,13 @@ export class WorkerBackedAgentHost implements SessionRunner {
       providerGroup,
       sessionId: this.session.id,
     });
+    const provider = getCanonicalProvider(providerGroup);
     this.session = {
       ...this.session,
       model: modelId,
-      provider: getCanonicalProvider(providerGroup),
+      provider,
       providerGroup,
+      thinkingLevel: clampThinkingLevel(this.session.thinkingLevel, getModel(provider, modelId)),
     };
   }
 

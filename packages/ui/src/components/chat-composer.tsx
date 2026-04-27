@@ -5,6 +5,11 @@ import type { PromptInputMessage } from "@gitaura/ui/components/ai-elements/prom
 import type { ProviderGroupId, ThinkingLevel } from "@gitaura/pi/types/models";
 import { getModelForGroup } from "@gitaura/pi/models/catalog";
 import {
+  clampThinkingLevel,
+  formatThinkingLevelLabel,
+  getAvailableThinkingLevels,
+} from "@gitaura/pi/agent/thinking-levels";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -34,14 +39,6 @@ import {
   usePromptInputAttachments,
   usePromptInputController,
 } from "@gitaura/ui/components/ai-elements/prompt-input";
-
-const THINKING_LEVELS: Array<{ label: string; value: ThinkingLevel }> = [
-  { label: "Off", value: "off" },
-  { label: "Minimal", value: "minimal" },
-  { label: "Low", value: "low" },
-  { label: "Medium", value: "medium" },
-  { label: "High", value: "high" },
-];
 
 function ChatComposerInner(props: {
   composerDisabled?: boolean;
@@ -81,7 +78,9 @@ function ChatComposerInner(props: {
   const submitStatus: ChatStatus = props.isStreaming ? "streaming" : "ready";
 
   const currentModel = getModelForGroup(props.providerGroup, props.model);
-  const supportsThinking = currentModel.reasoning === true;
+  const thinkingLevels = getAvailableThinkingLevels(currentModel);
+  const supportsThinking = thinkingLevels.some((level) => level !== "off");
+  const selectedThinkingLevel = clampThinkingLevel(props.thinkingLevel, currentModel);
   const controlsDisabled = locked || props.isStreaming;
 
   return (
@@ -133,15 +132,15 @@ function ChatComposerInner(props: {
                 onValueChange={(value) => {
                   void props.onThinkingLevelChange(value as ThinkingLevel);
                 }}
-                value={props.thinkingLevel}
+                value={selectedThinkingLevel}
               >
                 <SelectTrigger aria-label="Thinking mode" className="min-w-24" size="sm">
                   <SelectValue placeholder="Thinking" />
                 </SelectTrigger>
                 <SelectContent>
-                  {THINKING_LEVELS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                  {thinkingLevels.map((level) => (
+                    <SelectItem key={level} value={level}>
+                      {formatThinkingLevelLabel(level)}
                     </SelectItem>
                   ))}
                 </SelectContent>

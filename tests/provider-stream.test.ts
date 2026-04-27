@@ -7,14 +7,9 @@ import { getModel } from "@/models/catalog";
 import { createEmptyUsage } from "@/types/models";
 import { buildProxiedUrl } from "@/proxy/url";
 
-const { getProxyConfig, resolveProviderAuthForProvider, streamSimple } = vi.hoisted(() => ({
+const { getProxyConfig, streamSimple } = vi.hoisted(() => ({
   getProxyConfig: vi.fn(),
-  resolveProviderAuthForProvider: vi.fn(),
   streamSimple: vi.fn(),
-}));
-
-vi.mock("@/auth/resolve-api-key", () => ({
-  resolveProviderAuthForProvider,
 }));
 
 vi.mock("@/proxy/settings", () => ({
@@ -96,20 +91,39 @@ function createMockStream(
   return stream;
 }
 
+async function collectProviderStream(stream: PiAi.AssistantMessageEventStream) {
+  let errorMessage: string | undefined;
+  let finalMessage: PiAi.AssistantMessage | undefined;
+  let text = "";
+
+  for await (const event of stream) {
+    if (event.type === "text_delta") {
+      text += event.delta;
+    }
+
+    if (event.type === "done") {
+      finalMessage = event.message;
+    }
+
+    if (event.type === "error") {
+      errorMessage = event.error.errorMessage ?? "Request failed";
+    }
+  }
+
+  return {
+    errorMessage,
+    finalMessage,
+    text,
+  };
+}
+
 describe("provider stream", () => {
   beforeEach(() => {
-    resolveProviderAuthForProvider.mockReset();
     getProxyConfig.mockReset();
     streamSimple.mockReset();
   });
 
   it("delegates codex streaming to pi-ai and proxies the model baseUrl", async () => {
-    resolveProviderAuthForProvider.mockResolvedValue({
-      apiKey: "api-key",
-      isOAuth: true,
-      provider: "openai-codex",
-      storedValue: '{"providerId":"openai-codex"}',
-    });
     getProxyConfig.mockResolvedValue({
       enabled: true,
       url: "https://proxy.example/proxy",
@@ -149,21 +163,23 @@ describe("provider stream", () => {
       }),
     );
 
-    const { streamChat } = await import("@/agent/provider-stream");
+    const { streamChatWithPiAgent } = await import("@/agent/provider-stream");
     const model = getModel("openai-codex", "gpt-5.1-codex-mini");
-    let text = "";
-    const result = await streamChat({
-      messages: [],
-      model: "gpt-5.1-codex-mini",
-      onTextDelta(delta) {
-        text += delta;
+    const stream = await streamChatWithPiAgent(
+      model,
+      {
+        messages: [],
+        systemPrompt: "system",
+        tools: [],
       },
-      provider: "openai-codex",
-      sessionId: "session-1",
-      signal: new AbortController().signal,
-      thinkingLevel: "medium",
-      tools: [],
-    });
+      {
+        apiKey: "api-key",
+        reasoning: "medium",
+        sessionId: "session-1",
+        signal: new AbortController().signal,
+      },
+    );
+    const result = await collectProviderStream(stream);
 
     expect(streamSimple).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -181,21 +197,12 @@ describe("provider stream", () => {
         sessionId: "session-1",
       }),
     );
-    expect(text).toBe("Hello");
-    expect(result.assistantMessage.content).toEqual([{ text: "Hello", type: "text" }]);
-    expect(result.assistantMessage.id).toBeTruthy();
+    expect(result.text).toBe("Hello");
+    expect(result.finalMessage?.content).toEqual([{ text: "Hello", type: "text" }]);
+    expect(result.finalMessage && "id" in result.finalMessage).toBe(true);
   });
 
   it("keeps google gemini requests direct while still delegating to pi-ai", async () => {
-    resolveProviderAuthForProvider.mockResolvedValue({
-      apiKey: JSON.stringify({
-        projectId: "project-1",
-        token: "google-access",
-      }),
-      isOAuth: true,
-      provider: "google-gemini-cli",
-      storedValue: '{"providerId":"google-gemini-cli"}',
-    });
     getProxyConfig.mockResolvedValue({
       enabled: true,
       url: "https://proxy.example/proxy",
@@ -216,18 +223,27 @@ describe("provider stream", () => {
       }),
     );
 
-    const { streamChat } = await import("@/agent/provider-stream");
+    const { streamChatWithPiAgent } = await import("@/agent/provider-stream");
     const model = getModel("google-gemini-cli", "gemini-2.5-pro");
-    const result = await streamChat({
-      messages: [],
-      model: "gemini-2.5-pro",
-      onTextDelta() {},
-      provider: "google-gemini-cli",
-      sessionId: "session-4",
-      signal: new AbortController().signal,
-      thinkingLevel: "medium",
-      tools: [],
+    const apiKey = JSON.stringify({
+      projectId: "project-1",
+      token: "google-access",
     });
+    const stream = await streamChatWithPiAgent(
+      model,
+      {
+        messages: [],
+        systemPrompt: "system",
+        tools: [],
+      },
+      {
+        apiKey,
+        reasoning: "medium",
+        sessionId: "session-4",
+        signal: new AbortController().signal,
+      },
+    );
+    const result = await collectProviderStream(stream);
 
     expect(streamSimple).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -236,22 +252,13 @@ describe("provider stream", () => {
       }),
       expect.any(Object),
       expect.objectContaining({
-        apiKey: JSON.stringify({
-          projectId: "project-1",
-          token: "google-access",
-        }),
+        apiKey,
       }),
     );
-    expect(result.assistantMessage.content).toEqual([{ text: "Gemini", type: "text" }]);
+    expect(result.finalMessage?.content).toEqual([{ text: "Gemini", type: "text" }]);
   });
 
-  it("throws when the delegated stream ends with an error event", async () => {
-    resolveProviderAuthForProvider.mockResolvedValue({
-      apiKey: "api-key",
-      isOAuth: false,
-      provider: "opencode",
-      storedValue: "api-key",
-    });
+  it("emits a diagnostic error when the delegated stream ends with an error event", async () => {
     getProxyConfig.mockResolvedValue({
       enabled: false,
       url: "https://proxy.example/proxy",
@@ -283,25 +290,26 @@ describe("provider stream", () => {
       }),
     );
 
-    const { streamChat } = await import("@/agent/provider-stream");
-    const deltas: Array<string> = [];
-
-    await expect(
-      streamChat({
+    const { streamChatWithPiAgent } = await import("@/agent/provider-stream");
+    const model = getModel("opencode", "gpt-5-nano");
+    const stream = await streamChatWithPiAgent(
+      model,
+      {
         messages: [],
-        model: "gpt-5-nano",
-        onTextDelta(delta) {
-          deltas.push(delta);
-        },
-        provider: "opencode",
+        systemPrompt: "system",
+        tools: [],
+      },
+      {
+        apiKey: "api-key",
+        reasoning: "medium",
         sessionId: "session-error",
         signal: new AbortController().signal,
-        thinkingLevel: "medium",
-        tools: [],
-      }),
-    ).rejects.toThrow("Boom [opencode/gpt-5-nano → https://opencode.ai/zen/v1]");
+      },
+    );
+    const result = await collectProviderStream(stream);
 
-    expect(deltas).toEqual(["Partial"]);
+    expect(result.errorMessage).toBe("Boom [opencode/gpt-5-nano → https://opencode.ai/zen/v1]");
+    expect(result.text).toBe("Partial");
   });
 
   it("preserves pi-ai tool call events for agent mode and attaches app ids", async () => {
