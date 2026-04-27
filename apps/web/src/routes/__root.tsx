@@ -13,7 +13,7 @@ import { Analytics as OneDollarStats } from "@/components/analytics";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { RootGuard } from "@/components/root-guard";
-import { parseSettingsSection } from "@/navigation/search-state";
+import { parseSettingsSection } from "@gitaura/ui/lib/search-state";
 import { SidebarInset, SidebarProvider } from "@gitaura/ui/components/sidebar";
 import { AppSettingsDialog } from "@gitaura/ui/components/settings-dialog";
 import { ThemeProvider } from "@gitaura/ui/components/theme-provider";
