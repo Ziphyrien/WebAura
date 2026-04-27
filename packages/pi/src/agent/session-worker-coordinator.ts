@@ -25,7 +25,6 @@ import { resolveApiKeyForProvider } from "@gitaura/pi/auth/resolve-api-key";
 import { putSession } from "@gitaura/db";
 import { getIsoNow } from "@gitaura/pi/lib/dates";
 import { getCanonicalProvider, getModel } from "@gitaura/pi/models/catalog";
-import { createOptionalRepoRuntime } from "@gitaura/pi/repo/repo-runtime";
 import {
   loadSessionWithMessages,
   buildPersistedSession,
@@ -55,7 +54,6 @@ class WorkerAgentRunner {
   private finalizing = false;
   private promptPending = false;
   private runningTurn?: Promise<void>;
-  private repoRuntime;
   private unsubscribe?: () => void;
   private lastProgressAt = 0;
   private watchdogInterval?: ReturnType<typeof setInterval>;
@@ -72,8 +70,6 @@ class WorkerAgentRunner {
   constructor(store: TurnEventStore) {
     this.store = store;
     this.sessionId = store.session.id;
-    this.repoRuntime = createOptionalRepoRuntime(store.session.repoSource);
-
     const model = getModel(store.session.provider, store.session.model);
     const streamFn: StreamFn = (llmModel, context, streamOptions) =>
       streamChatWithPiAgent(llmModel, context, streamOptions);
@@ -85,7 +81,7 @@ class WorkerAgentRunner {
         this.store.session,
         this.store.transcriptMessages,
         model,
-        this.getAgentTools(this.repoRuntime),
+        this.getAgentTools(),
       ),
       streamFn,
       toolExecution: "sequential",
@@ -474,12 +470,12 @@ class WorkerAgentRunner {
     this.flushTimer = undefined;
   }
 
-  private getAgentTools(runtime = this.repoRuntime): AgentTool[] {
-    if (!runtime) {
+  private getAgentTools(): AgentTool[] {
+    if (!this.store.session.repoSource) {
       return [];
     }
 
-    return createRepoTools(runtime, {
+    return createRepoTools(this.store.session.repoSource, {
       onRepoError: async (error) => {
         const nextError = error instanceof Error ? error : new Error(String(error));
         await this.store.applyEnvelope({

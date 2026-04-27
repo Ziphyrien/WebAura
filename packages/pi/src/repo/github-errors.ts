@@ -1,5 +1,102 @@
-import type { GitHubRateLimitKind } from "./github-rate-limit.js";
-import { GitHubFsError, type GitHubErrorKind } from "./types.js";
+export type GitHubRateLimitKind = "primary" | "secondary" | "unknown";
+
+export interface ParsedGitHubRateLimitInfo {
+  limit: number;
+  remaining: number;
+  reset: Date;
+}
+
+export type GitHubErrorKind =
+  | "not_found"
+  | "auth"
+  | "permission"
+  | "rate_limit"
+  | "conflict"
+  | "validation"
+  | "unsupported"
+  | "network"
+  | "unknown";
+
+export class GitHubApiError extends Error {
+  code: string;
+  githubMessage?: string;
+  isRetryable?: boolean;
+  kind: GitHubErrorKind;
+  path?: string;
+  rateLimitKind?: GitHubRateLimitKind;
+  retryAt?: number;
+  status?: number;
+
+  constructor(options: {
+    cause?: unknown;
+    code: string;
+    githubMessage?: string;
+    isRetryable?: boolean;
+    kind: GitHubErrorKind;
+    message: string;
+    path?: string;
+    rateLimitKind?: GitHubRateLimitKind;
+    retryAt?: number;
+    status?: number;
+  });
+  constructor(code: string, message: string, path?: string);
+  constructor(
+    input:
+      | {
+          cause?: unknown;
+          code: string;
+          githubMessage?: string;
+          isRetryable?: boolean;
+          kind: GitHubErrorKind;
+          message: string;
+          path?: string;
+          rateLimitKind?: GitHubRateLimitKind;
+          retryAt?: number;
+          status?: number;
+        }
+      | string,
+    legacyMessage?: string,
+    legacyPath?: string,
+  ) {
+    const options =
+      typeof input === "string"
+        ? {
+            code: input,
+            isRetryable: input === "EIO",
+            kind: kindFromLegacyCode(input),
+            message: legacyMessage ?? input,
+            path: legacyPath,
+          }
+        : input;
+
+    super(options.message, options.cause ? { cause: options.cause } : undefined);
+    this.name = "GitHubApiError";
+    this.code = options.code;
+    this.githubMessage = options.githubMessage;
+    this.isRetryable = options.isRetryable;
+    this.kind = options.kind;
+    this.path = options.path;
+    this.rateLimitKind = options.rateLimitKind;
+    this.retryAt = options.retryAt;
+    this.status = options.status;
+  }
+}
+
+export function parseGitHubRateLimitInfo(res: Response): ParsedGitHubRateLimitInfo | null {
+  const limit = parsePositiveInt(res.headers.get("x-ratelimit-limit"));
+  const remaining = parsePositiveInt(res.headers.get("x-ratelimit-remaining"));
+  const resetAtSeconds = parsePositiveInt(res.headers.get("x-ratelimit-reset"));
+
+  if (limit === undefined || remaining === undefined || resetAtSeconds === undefined) {
+    return null;
+  }
+
+  return {
+    limit,
+    remaining,
+    reset: new Date(resetAtSeconds * 1000),
+  };
+}
 
 export async function readGitHubErrorMessage(res: Response): Promise<string | undefined> {
   try {
@@ -44,7 +141,7 @@ export function stripAuthorization(headers: Record<string, string>): Record<stri
   return nextHeaders;
 }
 
-export function toGitHubFsError(
+export function toGitHubApiError(
   res: Response,
   path: string,
   detail?: string,
@@ -53,9 +150,9 @@ export function toGitHubFsError(
     rateLimitKind?: GitHubRateLimitKind;
     retryAt?: number;
   },
-): GitHubFsError {
+): GitHubApiError {
   if (isRateLimitResponse(res, detail)) {
-    return new GitHubFsError({
+    return new GitHubApiError({
       code: "EACCES",
       githubMessage: detail,
       isRetryable: true,
@@ -70,7 +167,7 @@ export function toGitHubFsError(
 
   const input = githubErrorFromStatus(res.status);
 
-  return new GitHubFsError({
+  return new GitHubApiError({
     code: input.code,
     githubMessage: detail,
     isRetryable: options?.isRetryable ?? input.isRetryable,
@@ -153,4 +250,31 @@ function buildRateLimitMessage(path: string, retryAt: number | undefined): strin
   }
 
   return `GitHub API rate limit exceeded (retry after ${new Date(retryAt).toLocaleTimeString()}): ${path}`;
+}
+
+function kindFromLegacyCode(code: string): GitHubErrorKind {
+  switch (code) {
+    case "ENOENT":
+      return "not_found";
+    case "EACCES":
+      return "permission";
+    case "EINVAL":
+      return "validation";
+    case "EFBIG":
+    case "EISDIR":
+    case "ENOTDIR":
+    case "ENOTSUP":
+      return "unsupported";
+    default:
+      return "unknown";
+  }
+}
+
+function parsePositiveInt(value: string | null): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }

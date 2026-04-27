@@ -13,7 +13,6 @@ export const SUGGESTED_REPOS: ReadonlyArray<
   { owner: "badlogic", repo: "pi-mono", ref: "main", refOrigin: "default" },
   { owner: "openclaw", repo: "openclaw", ref: "main", refOrigin: "default" },
   { owner: "oven-sh", repo: "bun", ref: "main", refOrigin: "default" },
-  { owner: "vercel-labs", repo: "just-bash", ref: "main", refOrigin: "default" },
   { owner: "Effect-TS", repo: "effect", ref: "main", refOrigin: "default" },
   { owner: "rocicorp", repo: "mono", ref: "main", refOrigin: "default" },
   { owner: "zml", repo: "zml", ref: "main", refOrigin: "default" },

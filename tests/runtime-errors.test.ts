@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import { GitHubFsError } from "@/lib/github";
+import { GitHubApiError } from "@/repo/github-errors";
 import {
   BusyRuntimeError,
   MissingSessionRuntimeError,
@@ -38,7 +38,7 @@ describe("classifyRuntimeError", () => {
 
   it("preserves fingerprints in persisted system messages", () => {
     const classified = classifyRuntimeError(
-      new GitHubFsError("ENOENT", "README.md not found", "/README.md"),
+      new GitHubApiError("ENOENT", "README.md not found", "/README.md"),
     );
     const message = buildSystemMessage(classified, "system-1", 123);
 

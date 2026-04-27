@@ -312,8 +312,8 @@ function AboutPanel() {
               repository and chat in natural language; answers are grounded in the code.
             </li>
             <li>
-              <span className="font-medium text-foreground">Stack</span> - pi-mono, read-only shell
-              via just-bash, and a virtual filesystem backed by the GitHub API.
+              <span className="font-medium text-foreground">Stack</span> - pi-mono with direct
+              GitHub API access for repository content.
             </li>
             <li>
               <span className="font-medium text-foreground">Local first</span> - The agent runs in a

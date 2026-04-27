@@ -44,9 +44,9 @@ function buildMessagesWithTools(): ChatMessage[] {
           type: "toolCall",
         },
         {
-          arguments: { command: 'rg -n "copySessionToClipboard|messagesToMarkdown" -S .' },
-          id: "call-bash",
-          name: "bash",
+          arguments: { path: "packages/pi/src/lib/missing.ts" },
+          id: "call-read-error",
+          name: "read",
           type: "toolCall",
         },
         {
@@ -85,12 +85,11 @@ function buildMessagesWithTools(): ChatMessage[] {
       parentAssistantId: "assistant-1",
       role: "toolResult",
       timestamp: 3,
-      toolCallId: "call-bash",
-      toolName: "bash",
+      toolCallId: "call-read-error",
+      toolName: "read",
       details: {
-        command: 'rg -n "copySessionToClipboard|messagesToMarkdown" -S .',
-        cwd: "/repo",
-        exitCode: 1,
+        path: "packages/pi/src/lib/missing.ts",
+        resolvedPath: "/repo/packages/pi/src/lib/missing.ts",
       },
     },
   ];
@@ -163,11 +162,9 @@ describe("messagesToMarkdown", () => {
     expect(markdown).toContain("   offset: 626");
     expect(markdown).toContain("   limit: 18");
     expect(markdown).toContain("   resolved: /repo/packages/ui/src/components/chat.tsx");
-    expect(markdown).toContain("2. bash — Error");
-    expect(markdown).toContain(
-      '   command: rg -n "copySessionToClipboard|messagesToMarkdown" -S .',
-    );
-    expect(markdown).toContain("   cwd: /repo");
+    expect(markdown).toContain("2. read — Error");
+    expect(markdown).toContain("   path: packages/pi/src/lib/missing.ts");
+    expect(markdown).toContain("   resolved: /repo/packages/pi/src/lib/missing.ts");
     expect(markdown).toContain("   error: command failed loudly");
     expect(markdown).toContain("3. read — Running");
     expect(markdown).toContain("   path: packages/pi/src/lib/copy-session-markdown.ts");

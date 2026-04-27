@@ -1,21 +1,19 @@
-import type { RepoRuntime } from "@gitaura/pi/repo/repo-types";
-import { createBashTool } from "@gitaura/pi/tools/bash";
+import type { ResolvedRepoSource } from "@gitaura/db";
 import { createReadTool } from "@gitaura/pi/tools/read";
 import { toAgentTool, toProviderToolDefinition } from "@gitaura/pi/tools/types";
 
 export function createRepoTools(
-  runtime: RepoRuntime,
+  source: ResolvedRepoSource,
   options?: {
     onRepoError?: (error: unknown) => void | Promise<void>;
   },
 ) {
-  const read = createReadTool(runtime, options?.onRepoError);
-  const bash = createBashTool(runtime, options?.onRepoError);
-  const definitions = [read, bash];
+  const read = createReadTool(source, options?.onRepoError);
+  const definitions = [read];
 
   return {
-    agentTools: [toAgentTool(read), toAgentTool(bash)],
+    agentTools: [toAgentTool(read)],
     definitions,
-    providerTools: [toProviderToolDefinition(read), toProviderToolDefinition(bash)],
+    providerTools: [toProviderToolDefinition(read)],
   };
 }

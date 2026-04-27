@@ -108,14 +108,6 @@ export default defineConfig({
         find: "@/store/auth-store",
         replacement: fromRoot("./apps/web/src/store/auth-store.ts"),
       },
-      { find: "@/lib/github/cache", replacement: fromRoot("./packages/just-github/src/cache.ts") },
-      {
-        find: "@/lib/github/github-fs",
-        replacement: fromRoot("./packages/just-github/src/github-fs.ts"),
-      },
-      { find: "@/lib/github/refs", replacement: fromRoot("./packages/just-github/src/refs.ts") },
-      { find: "@/lib/github/types", replacement: fromRoot("./packages/just-github/src/types.ts") },
-      { find: "@/lib/github", replacement: fromRoot("./packages/just-github/src/index.ts") },
       { find: "@/lib/utils", replacement: fromRoot("./packages/ui/src/lib/utils.ts") },
       { find: "@/types/storage", replacement: fromRoot("./packages/db/src/types.ts") },
       { find: "@/agent", replacement: fromRoot("./packages/pi/src/agent") },
@@ -134,7 +126,6 @@ export default defineConfig({
       { find: "@/tools", replacement: fromRoot("./packages/pi/src/tools") },
       { find: "@/types", replacement: fromRoot("./packages/pi/src/types") },
       { find: "@/test", replacement: fromRoot("./tests/lib") },
-      { find: "@/just-github", replacement: fromRoot("./packages/just-github/src") },
       {
         find: /^@gitaura\/db$/,
         replacement: fromRoot("./packages/db/src/index.ts"),
@@ -149,11 +140,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     testTimeout: 30_000,
-    include: [
-      "tests/**/*.test.ts",
-      "tests/**/*.test.tsx",
-      "packages/just-github/tests/**/*.test.ts",
-    ],
+    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     setupFiles: ["./tests/setup.ts"],
   },
 });

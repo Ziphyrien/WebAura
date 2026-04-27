@@ -1,4 +1,4 @@
-import { GitHubFsError } from "@gitaura/just-github/types";
+import { GitHubApiError } from "@gitaura/pi/repo/github-errors";
 
 export type RuntimeErrorPayload =
   | {
@@ -10,17 +10,17 @@ export type RuntimeErrorPayload =
       code: string;
       githubMessage?: string;
       isRetryable?: boolean;
-      kind: GitHubFsError["kind"];
+      kind: GitHubApiError["kind"];
       message: string;
       path?: string;
-      rateLimitKind?: GitHubFsError["rateLimitKind"];
+      rateLimitKind?: GitHubApiError["rateLimitKind"];
       retryAt?: number;
       status?: number;
       type: "github";
     };
 
 export function serializeRuntimeError(error: unknown): RuntimeErrorPayload {
-  if (error instanceof GitHubFsError) {
+  if (error instanceof GitHubApiError) {
     return {
       code: error.code,
       githubMessage: error.githubMessage,
@@ -46,7 +46,7 @@ export function serializeRuntimeError(error: unknown): RuntimeErrorPayload {
 
 export function deserializeRuntimeError(payload: RuntimeErrorPayload): Error {
   if (payload.type === "github") {
-    return new GitHubFsError({
+    return new GitHubApiError({
       code: payload.code,
       githubMessage: payload.githubMessage,
       isRetryable: payload.isRetryable,

@@ -74,7 +74,7 @@ describe("chat-adapter", () => {
     const tc = {
       arguments: {},
       id: "t1",
-      name: "bash",
+      name: "read",
       type: "toolCall" as const,
     };
     const msg = assistantMessage([{ text: "x", type: "text" }, tc]);
@@ -103,12 +103,12 @@ describe("chat-adapter", () => {
       role: "toolResult",
       timestamp: 0,
       toolCallId: "t1",
-      toolName: "bash",
+      toolName: "read",
     };
     const m: ChatMessage = tr;
     expect(isToolResultMessage(m)).toBe(true);
     if (isToolResultMessage(m)) {
-      expect(m.toolName).toBe("bash");
+      expect(m.toolName).toBe("read");
     }
   });
 });

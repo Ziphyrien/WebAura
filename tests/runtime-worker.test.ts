@@ -331,7 +331,7 @@ describe("runtime worker", () => {
     });
 
     const worker = await import("@/agent/runtime-worker");
-    const repoModule = await import("@/lib/github");
+    const repoModule = await import("@/repo/github-errors");
 
     await worker.startTurn({
       ownerTabId: "tab-1",
@@ -339,7 +339,7 @@ describe("runtime worker", () => {
       turn: createTurn(),
     });
 
-    await onRepoError?.(new repoModule.GitHubFsError("EACCES", "Authentication required: /", "/"));
+    await onRepoError?.(new repoModule.GitHubApiError("EACCES", "Authentication required: /", "/"));
     await flushMicrotasks();
 
     expect(abortMock).toHaveBeenCalledTimes(1);

@@ -2,13 +2,11 @@ import { toast } from "sonner";
 import { env as webEnv } from "@gitaura/env/web";
 import {
   parseGitHubRateLimitInfo,
-  type GitHubRateLimitKind,
-} from "@gitaura/just-github/github-rate-limit";
-import {
   readGitHubErrorMessage,
   shouldRetryUnauthenticated,
   stripAuthorization,
-} from "@gitaura/just-github/github-http";
+  type GitHubRateLimitKind,
+} from "@gitaura/pi/repo/github-errors";
 import { classifyRuntimeError } from "@gitaura/pi/agent/runtime-errors";
 import {
   resolveRegisteredGitHubRequestAuth,

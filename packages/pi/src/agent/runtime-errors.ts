@@ -1,4 +1,4 @@
-import { GitHubFsError } from "@gitaura/just-github/types";
+import { GitHubApiError } from "@gitaura/pi/repo/github-errors";
 import type { SystemMessage } from "@gitaura/pi/types/chat";
 import {
   BusyRuntimeError,
@@ -174,7 +174,7 @@ function fingerprintFor(kind: RuntimeErrorKind, message: string, path?: string):
   return path ? `${base}:${path}` : base;
 }
 
-function classifyGitHubFsKind(error: GitHubFsError): GitHubFsError["kind"] {
+function classifyGitHubApiKind(error: GitHubApiError): GitHubApiError["kind"] {
   const lower = error.message.toLowerCase();
 
   if (lower.includes(RATE_LIMIT_SUBSTR) || lower.includes("rate limit exceeded")) {
@@ -248,9 +248,9 @@ export function classifyRuntimeError(error: unknown): ClassifiedRuntimeError {
     };
   }
 
-  if (error instanceof GitHubFsError) {
+  if (error instanceof GitHubApiError) {
     const path = error.path ?? "";
-    const githubKind = classifyGitHubFsKind(error);
+    const githubKind = classifyGitHubApiKind(error);
 
     if (githubKind === "rate_limit") {
       return {

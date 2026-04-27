@@ -3,27 +3,8 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import { fileURLToPath } from "node:url";
-import { defineConfig, type Plugin } from "vite-plus";
+import { defineConfig } from "vite-plus";
 import { comlink } from "vite-plugin-comlink";
-
-function createBrowserNodeZlibAliasPlugin() {
-  const replacement = fileURLToPath(new URL("./src/shims/node-zlib.ts", import.meta.url));
-  type ApplyToEnvironmentArg = Parameters<NonNullable<Plugin["applyToEnvironment"]>>[0];
-
-  return {
-    applyToEnvironment(environment: ApplyToEnvironmentArg) {
-      return environment.config.consumer === "client";
-    },
-    enforce: "pre" as const,
-    name: "browser-node-zlib-alias",
-    resolveId(id: string) {
-      if (id === "node:zlib") {
-        return replacement;
-      }
-      return undefined;
-    },
-  };
-}
 
 export default defineConfig({
   optimizeDeps: {
@@ -38,14 +19,7 @@ export default defineConfig({
       "@braintree/sanitize-url",
     ],
   },
-  plugins: [
-    comlink(),
-    createBrowserNodeZlibAliasPlugin(),
-    nitro(),
-    tailwindcss(),
-    tanstackStart(),
-    viteReact(),
-  ],
+  plugins: [comlink(), nitro(), tailwindcss(), tanstackStart(), viteReact()],
   resolve: {
     alias: {
       "@gitaura/env/server": fileURLToPath(
@@ -63,6 +37,6 @@ export default defineConfig({
   },
   worker: {
     format: "es",
-    plugins: () => [createBrowserNodeZlibAliasPlugin(), comlink()],
+    plugins: () => [comlink()],
   },
 });

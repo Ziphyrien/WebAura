@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
-import { createRepoRuntime } from "@/repo/repo-runtime";
 import { createReadTool } from "@/tools/read";
 import { installMockRepoFetch, TEST_REPO_SOURCE } from "./repo-test-utils";
 
@@ -13,8 +12,7 @@ describe("read tool", () => {
   });
 
   it("reads repository files and pages long content", async () => {
-    const runtime = createRepoRuntime(TEST_REPO_SOURCE);
-    const tool = createReadTool(runtime);
+    const tool = createReadTool(TEST_REPO_SOURCE);
 
     const result = await tool.execute("call-1", {
       limit: 2,
@@ -30,8 +28,7 @@ describe("read tool", () => {
   });
 
   it("surfaces missing file errors", async () => {
-    const runtime = createRepoRuntime(TEST_REPO_SOURCE);
-    const tool = createReadTool(runtime);
+    const tool = createReadTool(TEST_REPO_SOURCE);
 
     await expect(
       tool.execute("call-2", {

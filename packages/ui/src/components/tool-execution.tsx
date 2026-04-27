@@ -10,12 +10,6 @@ import {
 import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@gitaura/pi/agent/runtime-errors";
 import type { ToolCall, ToolResultMessage } from "@gitaura/pi/types/chat";
 
-interface BashDetails {
-  command: string;
-  cwd: string;
-  exitCode: number;
-}
-
 interface ReadDetails {
   path: string;
   resolvedPath: string;
@@ -23,15 +17,6 @@ interface ReadDetails {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
-}
-
-function isBashDetails(value: unknown): value is BashDetails {
-  return (
-    isObject(value) &&
-    typeof value.command === "string" &&
-    typeof value.cwd === "string" &&
-    typeof value.exitCode === "number"
-  );
 }
 
 function isReadDetails(value: unknown): value is ReadDetails {
@@ -58,9 +43,8 @@ function getDisplayToolResultText(message: ToolResultMessage): string {
 function renderToolResultBody(message: ToolResultMessage) {
   const text = getDisplayToolResultText(message);
   const hasReadDetails = isReadDetails(message.details);
-  const hasBashDetails = isBashDetails(message.details);
 
-  if (!text && !hasReadDetails && !hasBashDetails) {
+  if (!text && !hasReadDetails) {
     return null;
   }
 
@@ -69,17 +53,6 @@ function renderToolResultBody(message: ToolResultMessage) {
       {hasReadDetails ? (
         <div className="text-muted-foreground">
           {message.details.path} → {message.details.resolvedPath}
-        </div>
-      ) : null}
-
-      {hasBashDetails ? (
-        <div className="space-y-1 text-muted-foreground">
-          <div>
-            {message.details.cwd} · exit {message.details.exitCode}
-          </div>
-          <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-md bg-background/60 p-3 font-mono text-foreground/80">
-            {message.details.command}
-          </pre>
         </div>
       ) : null}
 

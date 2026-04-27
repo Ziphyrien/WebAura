@@ -1,12 +1,6 @@
 import type { ToolResultMessage } from "@gitaura/pi/types/chat";
 import { Badge } from "@gitaura/ui/components/badge";
 
-interface BashDetails {
-  command: string;
-  cwd: string;
-  exitCode: number;
-}
-
 interface ReadDetails {
   path: string;
   resolvedPath: string;
@@ -14,15 +8,6 @@ interface ReadDetails {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
-}
-
-function isBashDetails(value: unknown): value is BashDetails {
-  return (
-    isObject(value) &&
-    typeof value.command === "string" &&
-    typeof value.cwd === "string" &&
-    typeof value.exitCode === "number"
-  );
 }
 
 function isReadDetails(value: unknown): value is ReadDetails {
@@ -53,12 +38,6 @@ export function ToolResultBubble(props: { message: ToolResultMessage }) {
       {isReadDetails(props.message.details) ? (
         <div className="text-xs text-muted-foreground">
           {props.message.details.path} → {props.message.details.resolvedPath}
-        </div>
-      ) : null}
-      {isBashDetails(props.message.details) ? (
-        <div className="text-xs text-muted-foreground">
-          {props.message.details.cwd} · exit {props.message.details.exitCode}
-          <div className="mt-1 font-mono text-foreground/80">{props.message.details.command}</div>
         </div>
       ) : null}
       <pre className="overflow-x-auto whitespace-pre-wrap break-words bg-card/60 p-3 text-xs leading-5">

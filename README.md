@@ -34,7 +34,7 @@ We use **Vercel** (hosting) and **OneDollar Stats** for **aggregate** traffic an
 ## How it works
 
 - **Research agent** - Pick a repository and chat in natural language; answers are grounded in the code.
-- **Stack** - [pi-mono](https://github.com/badlogic/pi-mono), read-only shell via [just-bash](https://github.com/vercel-labs/just-bash), and a virtual filesystem backed by the GitHub API via [just-github](https://github.com/ThallesP/just-github).
+- **Stack** - [pi-mono](https://github.com/badlogic/pi-mono) with direct GitHub API access for repository content.
 - **Local first** - Agent work runs in a per-tab `DedicatedWorker`; durable state stays on the main thread through IndexedDB.
 - **Resilient** - Lease ownership, runtime recovery, and interrupted-turn repair all stay inside the browser runtime.
 

@@ -1,6 +1,11 @@
 import { Type, type Static } from "typebox";
-import type { RepoRuntime } from "@gitaura/pi/repo/repo-types";
-import { warningMessageToError } from "@gitaura/pi/tools/repo-warnings";
+import type { ResolvedRepoSource } from "@gitaura/db";
+import {
+  GitHubApiError,
+  readGitHubErrorMessage,
+  toGitHubApiError,
+} from "@gitaura/pi/repo/github-errors";
+import { githubApiFetch } from "@gitaura/pi/repo/github-fetch";
 import {
   DEFAULT_MAX_BYTES,
   DEFAULT_MAX_LINES,
@@ -8,6 +13,8 @@ import {
   type TruncationResult,
 } from "@gitaura/pi/tools/truncate";
 import type { AppToolDefinition } from "@gitaura/pi/tools/types";
+
+const MAX_SUPPORTED_FILE_BYTES = 1_000_000;
 
 const readSchema = Type.Object({
   limit: Type.Optional(
@@ -33,40 +40,158 @@ export interface ReadToolDetails {
   path: string;
   resolvedPath: string;
   truncation?: TruncationResult;
-  warnings?: string[];
 }
 
-function resolveReadPath(runtime: RepoRuntime, path: string): string {
-  if (path.startsWith("/")) {
-    return path;
+type GitHubContentResponse = {
+  content?: string;
+  encoding?: string;
+  name: string;
+  path: string;
+  sha: string;
+  size: number;
+  type: "dir" | "file" | "submodule" | "symlink";
+};
+
+function normalizePath(path: string): string {
+  const trimmed = path.trim();
+
+  if (!trimmed || trimmed === "/" || trimmed === ".") {
+    return "";
   }
 
-  return runtime.fs.resolvePath(runtime.getCwd(), path);
+  const normalizedSegments: string[] = [];
+
+  for (const segment of trimmed.split("/")) {
+    const next = segment.trim();
+
+    if (!next || next === ".") {
+      continue;
+    }
+
+    if (next === "..") {
+      normalizedSegments.pop();
+      continue;
+    }
+
+    normalizedSegments.push(next);
+  }
+
+  return normalizedSegments.join("/");
+}
+
+function encodePath(path: string): string {
+  return path
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+}
+
+function getSourceRef(source: ResolvedRepoSource): string {
+  if (source.resolvedRef.kind === "commit") {
+    return source.resolvedRef.sha;
+  }
+
+  return source.resolvedRef.name;
+}
+
+function buildContentsPath(source: ResolvedRepoSource, path: string): string {
+  const owner = encodeURIComponent(source.owner);
+  const repo = encodeURIComponent(source.repo);
+  const normalizedPath = normalizePath(path);
+  const encodedPath = encodePath(normalizedPath);
+  const ref = encodeURIComponent(getSourceRef(source));
+  const pathSuffix = encodedPath ? `/${encodedPath}` : "";
+
+  return `/repos/${owner}/${repo}/contents${pathSuffix}?ref=${ref}`;
+}
+
+function directoryError(path: string): GitHubApiError {
+  return new GitHubApiError({
+    code: "EISDIR",
+    isRetryable: false,
+    kind: "unsupported",
+    message: `Is a directory: ${path}`,
+    path,
+  });
+}
+
+function unsupportedFileError(path: string, size: number): GitHubApiError {
+  return new GitHubApiError({
+    code: "EFBIG",
+    githubMessage: `File size: ${size} bytes`,
+    isRetryable: false,
+    kind: "unsupported",
+    message: `File is too large for GitAura (${size} bytes): ${path}`,
+    path,
+  });
+}
+
+function decodeBase64(encoded: string): string {
+  const cleaned = encoded.replace(/\n/g, "");
+  const bytes = Uint8Array.from(atob(cleaned), (character) => character.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 }
 
 function isProbablyBinary(content: string): boolean {
   return content.includes("\u0000");
 }
 
+async function readRepoFile(source: ResolvedRepoSource, path: string, signal?: AbortSignal) {
+  const resolvedPath = normalizePath(path);
+  const pathForError = resolvedPath ? `/${resolvedPath}` : "/";
+  const response = await githubApiFetch(buildContentsPath(source, resolvedPath), {
+    access: "repo",
+    signal,
+  });
+
+  if (!response.ok) {
+    throw toGitHubApiError(response, pathForError, await readGitHubErrorMessage(response));
+  }
+
+  const payload = (await response.json()) as GitHubContentResponse | GitHubContentResponse[];
+  if (Array.isArray(payload) || (payload.type !== "file" && payload.type !== "symlink")) {
+    throw directoryError(pathForError);
+  }
+
+  if (payload.size > MAX_SUPPORTED_FILE_BYTES) {
+    throw unsupportedFileError(pathForError, payload.size);
+  }
+
+  if (!payload.content || payload.encoding !== "base64") {
+    throw new GitHubApiError({
+      code: "ENOTSUP",
+      isRetryable: false,
+      kind: "unsupported",
+      message: `GitHub did not return inline text content for: ${pathForError}`,
+      path: pathForError,
+    });
+  }
+
+  return {
+    path: payload.path,
+    resolvedPath: pathForError,
+    text: decodeBase64(payload.content),
+  };
+}
+
 export function createReadTool(
-  runtime: RepoRuntime,
+  source: ResolvedRepoSource,
   onRepoError?: (error: unknown) => void | Promise<void>,
 ): AppToolDefinition<typeof readSchema, ReadToolDetails> {
   return {
     description:
-      "Read text file contents from the active repository. Use offset and limit for large files. " +
+      "Read text file contents from the active GitHub repository. Use offset and limit for large files. " +
       `Output is truncated to ${DEFAULT_MAX_LINES} lines or ${Math.floor(DEFAULT_MAX_BYTES / 1024)}KB.`,
     async execute(_toolCallId, params, signal) {
       if (signal?.aborted) {
         throw new Error("Read aborted");
       }
 
-      const resolvedPath = resolveReadPath(runtime, params.path);
-
-      let text: string;
+      let file: Awaited<ReturnType<typeof readRepoFile>>;
 
       try {
-        text = await runtime.fs.readFile(resolvedPath);
+        file = await readRepoFile(source, params.path, signal);
       } catch (error) {
         if (onRepoError) {
           await onRepoError(error);
@@ -75,13 +200,17 @@ export function createReadTool(
         throw error;
       }
 
-      if (isProbablyBinary(text)) {
-        throw new Error(
-          "Binary files are not supported by read yet. Use bash to inspect metadata instead.",
-        );
+      if (isProbablyBinary(file.text)) {
+        throw new GitHubApiError({
+          code: "ENOTSUP",
+          isRetryable: false,
+          kind: "unsupported",
+          message: "Binary files are not supported by read.",
+          path: file.resolvedPath,
+        });
       }
 
-      const allLines = text.split("\n");
+      const allLines = file.text.split("\n");
       const start = params.offset ? Math.max(0, params.offset - 1) : 0;
 
       if (start >= allLines.length) {
@@ -101,7 +230,7 @@ export function createReadTool(
       if (truncation.firstLineExceedsLimit) {
         output =
           `Line ${start + 1} exceeds the ${Math.floor(DEFAULT_MAX_BYTES / 1024)}KB read limit. ` +
-          "Use bash with a narrower command such as sed or head.";
+          "Use offset and limit to request a narrower range.";
       } else if (truncation.truncated) {
         const endLine = start + truncation.outputLines;
         output += `\n\n[Showing lines ${start + 1}-${endLine}. Use offset=${endLine + 1} to continue.]`;
@@ -109,20 +238,12 @@ export function createReadTool(
         output += `\n\n[More lines remain. Use offset=${start + selectedLines.length + 1} to continue.]`;
       }
 
-      const warnings = runtime.getWarnings();
-      if (onRepoError) {
-        for (const warning of warnings) {
-          await onRepoError(warningMessageToError(warning));
-        }
-      }
-
       return {
         content: [{ text: output, type: "text" }],
         details: {
           path: params.path,
-          resolvedPath,
+          resolvedPath: file.resolvedPath,
           truncation: truncation.truncated ? truncation : undefined,
-          warnings,
         },
       };
     },

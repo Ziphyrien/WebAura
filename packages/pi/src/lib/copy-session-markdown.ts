@@ -84,20 +84,6 @@ function formatToolArguments(toolCall: ToolCall, toolResult?: ToolResultMessage)
     ) {
       lines.push(`   resolved: ${details.resolvedPath}`);
     }
-  } else if (toolCall.name === "bash") {
-    if (typeof args.command === "string") {
-      lines.push(`   command: ${args.command}`);
-    }
-
-    const details = toolResult?.details;
-    if (
-      details &&
-      typeof details === "object" &&
-      "cwd" in details &&
-      typeof details.cwd === "string"
-    ) {
-      lines.push(`   cwd: ${details.cwd}`);
-    }
   } else {
     lines.push(`   args: ${JSON.stringify(args)}`);
   }

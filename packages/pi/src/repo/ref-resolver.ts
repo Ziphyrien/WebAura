@@ -1,5 +1,8 @@
-import { readGitHubErrorMessage, toGitHubFsError } from "@gitaura/just-github/github-http";
-import { GitHubFsError } from "@gitaura/just-github/types";
+import {
+  GitHubApiError,
+  readGitHubErrorMessage,
+  toGitHubApiError,
+} from "@gitaura/pi/repo/github-errors";
 import type { ResolvedRepoRef } from "@gitaura/db";
 import { githubApiFetch } from "@gitaura/pi/repo/github-fetch";
 import type { RepoPathIntent, ResolvedRepoLocation } from "@gitaura/pi/repo/path-intent";
@@ -45,8 +48,8 @@ function requireTrimmed(value: string | undefined, field: string): string {
   return trimmed;
 }
 
-function createRepoRefNotFoundError(path: string): GitHubFsError {
-  return new GitHubFsError({
+function createRepoRefNotFoundError(path: string): GitHubApiError {
+  return new GitHubApiError({
     code: "ENOENT",
     isRetryable: false,
     kind: "not_found",
@@ -56,7 +59,7 @@ function createRepoRefNotFoundError(path: string): GitHubFsError {
 }
 
 async function throwGitHubResponseError(response: Response, path: string): Promise<never> {
-  throw toGitHubFsError(response, path, await readGitHubErrorMessage(response));
+  throw toGitHubApiError(response, path, await readGitHubErrorMessage(response));
 }
 
 async function requestGitHubJson<T>(path: string, pathForError: string): Promise<T> {

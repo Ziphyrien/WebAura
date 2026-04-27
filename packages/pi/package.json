@@ -15,12 +15,10 @@
   "dependencies": {
     "@gitaura/db": "workspace:*",
     "@gitaura/env": "workspace:*",
-    "@gitaura/just-github": "workspace:*",
     "@mariozechner/pi-agent-core": "0.70.2",
     "@mariozechner/pi-ai": "0.70.2",
     "comlink": "^4.4.2",
     "dexie-react-hooks": "^4.2.0",
-    "just-bash": "^2.14.0",
     "react": "catalog:",
     "sonner": "catalog:",
     "typebox": "1.1.24"
