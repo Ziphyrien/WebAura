@@ -52,7 +52,6 @@
         "@gitaura/db": "workspace:*",
         "@gitaura/env": "workspace:*",
         "@gitaura/pi": "workspace:*",
-        "@gitaura/shared": "workspace:*",
         "@gitaura/ui": "workspace:*",
         "@tailwindcss/vite": "^4.2.1",
         "@tanstack/react-query": "^5.96.2",
@@ -137,17 +136,6 @@
       "devDependencies": {
         "@gitaura/config": "workspace:*",
         "@types/react": "catalog:",
-        "typescript": "^5",
-      },
-    },
-    "packages/shared": {
-      "name": "@gitaura/shared",
-      "version": "0.0.0",
-      "dependencies": {
-        "zod": "catalog:",
-      },
-      "devDependencies": {
-        "@gitaura/config": "workspace:*",
         "typescript": "^5",
       },
     },
@@ -550,8 +538,6 @@
     "@gitaura/env": ["@gitaura/env@workspace:packages/env"],
 
     "@gitaura/pi": ["@gitaura/pi@workspace:packages/pi"],
-
-    "@gitaura/shared": ["@gitaura/shared@workspace:packages/shared"],
 
     "@gitaura/ui": ["@gitaura/ui@workspace:packages/ui"],
 

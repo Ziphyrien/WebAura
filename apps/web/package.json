@@ -12,7 +12,6 @@
     "@gitaura/db": "workspace:*",
     "@gitaura/env": "workspace:*",
     "@gitaura/pi": "workspace:*",
-    "@gitaura/shared": "workspace:*",
     "@gitaura/ui": "workspace:*",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.96.2",

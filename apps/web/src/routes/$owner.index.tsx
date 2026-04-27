@@ -8,7 +8,6 @@ export const Route = createFileRoute("/$owner/")({
       throw redirect({
         search: {
           tab: undefined,
-          feedback: undefined,
           settings: undefined,
           sidebar: undefined,
         },

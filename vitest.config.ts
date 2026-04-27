@@ -37,10 +37,6 @@ export default defineConfig({
         replacement: fromRoot("./apps/web/src/components/auth-dialog-wrapper.tsx"),
       },
       {
-        find: "@/components/feedback-dialog",
-        replacement: fromRoot("./apps/web/src/components/feedback-dialog.tsx"),
-      },
-      {
         find: "@/components/pricing-settings-panel",
         replacement: fromRoot("./apps/web/src/components/pricing-settings-panel.tsx"),
       },
@@ -93,10 +89,6 @@ export default defineConfig({
         replacement: fromRoot("./apps/web/src/lib/fetch-dexie-cloud-tokens.ts"),
       },
       {
-        find: "@/lib/feedback.server",
-        replacement: fromRoot("./apps/web/src/lib/feedback.server.ts"),
-      },
-      {
         find: "@/lib/subscription-entitlements",
         replacement: fromRoot("./apps/web/src/lib/subscription-entitlements.ts"),
       },
@@ -129,10 +121,6 @@ export default defineConfig({
       {
         find: /^@gitaura\/db$/,
         replacement: fromRoot("./packages/db/src/index.ts"),
-      },
-      {
-        find: "@gitaura/shared/feedback",
-        replacement: fromRoot("./packages/shared/src/feedback.ts"),
       },
     ],
   },

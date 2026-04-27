@@ -30,7 +30,6 @@ import { Trash2, X } from "lucide-react";
 import type { SettingsSection } from "@gitaura/ui/lib/search-state";
 
 type SessionRouteSearch = {
-  feedback?: "open";
   q: string | undefined;
   settings: SettingsSection | undefined;
   sidebar: "open" | undefined;

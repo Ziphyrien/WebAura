@@ -28,8 +28,7 @@
       "@gitaura/db": ["../../packages/db/src/index.ts"],
       "@gitaura/db/session-leases": ["../../packages/db/src/session-leases.ts"],
       "@gitaura/db/session-runtime": ["../../packages/db/src/session-runtime.ts"],
-      "@gitaura/env/*": ["../../packages/env/src/*"],
-      "@gitaura/shared/*": ["../../packages/shared/src/*"]
+      "@gitaura/env/*": ["../../packages/env/src/*"]
     }
   }
 }

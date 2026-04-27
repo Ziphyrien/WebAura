@@ -1,5 +1,4 @@
 import * as React from "react";
-import { type FeedbackSentiment, parseFeedbackSentiment } from "@gitaura/shared/feedback";
 import {
   HeadContent,
   Link,
@@ -23,37 +22,22 @@ import { TooltipProvider } from "@gitaura/ui/components/tooltip";
 import appCss from "../styles.css?url";
 
 type RootSearchInput = {
-  feedback?: string;
-  feedbackIncludeDiagnostics?: string;
-  feedbackMessage?: string;
-  feedbackSentiment?: string;
   settings?: string;
   sidebar?: string;
 };
 
 type RootSearch = {
-  feedback?: "open";
-  feedbackIncludeDiagnostics?: boolean;
-  feedbackMessage?: string;
-  feedbackSentiment?: FeedbackSentiment;
   settings?: ReturnType<typeof parseSettingsSection>;
   sidebar?: "open";
 };
 
 export const Route = createRootRoute({
   validateSearch: (search: RootSearchInput): RootSearch => ({
-    feedback: search.feedback === "open" ? "open" : undefined,
-    feedbackIncludeDiagnostics: search.feedbackIncludeDiagnostics === "true" ? true : undefined,
-    feedbackMessage:
-      typeof search.feedbackMessage === "string" && search.feedbackMessage.length > 0
-        ? search.feedbackMessage.slice(0, 2_000)
-        : undefined,
-    feedbackSentiment: parseFeedbackSentiment(search.feedbackSentiment),
     settings: parseSettingsSection(search.settings),
     sidebar: search.sidebar === "open" ? "open" : undefined,
   }),
   search: {
-    middlewares: [retainSearchParams(["settings", "sidebar", "feedback"])],
+    middlewares: [retainSearchParams(["settings", "sidebar"])],
   },
   head: () => ({
     meta: [
@@ -183,7 +167,6 @@ function NotFoundPage() {
         className="text-xs underline underline-offset-4 hover:text-foreground"
         search={{
           tab: undefined,
-          feedback: undefined,
           settings: undefined,
           sidebar: undefined,
         }}
