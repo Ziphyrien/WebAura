@@ -172,7 +172,7 @@ function NotFoundPage() {
         }}
         to="/"
       >
-        Go back home
+        Go to chat
       </Link>
     </div>
   );

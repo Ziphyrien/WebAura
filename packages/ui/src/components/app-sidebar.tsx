@@ -176,7 +176,7 @@ export function AppSidebar({ showGetPro = true }: { showGetPro?: boolean } = {})
         runningSessionIds={runningSessionIds}
         sessions={sessionList}
       />
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-sidebar-border md:hidden">
         <ChatFooter showGetPro={showGetPro} />
       </SidebarFooter>
       <SidebarRail />

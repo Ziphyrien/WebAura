@@ -1,12 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-} from "@webaura/ui/components/breadcrumb";
 import { Button } from "@webaura/ui/components/button";
-import { ChatLogo } from "@webaura/ui/components/chat-logo";
 import { Icons } from "@webaura/ui/components/icons";
 import { Separator } from "@webaura/ui/components/separator";
 import { SidebarTrigger } from "@webaura/ui/components/sidebar";
@@ -29,16 +22,6 @@ export function AppHeader() {
         <HeaderTooltip label="Toggle sidebar">
           <SidebarTrigger />
         </HeaderTooltip>
-        <Separator className="mr-2 !h-7 !self-center" orientation="vertical" />
-        <Breadcrumb className="min-w-0 flex-1 overflow-hidden">
-          <BreadcrumbList className="w-full min-w-0 flex-nowrap justify-start text-sm sm:text-base">
-            <BreadcrumbItem className="max-w-full min-w-0 flex-1">
-              <BreadcrumbPage className="block max-w-full min-w-0 p-0">
-                <ChatLogo className="w-auto min-w-0 justify-start" truncate />
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
       </div>
       <div className="flex items-center gap-2 px-3 md:hidden">
         <Button
