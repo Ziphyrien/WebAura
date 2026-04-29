@@ -1,26 +1,19 @@
 import * as React from "react";
 import {
+  ClientOnly,
   HeadContent,
   Link,
-  Outlet,
   Scripts,
   createRootRoute,
   retainSearchParams,
-  useNavigate,
 } from "@tanstack/react-router";
-import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
-import { Analytics as OneDollarStats } from "@/components/analytics";
-import { AppHeader } from "@/components/app-header";
-import { AppSidebar } from "@/components/app-sidebar";
-import { RootGuard } from "@/components/root-guard";
-import { WEB_EXTENSION_SETTINGS } from "@/extensions/ui";
 import { parseSettingsSection } from "@webaura/ui/lib/search-state";
-import { SidebarInset, SidebarProvider } from "@webaura/ui/components/sidebar";
-import { AppSettingsDialog } from "@webaura/ui/components/settings-dialog";
-import { ThemeProvider } from "@webaura/ui/components/theme-provider";
-import { Toaster } from "@webaura/ui/components/sonner";
-import { TooltipProvider } from "@webaura/ui/components/tooltip";
 import appCss from "../styles.css?url";
+
+const RootAppChrome = React.lazy(async () => {
+  const module = await import("../components/root-app-chrome.client");
+  return { default: module.RootAppChrome };
+});
 
 type RootSearchInput = {
   settings?: string;
@@ -94,9 +87,19 @@ export const Route = createRootRoute({
   }),
   notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
-  component: RootAppChrome,
+  component: RootAppChromeBoundary,
   ssr: false,
 });
+
+function RootAppChromeBoundary() {
+  return (
+    <ClientOnly>
+      <React.Suspense fallback={null}>
+        <RootAppChrome />
+      </React.Suspense>
+    </ClientOnly>
+  );
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -105,55 +108,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>{children}</TooltipProvider>
-        </ThemeProvider>
+        {children}
         <Scripts />
-        <VercelAnalytics />
-        <OneDollarStats />
       </body>
     </html>
-  );
-}
-
-function RootAppChrome() {
-  const navigate = useNavigate();
-  const search = Route.useSearch();
-
-  return (
-    <>
-      <RootGuard>
-        <SidebarProvider
-          onOpenChange={(open) => {
-            void navigate({
-              search: (prev) => ({
-                ...prev,
-                sidebar: open ? "open" : undefined,
-              }),
-              to: ".",
-            });
-          }}
-          open={search.sidebar === "open"}
-        >
-          <div className="relative flex h-svh w-full overflow-hidden overscroll-none">
-            <AppSidebar />
-            <SidebarInset className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-              <AppHeader />
-              <main className="flex min-h-0 flex-1 overflow-hidden">
-                <Outlet />
-              </main>
-            </SidebarInset>
-          </div>
-          <AppSettingsDialog extensionSettings={WEB_EXTENSION_SETTINGS} />
-        </SidebarProvider>
-      </RootGuard>
-      <Toaster position="bottom-right" />
-    </>
   );
 }
 

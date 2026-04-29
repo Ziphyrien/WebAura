@@ -19,7 +19,20 @@ export default defineConfig({
       "@braintree/sanitize-url",
     ],
   },
-  plugins: [comlink(), nitro(), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [
+    comlink(),
+    nitro(),
+    tailwindcss(),
+    tanstackStart({
+      importProtection: {
+        behavior: {
+          build: "mock",
+        },
+        mockAccess: "off",
+      },
+    }),
+    viteReact(),
+  ],
   resolve: {
     alias: {
       "@webaura/env/server": fileURLToPath(

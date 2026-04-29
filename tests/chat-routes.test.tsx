@@ -18,7 +18,7 @@ describe("chat routes", () => {
 
     render(<Component />);
 
-    expect(screen.getByTestId("chat-view").textContent).toBe("global");
+    expect((await screen.findByTestId("chat-view")).textContent).toBe("global");
   });
 
   it("renders the shared chat component on /chat", async () => {
@@ -31,7 +31,7 @@ describe("chat routes", () => {
 
     render(<Component />);
 
-    expect(screen.getByTestId("chat-view").textContent).toBe("global");
+    expect((await screen.findByTestId("chat-view")).textContent).toBe("global");
   });
 
   it("passes the session id into the shared chat component for session routes", async () => {
@@ -48,6 +48,6 @@ describe("chat routes", () => {
 
     render(<Component />);
 
-    expect(screen.getByTestId("chat-view").textContent).toBe("session:session-1");
+    expect((await screen.findByTestId("chat-view")).textContent).toBe("session:session-1");
   });
 });
