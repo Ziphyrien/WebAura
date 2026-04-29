@@ -1,10 +1,13 @@
 import * as React from "react";
-import { Link, useNavigate, useRouter, useRouterState, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import type { SettingsSection } from "@webaura/ui/lib/search-state";
 import { Icons } from "@webaura/ui/components/icons";
 import { CostsPanel } from "@webaura/ui/components/costs-panel";
 import { DataSettings } from "@webaura/ui/components/data-settings";
-import { GithubTokenSettings } from "@webaura/ui/components/github-token-settings";
+import {
+  ExtensionsSettings,
+  type ExtensionSettingsEntry,
+} from "@webaura/ui/components/extensions-settings";
 import { ProviderSettings } from "@webaura/ui/components/provider-settings";
 import { ProxySettings } from "@webaura/ui/components/proxy-settings";
 import { Dialog, DialogContent, DialogTitle } from "@webaura/ui/components/dialog";
@@ -44,10 +47,10 @@ const SETTINGS_SECTIONS: Array<SettingsSectionItem> = [
     label: "Providers",
   },
   {
-    description: "Optional local token storage for future GitHub modules",
-    icon: Icons.gitHub,
-    id: "github",
-    label: "GitHub",
+    description: "Enable optional AI-callable browser tools",
+    icon: Icons.sparkles,
+    id: "extensions",
+    label: "Extensions",
   },
   {
     description: "Session and daily usage totals",
@@ -77,11 +80,11 @@ const SETTINGS_SECTIONS: Array<SettingsSectionItem> = [
 
 export function AppSettingsDialog(props: {
   dataPanel?: React.ReactNode;
+  extensionSettings?: readonly ExtensionSettingsEntry[];
   pricingLabel?: string;
   pricingPanel?: React.ReactNode;
 }) {
   const navigate = useNavigate();
-  const router = useRouter();
   const search = useSearch({ strict: false });
   const currentMatch = useRouterState({
     select: (state) => state.matches[state.matches.length - 1],
@@ -211,12 +214,8 @@ export function AppSettingsDialog(props: {
                     }}
                   />
                 ) : null}
-                {section === "github" ? (
-                  <GithubTokenSettings
-                    onTokenSaved={async () => {
-                      await router.invalidate();
-                    }}
-                  />
+                {section === "extensions" ? (
+                  <ExtensionsSettings extensions={props.extensionSettings} />
                 ) : null}
                 {section === "proxy" ? <ProxySettings /> : null}
                 {section === "costs" ? <CostsPanel session={session} /> : null}
@@ -237,7 +236,7 @@ function AboutPanel() {
       <div className="space-y-5 text-sm leading-relaxed">
         <p className="text-foreground">
           WebAura is a local-first AI workspace that runs in your browser. The default experience is
-          plain AI chat; module-specific capabilities can be added later while keeping your own
+          plain AI chat; optional extensions can register AI-callable tools while keeping your own
           credentials in your own browser.
         </p>
 
@@ -248,12 +247,13 @@ function AboutPanel() {
           <div className="space-y-2 text-muted-foreground">
             <p>
               <span className="font-medium text-foreground">Local by default.</span> Chats,
-              sessions, settings, provider keys, GitHub tokens, and usage data stay in this browser.
+              sessions, settings, extension credentials, provider keys, and usage data stay in this
+              browser.
             </p>
             <p>
               <span className="font-medium text-foreground">Network:</span> Model requests go
               directly to the providers you configure, unless you explicitly enable your own proxy
-              in settings. Optional modules may call their own services when you enable them.
+              in settings. Optional extensions may call their own services when you enable them.
             </p>
           </div>
         </div>
@@ -277,11 +277,10 @@ function AboutPanel() {
                     API keys and OAuth credentials for the models you use.
                   </td>
                 </tr>
-                <tr>
-                  <td className="px-3 py-2 font-medium text-foreground">GitHub</td>
+                <tr className="border-b border-border/60">
+                  <td className="px-3 py-2 font-medium text-foreground">Extensions</td>
                   <td className="px-3 py-2">
-                    Optional PAT storage for future GitHub modules or extensions. The default chat
-                    experience does not use GitHub access.
+                    Optional AI-callable tools. Disabled extensions are not exposed to the model.
                   </td>
                 </tr>
               </tbody>

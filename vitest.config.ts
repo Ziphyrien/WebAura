@@ -122,6 +122,10 @@ export default defineConfig({
         find: /^@webaura\/db$/,
         replacement: fromRoot("./packages/db/src/index.ts"),
       },
+      {
+        find: /^@webaura\/extensions\/(.*)$/,
+        replacement: fromRoot("./packages/extensions/src/$1"),
+      },
     ],
   },
   test: {

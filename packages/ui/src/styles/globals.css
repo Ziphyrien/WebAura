@@ -6,6 +6,7 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/inter";
 @source "../../../apps/web/src/**/*.{ts,tsx}";
+@source "../../../extensions/src/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 @source "../../../../node_modules/streamdown/dist/*.js";
 @source "../../../../node_modules/@streamdown/cjk/dist/*.js";

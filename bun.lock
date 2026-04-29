@@ -39,6 +39,7 @@
         "@vercel/analytics": "^2.0.1",
         "@webaura/db": "workspace:*",
         "@webaura/env": "workspace:*",
+        "@webaura/extensions": "workspace:*",
         "@webaura/pi": "workspace:*",
         "@webaura/ui": "workspace:*",
         "dotenv": "catalog:",
@@ -95,6 +96,25 @@
         "@types/node": "catalog:",
         "@webaura/config": "workspace:*",
         "typescript": "^5",
+      },
+    },
+    "packages/extensions": {
+      "name": "@webaura/extensions",
+      "version": "0.0.0",
+      "dependencies": {
+        "@webaura/db": "workspace:*",
+        "@webaura/pi": "workspace:*",
+        "@webaura/ui": "workspace:*",
+        "lucide-react": "^1.0.1",
+        "react": "catalog:",
+        "sonner": "catalog:",
+        "typebox": "1.1.24",
+      },
+      "devDependencies": {
+        "@types/react": "catalog:",
+        "@webaura/config": "workspace:*",
+        "typescript": "^5",
+        "vite": "catalog:",
       },
     },
     "packages/pi": {

@@ -50,8 +50,8 @@ vi.mock("@/components/provider-settings", () => ({
   ProviderSettings: () => React.createElement("div", undefined, "providers"),
 }));
 
-vi.mock("@/components/github-token-settings", () => ({
-  GithubTokenSettings: () => React.createElement("div", undefined, "github"),
+vi.mock("@/components/extensions-settings", () => ({
+  ExtensionsSettings: () => React.createElement("div", undefined, "extensions"),
 }));
 
 vi.mock("@/components/proxy-settings", () => ({
@@ -71,8 +71,8 @@ vi.mock("@/components/icons", () => {
       bank: Icon,
       cost: Icon,
       faceThinking: Icon,
-      gitHub: Icon,
       globe: Icon,
+      sparkles: Icon,
     },
   };
 });

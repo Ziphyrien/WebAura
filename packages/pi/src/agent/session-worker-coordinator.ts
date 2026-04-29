@@ -22,6 +22,10 @@ import { webMessageTransformer } from "@webaura/pi/agent/message-transformer";
 import { streamChatWithPiAgent } from "@webaura/pi/agent/provider-stream";
 import { clampThinkingLevel } from "@webaura/pi/agent/thinking-levels";
 import { resolveApiKeyForProvider } from "@webaura/pi/auth/resolve-api-key";
+import { EMPTY_EXTENSION_RUNTIME } from "@webaura/pi/extensions/runtime";
+import { resolveEnabledExtensionRuntime } from "@webaura/pi/extensions/runtime-provider";
+import { buildExtensionSystemPrompt } from "@webaura/pi/extensions/system-prompt";
+import type { ExtensionRuntimeSnapshot } from "@webaura/pi/extensions/types";
 import { putSession } from "@webaura/db";
 import { getIsoNow } from "@webaura/pi/lib/dates";
 import { getCanonicalProvider, getModel } from "@webaura/pi/models/catalog";
@@ -38,6 +42,7 @@ const TURN_IDLE_POLL_MS = 30_000;
 const STREAM_FLUSH_MS = 50;
 
 type SessionWorkerSeed = {
+  extensionRuntime: ExtensionRuntimeSnapshot;
   runtime?: SessionRuntimeRow;
   session: SessionData;
   transcriptMessages: MessageRow[];
@@ -66,7 +71,10 @@ class WorkerAgentRunner {
   private flushTimer?: ReturnType<typeof setTimeout>;
   private latestResult?: TurnCompletionResult;
 
-  constructor(store: TurnEventStore) {
+  constructor(
+    store: TurnEventStore,
+    private extensionRuntime: ExtensionRuntimeSnapshot,
+  ) {
     this.store = store;
     this.sessionId = store.session.id;
     const model = getModel(store.session.provider, store.session.model);
@@ -81,6 +89,7 @@ class WorkerAgentRunner {
         this.store.transcriptMessages,
         model,
         this.getAgentTools(),
+        buildExtensionSystemPrompt(this.extensionRuntime.enabledExtensions),
       ),
       streamFn,
       toolExecution: "sequential",
@@ -104,6 +113,7 @@ class WorkerAgentRunner {
       throw new BusyRuntimeError(this.sessionId);
     }
 
+    await this.refreshExtensionRuntime();
     this.pendingTerminalResult = undefined;
     this.latestResult = undefined;
     this.promptPending = true;
@@ -475,7 +485,19 @@ class WorkerAgentRunner {
   }
 
   private getAgentTools(): AgentTool[] {
-    return [];
+    return this.extensionRuntime.tools;
+  }
+
+  private async refreshExtensionRuntime(): Promise<void> {
+    if (this.disposed || this.disposeRequested) {
+      return;
+    }
+
+    this.extensionRuntime = await resolveEnabledExtensionRuntime();
+    this.agent.state.tools = this.getAgentTools();
+    this.agent.state.systemPrompt = buildExtensionSystemPrompt(
+      this.extensionRuntime.enabledExtensions,
+    );
   }
 
   private isTurnOpenForEvents(): boolean {
@@ -495,6 +517,7 @@ async function loadSessionSeed(params: {
     }
 
     return {
+      extensionRuntime: EMPTY_EXTENSION_RUNTIME,
       runtime: undefined,
       session: params.fallbackSession,
       transcriptMessages: [],
@@ -502,6 +525,7 @@ async function loadSessionSeed(params: {
   }
 
   return {
+    extensionRuntime: await resolveEnabledExtensionRuntime(),
     runtime: loaded.runtime,
     session: loaded.session,
     transcriptMessages: loaded.messages,
@@ -540,6 +564,7 @@ export class SessionWorkerCoordinator {
         session: seed.session,
         transcriptMessages: seed.transcriptMessages,
       }),
+      seed.extensionRuntime,
     );
   }
 

@@ -17,6 +17,7 @@
     "@vercel/analytics": "^2.0.1",
     "@webaura/db": "workspace:*",
     "@webaura/env": "workspace:*",
+    "@webaura/extensions": "workspace:*",
     "@webaura/pi": "workspace:*",
     "@webaura/ui": "workspace:*",
     "dotenv": "catalog:",

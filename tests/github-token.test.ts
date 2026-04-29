@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
-import { validateGithubPersonalAccessToken } from "@/repo/github-token";
+import { validateGithubPersonalAccessToken } from "../packages/extensions/src/github/token";
 
 describe("validateGithubPersonalAccessToken", () => {
   afterEach(() => {

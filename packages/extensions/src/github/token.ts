@@ -1,14 +1,13 @@
 import { deleteSetting, getSetting, setSetting } from "@webaura/db";
 
-const GITHUB_PAT_KEY = "github.pat";
+const GITHUB_PAT_KEY = "extensions.github.pat";
+const LEGACY_GITHUB_PAT_KEY = "github.pat";
 
-/** Default GitHub token generator for optional future GitHub modules. */
 export const GITHUB_CREATE_PAT_URL =
-  "https://github.com/settings/personal-access-tokens/new?name=WebAura&description=Optional%20token%20for%20WebAura%20GitHub%20modules&expires_in=none";
+  "https://github.com/settings/personal-access-tokens/new?name=WebAura&description=Optional%20token%20for%20WebAura%20GitHub%20extension&expires_in=none";
 
 export type GithubTokenValidation = { ok: true; login: string } | { ok: false; message: string };
 
-/** Confirms the token works without enabling any GitHub module behavior. */
 export async function validateGithubPersonalAccessToken(
   token: string,
 ): Promise<GithubTokenValidation> {
@@ -48,7 +47,12 @@ function trimToUndefined(value: string | undefined): string | undefined {
 
 export async function getGithubPersonalAccessToken(): Promise<string | undefined> {
   const value = await getSetting(GITHUB_PAT_KEY);
-  return typeof value === "string" ? trimToUndefined(value) : undefined;
+  if (typeof value === "string") {
+    return trimToUndefined(value);
+  }
+
+  const legacyValue = await getSetting(LEGACY_GITHUB_PAT_KEY);
+  return typeof legacyValue === "string" ? trimToUndefined(legacyValue) : undefined;
 }
 
 export async function setGithubPersonalAccessToken(token: string | undefined): Promise<void> {
@@ -56,8 +60,10 @@ export async function setGithubPersonalAccessToken(token: string | undefined): P
 
   if (!normalized) {
     await deleteSetting(GITHUB_PAT_KEY);
+    await deleteSetting(LEGACY_GITHUB_PAT_KEY);
     return;
   }
 
   await setSetting(GITHUB_PAT_KEY, normalized);
+  await deleteSetting(LEGACY_GITHUB_PAT_KEY);
 }

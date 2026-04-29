@@ -13,6 +13,7 @@ import { Analytics as OneDollarStats } from "@/components/analytics";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { RootGuard } from "@/components/root-guard";
+import { WEB_EXTENSION_SETTINGS } from "@/extensions/ui";
 import { parseSettingsSection } from "@webaura/ui/lib/search-state";
 import { SidebarInset, SidebarProvider } from "@webaura/ui/components/sidebar";
 import { AppSettingsDialog } from "@webaura/ui/components/settings-dialog";
@@ -148,7 +149,7 @@ function RootAppChrome() {
               </main>
             </SidebarInset>
           </div>
-          <AppSettingsDialog />
+          <AppSettingsDialog extensionSettings={WEB_EXTENSION_SETTINGS} />
         </SidebarProvider>
       </RootGuard>
       <Toaster position="bottom-right" />

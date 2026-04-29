@@ -122,11 +122,12 @@ export function buildInitialAgentState(
   messages: MessageRow[],
   model: Model<any>,
   tools: AgentTool[],
+  systemPrompt = SYSTEM_PROMPT,
 ): Partial<AgentState> {
   return {
     messages: toAgentMessages(messages),
     model,
-    systemPrompt: SYSTEM_PROMPT,
+    systemPrompt,
     thinkingLevel: session.thinkingLevel,
     tools,
   };

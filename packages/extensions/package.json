@@ -1,0 +1,31 @@
+{
+  "name": "@webaura/extensions",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./github": {
+      "types": "./src/github/index.ts",
+      "default": "./src/github/index.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@webaura/db": "workspace:*",
+    "@webaura/pi": "workspace:*",
+    "@webaura/ui": "workspace:*",
+    "lucide-react": "^1.0.1",
+    "react": "catalog:",
+    "sonner": "catalog:",
+    "typebox": "1.1.24"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@webaura/config": "workspace:*",
+    "typescript": "^5",
+    "vite": "catalog:"
+  }
+}

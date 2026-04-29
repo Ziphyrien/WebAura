@@ -1,0 +1,17 @@
+{
+  "extends": "@webaura/config/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "paths": {
+      "@webaura/extensions/*": ["./src/*"],
+      "@webaura/db": ["../db/src/index.ts"],
+      "@webaura/pi/*": ["../pi/src/*"],
+      "@webaura/ui/*": ["../ui/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
+}

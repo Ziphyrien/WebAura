@@ -111,10 +111,6 @@ vi.mock("@/db/session-leases", () => ({
   renewSessionLease,
 }));
 
-vi.mock("@/repo/github-token", () => ({
-  getGithubPersonalAccessToken: vi.fn(async () => undefined),
-}));
-
 vi.mock("@/sessions/session-service", () => ({
   loadSession,
 }));
