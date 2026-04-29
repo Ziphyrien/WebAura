@@ -7,6 +7,10 @@ describe("provider-proxy", () => {
     expect(shouldUseProxyForProvider("opencode", "sk-opencode")).toBe(true);
   });
 
+  it("proxies Kimi coding requests because the browser API is not CORS-safe", () => {
+    expect(shouldUseProxyForProvider("kimi-coding", "kimi-key")).toBe(true);
+  });
+
   it("does not proxy providers outside the supported proxy set", () => {
     expect(shouldUseProxyForProvider("mistral", "mistral-key")).toBe(false);
   });

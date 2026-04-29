@@ -146,7 +146,13 @@ export type ModelSelectorLogoProps = Omit<ComponentProps<"img">, "src" | "alt"> 
 };
 
 function resolveLogoProvider(provider: string): string {
-  return provider === "openai-codex" ? "openai" : provider;
+  if (provider === "openai-codex") {
+    return "openai";
+  }
+  if (provider === "kimi-coding") {
+    return "moonshotai";
+  }
+  return provider;
 }
 
 export const ModelSelectorLogo = ({ provider, className, ...props }: ModelSelectorLogoProps) => {

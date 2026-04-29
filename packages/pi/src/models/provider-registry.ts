@@ -81,7 +81,11 @@ export const PROVIDER_CONFIGS: Partial<Record<KnownProvider, ProviderConfig>> = 
     apiKeySettings: { order: 60 },
   },
   "kimi-coding": {
-    apiKeySettings: { hidden: true },
+    apiKeySettings: { order: 45 },
+    defaultModel: "kimi-for-coding",
+    description: "Kimi API key for coding models",
+    label: "Kimi",
+    modelSelector: { order: 55 },
   },
   mistral: {
     apiKeySettings: { order: 70 },

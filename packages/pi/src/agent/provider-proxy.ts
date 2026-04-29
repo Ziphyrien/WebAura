@@ -12,6 +12,7 @@ export function shouldUseProxyForProvider(provider: string, apiKey: string): boo
     case "openai-codex":
     case "opencode":
     case "opencode-go":
+    case "kimi-coding":
       return true;
     default:
       return false;

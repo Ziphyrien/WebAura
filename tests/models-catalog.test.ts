@@ -54,6 +54,11 @@ describe("model catalog", () => {
   it("returns the configured default models", () => {
     expect(getDefaultModel("openai-codex").id).toBe(DEFAULT_MODELS["openai-codex"]);
     expect(getDefaultModel("anthropic").id).toBe(DEFAULT_MODELS.anthropic);
+    expect(getDefaultModel("kimi-coding").id).toBe("kimi-for-coding");
+  });
+
+  it("keeps Kimi's canonical API model name", () => {
+    expect(getModel("kimi-coding", "kimi-for-coding").name).toBe("Kimi For Coding");
   });
 
   it("falls back to the provider default when the requested model is missing", () => {
@@ -61,7 +66,9 @@ describe("model catalog", () => {
   });
 
   it("exposes provider groups from the shared registry", () => {
-    expect(getProviderGroups()).toEqual(expect.arrayContaining(["opencode", "openai-codex"]));
+    expect(getProviderGroups()).toEqual(
+      expect.arrayContaining(["opencode", "openai-codex", "kimi-coding"]),
+    );
   });
 
   it("calculates per-message cost from usage totals", () => {
