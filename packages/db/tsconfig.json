@@ -1,7 +1,6 @@
 {
   "extends": "@webaura/config/tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
     "paths": {
