@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from "vite-plus/test";
+import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { TurnEventStore } from "@/agent/turn-event-store";
 import {
+  db,
   deleteAllLocalData,
   getDailyCost,
   getSessionMessages,
@@ -336,6 +337,49 @@ describe("TurnEventStore", () => {
       phase: "interrupted",
       status: "interrupted",
       turnId: "turn-interrupted",
+    });
+  });
+
+  it("logs queued operation failures without poisoning later writes", async () => {
+    const session = createSession();
+    const store = new TurnEventStore({
+      runtime: undefined,
+      session,
+      transcriptMessages: [],
+    });
+    const failure = new Error("write failed");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await store.beginTurn({
+      ownerTabId: "tab-1",
+      turn: createTurn(),
+    });
+
+    const putRuntime = vi.spyOn(db.sessionRuntime, "put").mockRejectedValueOnce(failure);
+
+    await expect(
+      store.applyEnvelope({
+        kind: "assistant-stream",
+        message: createAssistantMessage({ id: "assistant-stream", timestamp: 2 }),
+        sessionId: session.id,
+        turnId: "turn-1",
+      }),
+    ).rejects.toThrow("write failed");
+
+    expect(consoleError).toHaveBeenCalledWith("TurnEventStore queued operation failed", failure);
+
+    putRuntime.mockRestore();
+    consoleError.mockRestore();
+
+    await store.applyEnvelope({
+      kind: "progress",
+      sessionId: session.id,
+      turnId: "turn-1",
+    });
+
+    expect(await getSessionRuntime(session.id)).toMatchObject({
+      phase: "running",
+      turnId: "turn-1",
     });
   });
 

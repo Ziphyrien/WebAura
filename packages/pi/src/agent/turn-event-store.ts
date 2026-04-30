@@ -426,7 +426,9 @@ export class TurnEventStore {
     const next = this.queue.then(run);
     this.queue = next.then(
       () => undefined,
-      () => undefined,
+      (error) => {
+        console.error("TurnEventStore queued operation failed", error);
+      },
     );
     return next;
   }

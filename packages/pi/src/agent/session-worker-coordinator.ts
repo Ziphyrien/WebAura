@@ -40,6 +40,7 @@ import type { MessageRow, SessionData, SessionRuntimeRow } from "@webaura/db";
 const TURN_IDLE_TIMEOUT_MS = 15 * 60_000;
 const TURN_IDLE_POLL_MS = 30_000;
 const STREAM_FLUSH_MS = 50;
+const DISPOSE_ABORT_WAIT_MS = 1_000;
 
 type SessionWorkerSeed = {
   extensionRuntime: ExtensionRuntimeSnapshot;
@@ -47,6 +48,29 @@ type SessionWorkerSeed = {
   session: SessionData;
   transcriptMessages: MessageRow[];
 };
+
+async function waitForSettledOrTimeout(
+  promise: Promise<unknown> | undefined,
+  timeoutMs: number,
+): Promise<void> {
+  if (!promise) {
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    const timeout = setTimeout(resolve, timeoutMs);
+    void promise.then(
+      () => {
+        clearTimeout(timeout);
+        resolve();
+      },
+      () => {
+        clearTimeout(timeout);
+        resolve();
+      },
+    );
+  });
+}
 
 class WorkerAgentRunner {
   readonly agent: Agent;
@@ -74,6 +98,7 @@ class WorkerAgentRunner {
   constructor(
     store: TurnEventStore,
     private extensionRuntime: ExtensionRuntimeSnapshot,
+    private readonly onActivity: () => void,
   ) {
     this.store = store;
     this.sessionId = store.session.id;
@@ -94,6 +119,7 @@ class WorkerAgentRunner {
       streamFn,
       toolExecution: "sequential",
     });
+    this.onActivity();
     this.agent.sessionId = this.sessionId;
     this.unsubscribe = this.agent.subscribe((event) => {
       this.enqueueEvent(event);
@@ -192,13 +218,14 @@ class WorkerAgentRunner {
 
     this.disposeRequested = true;
     this.disposePromise = (async () => {
+      this.stopWatchdog();
       if (this.isBusy()) {
         this.pendingTerminalResult ??= {
           sessionId: this.sessionId,
           status: "aborted",
         };
         this.agent.abort();
-        await this.runningTurn?.catch(() => undefined);
+        await waitForSettledOrTimeout(this.runningTurn, DISPOSE_ABORT_WAIT_MS);
       }
 
       this.finalizing = true;
@@ -291,11 +318,15 @@ class WorkerAgentRunner {
           sessionId: this.sessionId,
           status: "error",
         };
-        await this.store.applyEnvelope({
-          error: nextError,
-          kind: "runtime-error",
-          sessionId: this.sessionId,
-        });
+        try {
+          await this.store.applyEnvelope({
+            error: nextError,
+            kind: "runtime-error",
+            sessionId: this.sessionId,
+          });
+        } catch (handlerError) {
+          console.error("SessionWorkerCoordinator failed to persist event error", handlerError);
+        }
         this.agent.abort();
       },
     );
@@ -442,6 +473,7 @@ class WorkerAgentRunner {
 
   private markProgress(): void {
     this.lastProgressAt = Date.now();
+    this.onActivity();
   }
 
   private startWatchdog(): void {
@@ -556,6 +588,7 @@ export class SessionWorkerCoordinator {
   private pendingOperations = 0;
   private disposed = false;
   private disposePromise?: Promise<void>;
+  private lastActivityAt = Date.now();
 
   private constructor(seed: SessionWorkerSeed) {
     this.runner = new WorkerAgentRunner(
@@ -565,6 +598,7 @@ export class SessionWorkerCoordinator {
         transcriptMessages: seed.transcriptMessages,
       }),
       seed.extensionRuntime,
+      () => this.markActivity(),
     );
   }
 
@@ -586,6 +620,10 @@ export class SessionWorkerCoordinator {
 
   isIdle(): boolean {
     return this.pendingOperations === 0 && !this.runner.isBusy();
+  }
+
+  isStale(now: number, maxInactiveMs: number): boolean {
+    return now - this.lastActivityAt >= maxInactiveMs;
   }
 
   async startTurn(input: StartTurnInput): Promise<void> {
@@ -713,16 +751,33 @@ export class SessionWorkerCoordinator {
     return await this.disposePromise;
   }
 
+  private markActivity(): void {
+    this.lastActivityAt = Date.now();
+  }
+
   private run<T>(operation: () => Promise<T>): Promise<T> {
+    this.markActivity();
     this.pendingOperations += 1;
     const next = this.opQueue.then(operation);
-    this.opQueue = next.then(
-      () => undefined,
-      () => undefined,
+    const completed = next.then(
+      (value) => {
+        this.pendingOperations -= 1;
+        this.markActivity();
+        return value;
+      },
+      (error: unknown) => {
+        this.pendingOperations -= 1;
+        this.markActivity();
+        throw error;
+      },
     );
-    return next.finally(() => {
-      this.pendingOperations -= 1;
-    });
+    this.opQueue = completed.then(
+      () => undefined,
+      (error) => {
+        console.error("SessionWorkerCoordinator queued operation failed", error);
+      },
+    );
+    return completed;
   }
 }
 

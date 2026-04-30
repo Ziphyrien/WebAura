@@ -2,6 +2,7 @@ import { getGithubPersonalAccessToken } from "./token";
 import type { JsonValue } from "@webaura/pi/types/common";
 
 const GITHUB_API_BASE_URL = "https://api.github.com";
+const GITHUB_REQUEST_TIMEOUT_MS = 45_000;
 const MAX_TOOL_TEXT_LENGTH = 24_000;
 
 export function stringifyForTool(value: unknown): string {
@@ -95,29 +96,75 @@ function getGitHubErrorMessage(status: number, body: unknown): string {
   return `GitHub API request failed (${status})`;
 }
 
+function createTimeoutSignal(parent?: AbortSignal): {
+  cleanup: () => void;
+  signal: AbortSignal;
+  timedOut: () => boolean;
+} {
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, GITHUB_REQUEST_TIMEOUT_MS);
+  const abortFromParent = () => {
+    controller.abort(parent?.reason);
+  };
+
+  if (parent) {
+    if (parent.aborted) {
+      abortFromParent();
+    } else {
+      parent.addEventListener("abort", abortFromParent, { once: true });
+    }
+  }
+
+  return {
+    cleanup: () => {
+      clearTimeout(timeoutId);
+      parent?.removeEventListener("abort", abortFromParent);
+    },
+    signal: controller.signal,
+    timedOut: () => timedOut,
+  };
+}
+
 export async function githubRequest(path: string, init: RequestInit = {}): Promise<unknown> {
   if (!path.startsWith("/")) {
     throw new Error("GitHub API paths must start with /");
   }
 
-  const token = await getGithubPersonalAccessToken();
-  const response = await fetch(`${GITHUB_API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      Accept: "application/vnd.github+json",
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      "X-GitHub-Api-Version": "2022-11-28",
-      ...init.headers,
-    },
-  });
-  const body = await readResponseBody(response);
+  const timeoutSignal = createTimeoutSignal(init.signal ?? undefined);
 
-  if (!response.ok) {
-    throw new Error(getGitHubErrorMessage(response.status, body));
+  try {
+    const token = await getGithubPersonalAccessToken();
+    const response = await fetch(`${GITHUB_API_BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        Accept: "application/vnd.github+json",
+        ...(init.body ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        "X-GitHub-Api-Version": "2022-11-28",
+        ...init.headers,
+      },
+      signal: timeoutSignal.signal,
+    });
+    const body = await readResponseBody(response);
+
+    if (!response.ok) {
+      throw new Error(getGitHubErrorMessage(response.status, body));
+    }
+
+    return body;
+  } catch (error) {
+    if (timeoutSignal.timedOut()) {
+      throw new Error(`GitHub API request timed out after ${GITHUB_REQUEST_TIMEOUT_MS}ms: ${path}`);
+    }
+
+    throw error;
+  } finally {
+    timeoutSignal.cleanup();
   }
-
-  return body;
 }
 
 export function decodeBase64Bytes(content: string): Uint8Array {

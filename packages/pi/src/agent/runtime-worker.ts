@@ -10,8 +10,36 @@ import type {
 } from "@webaura/pi/agent/runtime-worker-types";
 import type { SessionData } from "@webaura/db";
 
+const COORDINATOR_STALE_MS = 20 * 60_000;
+
 const coordinators = new Map<string, SessionWorkerCoordinator>();
 const coordinatorLoads = new Map<string, Promise<SessionWorkerCoordinator | undefined>>();
+
+function logCoordinatorDisposeError(sessionId: string, error: unknown): void {
+  console.error(`Failed to dispose runtime coordinator for session ${sessionId}`, error);
+}
+
+function disposeCoordinatorInBackground(
+  sessionId: string,
+  coordinator: SessionWorkerCoordinator,
+): void {
+  if (coordinators.get(sessionId) !== coordinator) {
+    return;
+  }
+
+  coordinators.delete(sessionId);
+  void coordinator.dispose().catch((error) => {
+    logCoordinatorDisposeError(sessionId, error);
+  });
+}
+
+function disposeStaleCoordinators(now = Date.now()): void {
+  for (const [sessionId, coordinator] of coordinators) {
+    if (coordinator.isStale(now, COORDINATOR_STALE_MS)) {
+      disposeCoordinatorInBackground(sessionId, coordinator);
+    }
+  }
+}
 
 async function loadCoordinator(params: {
   sessionId: string;
@@ -33,6 +61,7 @@ async function getOrCreateCoordinator(
   sessionId: string,
   options?: { fallbackSession?: SessionData },
 ): Promise<SessionWorkerCoordinator | undefined> {
+  disposeStaleCoordinators();
   const existing = coordinators.get(sessionId);
 
   if (existing) {
@@ -63,6 +92,7 @@ async function getOrCreateCoordinator(
 async function getLoadedCoordinator(
   sessionId: string,
 ): Promise<SessionWorkerCoordinator | undefined> {
+  disposeStaleCoordinators();
   const existing = coordinators.get(sessionId);
 
   if (existing) {
@@ -77,14 +107,25 @@ async function disposeIdleCoordinator(
   sessionId: string,
   coordinator: SessionWorkerCoordinator | undefined,
 ): Promise<void> {
-  if (!coordinator || coordinators.get(sessionId) !== coordinator || !coordinator.isIdle()) {
+  if (!coordinator || coordinators.get(sessionId) !== coordinator) {
     return;
   }
 
-  await coordinator.dispose();
+  if (!coordinator.isIdle()) {
+    if (coordinator.isStale(Date.now(), COORDINATOR_STALE_MS)) {
+      disposeCoordinatorInBackground(sessionId, coordinator);
+    }
+    return;
+  }
 
-  if (coordinators.get(sessionId) === coordinator) {
-    coordinators.delete(sessionId);
+  try {
+    await coordinator.dispose();
+  } catch (error) {
+    logCoordinatorDisposeError(sessionId, error);
+  } finally {
+    if (coordinators.get(sessionId) === coordinator) {
+      coordinators.delete(sessionId);
+    }
   }
 }
 
@@ -115,8 +156,15 @@ export async function disposeSession(sessionId: string): Promise<void> {
     return;
   }
 
-  await coordinator.dispose();
-  coordinators.delete(sessionId);
+  try {
+    await coordinator.dispose();
+  } catch (error) {
+    logCoordinatorDisposeError(sessionId, error);
+  } finally {
+    if (coordinators.get(sessionId) === coordinator) {
+      coordinators.delete(sessionId);
+    }
+  }
 }
 
 export async function setModelSelection(input: ConfigureSessionInput): Promise<void> {

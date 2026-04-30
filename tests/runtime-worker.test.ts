@@ -76,12 +76,12 @@ vi.mock("@mariozechner/pi-agent-core", () => ({
   },
 }));
 
-function createSession(): SessionData {
+function createSession(id = "session-1"): SessionData {
   return {
     cost: 0,
     createdAt: "2026-03-24T12:00:00.000Z",
     error: undefined,
-    id: "session-1",
+    id,
     isStreaming: false,
     messageCount: 0,
     model: "gpt-5.4",
@@ -110,12 +110,12 @@ function createAssistantMessage(overrides: Partial<AssistantMessage> = {}): Assi
   };
 }
 
-function createTurn() {
+function createTurn(turnId = "turn-1") {
   return {
-    turnId: "turn-1",
+    turnId,
     userMessage: {
       content: "hello",
-      id: "user-1",
+      id: turnId === "turn-1" ? "user-1" : `user-${turnId}`,
       role: "user" as const,
       timestamp: 1,
     },
@@ -137,6 +137,7 @@ describe("runtime worker", () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.useRealTimers();
+    vi.restoreAllMocks();
     await deleteAllLocalData();
     promptMock.mockReset();
     abortMock.mockReset();
@@ -278,6 +279,36 @@ describe("runtime worker", () => {
         content: [{ text: "Partial", type: "text" }],
       }),
     });
+  });
+
+  it("evicts stale busy coordinators before loading another session", async () => {
+    let now = Date.parse("2026-03-24T12:00:00.000Z");
+    vi.spyOn(Date, "now").mockImplementation(() => now);
+    promptMock.mockImplementation(async () => {
+      agentState.isStreaming = true;
+      await new Promise<void>(() => {});
+    });
+    const worker = await import("@/agent/runtime-worker");
+
+    await worker.startTurn({
+      ownerTabId: "tab-1",
+      session: createSession(),
+      turn: createTurn(),
+    });
+
+    now += 20 * 60_000 + 1;
+    await worker.setModelSelection({
+      modelId: "gpt-5.5",
+      providerGroup: "openai-codex",
+      sessionId: "missing-session",
+    });
+    const abortsAfterStaleScan = abortMock.mock.calls.length;
+
+    expect(abortsAfterStaleScan).toBe(1);
+
+    await worker.abortTurn("session-1");
+
+    expect(abortMock).toHaveBeenCalledTimes(abortsAfterStaleScan);
   });
 
   it("routes idle configuration changes through the worker", async () => {
