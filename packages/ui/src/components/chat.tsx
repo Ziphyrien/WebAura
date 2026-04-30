@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
-import { event as trackEvent } from "onedollarstats";
 import { toast } from "sonner";
 import { getFoldedToolResultIds } from "@webaura/pi/lib/chat-adapter";
 import { ChatComposer } from "./chat-composer";
@@ -474,9 +473,6 @@ export function Chat(props: ChatProps) {
 
         try {
           await runtime.send(input);
-          void trackEvent("Message sent", "/chat").catch(() => {
-            // Analytics must never interfere with chat sends.
-          });
         } catch (error) {
           const runtimeError = error instanceof Error ? error : new Error(String(error));
           reportRuntimeFailure(runtimeError);

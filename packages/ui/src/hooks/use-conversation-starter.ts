@@ -1,6 +1,5 @@
 import * as React from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { event as trackEvent } from "onedollarstats";
 import { toast } from "sonner";
 import { runtimeClient } from "@webaura/pi/agent/runtime-client";
 import type { UserTurnInput } from "@webaura/pi/agent/user-turn-input";
@@ -42,9 +41,6 @@ export function useConversationStarter() {
         const session = await createSessionForChat(base);
 
         await runtimeClient.startInitialTurn(session, input.initialPrompt);
-        void trackEvent("Message sent").catch(() => {
-          // Analytics must never interfere with chat sends.
-        });
         await navigate({
           params: {
             sessionId: session.id,

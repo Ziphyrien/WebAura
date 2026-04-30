@@ -290,16 +290,6 @@ function AboutPanel() {
 
         <div>
           <div className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-            Analytics
-          </div>
-          <p className="text-muted-foreground">
-            Vercel and OneDollar Stats are used only for aggregate traffic measurement. They are not
-            used to inspect your chats or repository content.
-          </p>
-        </div>
-
-        <div>
-          <div className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
             How it works
           </div>
           <ul className="list-disc space-y-2 pl-5 text-muted-foreground">

@@ -14,7 +14,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatIndexRouteImport } from './routes/chat.index'
 import { Route as ChatSessionIdRouteImport } from './routes/chat.$sessionId'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as ApiERouteImport } from './routes/api/e'
 
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
@@ -41,23 +40,16 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiERoute = ApiERouteImport.update({
-  id: '/api/e',
-  path: '/api/e',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
-  '/api/e': typeof ApiERoute
   '/auth/callback': typeof AuthCallbackRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat/': typeof ChatIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/e': typeof ApiERoute
   '/auth/callback': typeof AuthCallbackRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat': typeof ChatIndexRoute
@@ -66,27 +58,19 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
-  '/api/e': typeof ApiERoute
   '/auth/callback': typeof AuthCallbackRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat/': typeof ChatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/chat'
-    | '/api/e'
-    | '/auth/callback'
-    | '/chat/$sessionId'
-    | '/chat/'
+  fullPaths: '/' | '/chat' | '/auth/callback' | '/chat/$sessionId' | '/chat/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/e' | '/auth/callback' | '/chat/$sessionId' | '/chat'
+  to: '/' | '/auth/callback' | '/chat/$sessionId' | '/chat'
   id:
     | '__root__'
     | '/'
     | '/chat'
-    | '/api/e'
     | '/auth/callback'
     | '/chat/$sessionId'
     | '/chat/'
@@ -95,7 +79,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChatRoute: typeof ChatRouteWithChildren
-  ApiERoute: typeof ApiERoute
   AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
@@ -136,13 +119,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/e': {
-      id: '/api/e'
-      path: '/api/e'
-      fullPath: '/api/e'
-      preLoaderRoute: typeof ApiERouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -161,7 +137,6 @@ const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChatRoute: ChatRouteWithChildren,
-  ApiERoute: ApiERoute,
   AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport

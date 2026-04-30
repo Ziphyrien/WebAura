@@ -1,6 +1,4 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
-import { Analytics as OneDollarStats } from "./analytics";
 import { AppHeader } from "./app-header";
 import { AppSidebar } from "./app-sidebar";
 import { RootGuard } from "./root-guard";
@@ -46,8 +44,6 @@ export function RootAppChrome() {
         </RootGuard>
       </TooltipProvider>
       <Toaster position="bottom-right" />
-      <VercelAnalytics />
-      <OneDollarStats />
     </ThemeProvider>
   );
 }

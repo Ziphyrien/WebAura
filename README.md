@@ -8,7 +8,7 @@ Local-first AI tools, running in your browser.
 
 **We don’t run a backend that stores your chats or credentials.** Session history, model choice, app settings, extension credentials, provider keys / OAuth, and usage totals live **only in this browser** (IndexedDB via [Dexie](https://github.com/dexie/Dexie.js)).
 
-**The app still uses the network:** Model requests go directly to the providers you configure, unless you explicitly route them through **Settings -> Proxy**. Optional extensions may call their own network services when enabled.
+**The app still uses the network:** Model requests go directly to the providers you configure, unless you explicitly route them through **Settings -> Proxy**. Optional extensions may call their own network services when enabled. WebAura does not load third-party analytics or event tracking.
 
 ---
 
@@ -18,12 +18,6 @@ Local-first AI tools, running in your browser.
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **Settings -> Providers**  | LLM API keys and OAuth credentials for the model providers you use.                                                            |
 | **Settings -> Extensions** | Optional AI-callable browser tools and extension-owned credentials/settings. Disabled extensions are not exposed to the model. |
-
----
-
-## Analytics
-
-We use **Vercel** (hosting) and **OneDollar Stats** for **aggregate** traffic and product analytics. These are **private** to the project and are **not** used to inspect your chats, prompts, or repository contents.
 
 ---
 
