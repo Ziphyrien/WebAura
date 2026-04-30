@@ -7,7 +7,6 @@ import type {
   ProviderId,
 } from "@webaura/pi/types/models";
 
-const OPENAI_GPT_5_4_SELECTOR_MODEL_IDS = ["gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"] as const;
 const UNORDERED = 10_000;
 
 export interface ProviderConfig {
@@ -15,11 +14,9 @@ export interface ProviderConfig {
     hidden?: boolean;
     order?: number;
   };
-  defaultModel?: string;
   description?: string;
   label?: string;
   modelSelector?: {
-    modelIds?: readonly string[];
     order?: number;
   };
   oauth?: {
@@ -34,7 +31,6 @@ export const PROVIDER_CONFIGS: Partial<Record<KnownProvider, ProviderConfig>> = 
   },
   anthropic: {
     apiKeySettings: { order: 10 },
-    defaultModel: "claude-sonnet-4-6",
     description: "Claude API and Claude subscription OAuth",
     label: "Anthropic",
     modelSelector: { order: 10 },
@@ -48,7 +44,6 @@ export const PROVIDER_CONFIGS: Partial<Record<KnownProvider, ProviderConfig>> = 
   },
   "github-copilot": {
     apiKeySettings: { hidden: true },
-    defaultModel: "gpt-4o",
     description: "GitHub Copilot subscription and API-compatible access",
     label: "Copilot",
     modelSelector: { order: 20 },
@@ -65,7 +60,6 @@ export const PROVIDER_CONFIGS: Partial<Record<KnownProvider, ProviderConfig>> = 
   },
   "google-gemini-cli": {
     apiKeySettings: { hidden: true },
-    defaultModel: "gemini-2.5-pro",
     description: "Cloud Code Assist OAuth for Gemini models",
     label: "Gemini",
     modelSelector: { order: 30 },
@@ -82,7 +76,6 @@ export const PROVIDER_CONFIGS: Partial<Record<KnownProvider, ProviderConfig>> = 
   },
   "kimi-coding": {
     apiKeySettings: { order: 45 },
-    defaultModel: "kimi-for-coding",
     description: "Kimi API key for coding models",
     label: "Kimi",
     modelSelector: { order: 55 },
@@ -92,23 +85,15 @@ export const PROVIDER_CONFIGS: Partial<Record<KnownProvider, ProviderConfig>> = 
   },
   openai: {
     apiKeySettings: { order: 20 },
-    defaultModel: "gpt-5.4",
     description: "OpenAI API key for GPT and o-series models",
     label: "OpenAI",
-    modelSelector: {
-      modelIds: OPENAI_GPT_5_4_SELECTOR_MODEL_IDS,
-      order: 40,
-    },
+    modelSelector: { order: 40 },
   },
   "openai-codex": {
     apiKeySettings: { hidden: true },
-    defaultModel: "gpt-5.4",
     description: "ChatGPT subscription OAuth and Codex-compatible responses",
     label: "OpenAI Codex",
-    modelSelector: {
-      modelIds: OPENAI_GPT_5_4_SELECTOR_MODEL_IDS,
-      order: 50,
-    },
+    modelSelector: { order: 50 },
     oauth: {
       label: "ChatGPT Plus/Pro",
       order: 20,
@@ -116,14 +101,12 @@ export const PROVIDER_CONFIGS: Partial<Record<KnownProvider, ProviderConfig>> = 
   },
   opencode: {
     apiKeySettings: { order: 30 },
-    defaultModel: "gpt-5.1-codex-mini",
     description: "OpenCode API key for the full OpenCode catalog",
     label: "OpenCode",
     modelSelector: { order: 60 },
   },
   "opencode-go": {
     apiKeySettings: { order: 40 },
-    defaultModel: "glm-5",
     description: "OpenCode Go API key for the Go-line catalog",
     label: "OpenCode Go",
     modelSelector: { order: 70 },
@@ -177,22 +160,6 @@ export function getCanonicalProvider(providerGroup: ProviderGroupId): ProviderId
 
 export function getDefaultProviderGroup(provider: ProviderId): ProviderGroupId {
   return provider as ProviderGroupId;
-}
-
-export function getDefaultModelId(provider: ProviderId): string | undefined {
-  return getProviderConfig(provider)?.defaultModel;
-}
-
-export function getConfiguredDefaultModels(): Partial<Record<ProviderId, string>> {
-  const entries = (Object.entries(PROVIDER_CONFIGS) as Array<[ProviderId, ProviderConfig]>)
-    .filter(([, config]) => typeof config.defaultModel === "string")
-    .map(([provider, config]) => [provider, config.defaultModel as string] as const);
-
-  return Object.fromEntries(entries) as Partial<Record<ProviderId, string>>;
-}
-
-export function getProviderSelectorModelIds(provider: ProviderId): readonly string[] | undefined {
-  return getProviderConfig(provider)?.modelSelector?.modelIds;
 }
 
 export function getOAuthProviderIds(): OAuthProviderId[] {

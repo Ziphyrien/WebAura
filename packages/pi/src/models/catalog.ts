@@ -5,22 +5,13 @@ import { isOAuthCredentials, parseOAuthCredentials } from "@webaura/pi/auth/oaut
 import {
   getAtlasProviderGroups,
   getCanonicalProvider,
-  getConfiguredDefaultModels,
-  getDefaultModelId,
   getDefaultProviderGroup,
   getProviderGroupMetadata,
-  getProviderSelectorModelIds,
   getRuntimeSupportedProviders,
   isProviderGroupId,
 } from "@webaura/pi/models/provider-registry";
 
 const SUPPORTED_PROVIDERS = getRuntimeSupportedProviders();
-
-export const DEFAULT_MODELS = getConfiguredDefaultModels();
-
-function hasConfiguredSelectorModel(provider: ProviderId, modelId: string): boolean {
-  return getProviderSelectorModelIds(provider)?.includes(modelId) ?? false;
-}
 
 function requireProviderGroups(): Array<ProviderGroupId> {
   const groups = getProviderGroups();
@@ -46,76 +37,19 @@ function normalizeLegacyProviderGroupId(group: string): ProviderGroupId {
   return defaultProviderGroup();
 }
 
-/**
- * pi-ai has no `gpt-5.4-nano` under `openai-codex`; reuse OpenAI weights + Codex API template.
- */
-function syntheticOpenAiCodexModel(modelId: string): ModelDefinition | undefined {
-  const openaiModel = getRegistryModel("openai", modelId as never) as ModelDefinition | undefined;
-  const template =
-    (getRegistryModel("openai-codex", "gpt-5.4-mini" as never) as ModelDefinition | undefined) ??
-    (getRegistryModel("openai-codex", "gpt-5.4" as never) as ModelDefinition | undefined);
-  if (!openaiModel || !template) {
-    return undefined;
-  }
-
-  return {
-    ...openaiModel,
-    api: template.api,
-    baseUrl: template.baseUrl,
-    name: modelId === "gpt-5.4-nano" ? "GPT-5.4 Nano" : openaiModel.name,
-    provider: "openai-codex",
-  } as ModelDefinition;
-}
-
-function openAiCodexSelectorModels(
-  codexRegistryModels: Array<ModelDefinition>,
-  selectorModelIds: readonly string[],
-): Array<ModelDefinition> {
-  const byId = new Map(codexRegistryModels.map((model) => [model.id, model]));
-  return selectorModelIds
-    .map((id) => byId.get(id) ?? syntheticOpenAiCodexModel(id))
-    .filter((model): model is ModelDefinition => model !== undefined);
-}
-
 export function getProviders(): Array<ProviderId> {
   return SUPPORTED_PROVIDERS;
 }
 
-function pickSelectorModels(
-  provider: ProviderId,
-  models: Array<ModelDefinition>,
-): Array<ModelDefinition> {
-  const selectorModelIds = getProviderSelectorModelIds(provider);
-  if (!selectorModelIds) {
-    return models;
-  }
-
-  if (provider === "openai-codex") {
-    return openAiCodexSelectorModels(models, selectorModelIds);
-  }
-
-  const byId = new Map(models.map((model) => [model.id, model]));
-  return selectorModelIds
-    .map((id) => byId.get(id))
-    .filter((model): model is ModelDefinition => model !== undefined);
-}
-
 export function getPiAiModels(provider: ProviderId): ModelDefinition[] {
-  const registryModels = getRegistryModels(provider as never) as ModelDefinition[];
-  return pickSelectorModels(provider, registryModels);
+  return getRegistryModels(provider as never) as ModelDefinition[];
 }
 
 export function getPiAiModel(provider: ProviderId, modelId: string): ModelDefinition | undefined {
   const direct = getRegistryModel(provider as never, modelId as never) as
     | ModelDefinition
     | undefined;
-  if (direct) {
-    return direct;
-  }
-  if (provider === "openai-codex" && hasConfiguredSelectorModel(provider, modelId)) {
-    return syntheticOpenAiCodexModel(modelId);
-  }
-  return undefined;
+  return direct;
 }
 
 export function getProviderGroups(): Array<ProviderGroupId> {
@@ -201,18 +135,12 @@ export function getModelsForGroup(providerGroup: ProviderGroupId): Array<ModelDe
   const provider = getCanonicalProvider(group);
   const models = getModels(provider);
 
-  return getProviderSelectorModelIds(provider) ? models : sortModelsForDisplay(models);
+  return sortModelsForDisplay(models);
 }
 
 export function getDefaultModelForGroup(providerGroup: ProviderGroupId): ModelDefinition {
   const group = normalizeLegacyProviderGroupId(providerGroup as string);
-  const firstModel = getModelsForGroup(group).at(0);
-
-  if (firstModel === undefined) {
-    throw new Error(`Missing default model for provider group: ${group}`);
-  }
-
-  return firstModel;
+  return getDefaultModel(getCanonicalProvider(group));
 }
 
 export function hasModelForGroup(providerGroup: ProviderGroupId, modelId: string): boolean {
@@ -228,15 +156,7 @@ export function getModelForGroup(providerGroup: ProviderGroupId, modelId: string
 }
 
 export function getDefaultModel(provider: ProviderId): ModelDefinition {
-  const preferredId = getDefaultModelId(provider);
-  if (preferredId) {
-    const defaultModel = getPiAiModel(provider, preferredId);
-    if (defaultModel) {
-      return defaultModel;
-    }
-  }
-
-  const first = getPiAiModels(provider).at(0);
+  const first = getRegistryModels(provider as never).at(0) as ModelDefinition | undefined;
   if (!first) {
     throw new Error(`Missing default model for provider: ${provider}`);
   }

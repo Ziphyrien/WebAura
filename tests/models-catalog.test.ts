@@ -1,15 +1,28 @@
 import { describe, expect, it } from "vite-plus/test";
+import { getModels as getRegistryModels } from "@mariozechner/pi-ai";
 import { createEmptyUsage } from "@/types/models";
 import { serializeOAuthCredentials } from "@/auth/oauth-types";
 import {
-  DEFAULT_MODELS,
   calculateCost,
+  getCanonicalProvider,
   getConnectedProviders,
   getDefaultModel,
+  getDefaultModelForGroup,
   getModel,
   getModelsForGroup,
   getProviderGroups,
 } from "@/models/catalog";
+import type { ProviderId } from "@/types/models";
+
+function firstRegistryModelId(provider: ProviderId): string {
+  const first = (getRegistryModels(provider as never) as Array<{ id: string }>).at(0);
+
+  if (!first) {
+    throw new Error(`Missing pi-ai registry model for ${provider}`);
+  }
+
+  return first.id;
+}
 
 describe("model catalog", () => {
   it("does not treat a non-OAuth openai-codex key as connected", () => {
@@ -35,13 +48,7 @@ describe("model catalog", () => {
     expect(connected).toContain("openai-codex");
   });
 
-  it("limits OpenAI groups to GPT-5.4 / Mini / Nano in that order", () => {
-    const expected = ["gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"];
-    expect(getModelsForGroup("openai").map((m) => m.id)).toEqual(expected);
-    expect(getModelsForGroup("openai-codex").map((m) => m.id)).toEqual(expected);
-  });
-
-  it("sorts non-OpenAI models by id descending (newer ids first)", () => {
+  it("sorts displayed models by id descending (newer ids first)", () => {
     const models = getModelsForGroup("anthropic");
     const ids = models.map((model) => model.id);
     const sorted = [...ids].sort((left, right) =>
@@ -51,18 +58,23 @@ describe("model catalog", () => {
     expect(ids).toEqual(sorted);
   });
 
-  it("returns the configured default models", () => {
-    expect(getDefaultModel("openai-codex").id).toBe(DEFAULT_MODELS["openai-codex"]);
-    expect(getDefaultModel("anthropic").id).toBe(DEFAULT_MODELS.anthropic);
-    expect(getDefaultModel("kimi-coding").id).toBe("kimi-for-coding");
+  it("uses pi-ai registry order as the only default model source", () => {
+    for (const group of getProviderGroups()) {
+      const provider = getCanonicalProvider(group);
+      const expected = firstRegistryModelId(provider);
+      expect(getDefaultModel(provider).id).toBe(expected);
+      expect(getDefaultModelForGroup(group).id).toBe(expected);
+    }
   });
 
   it("keeps Kimi's canonical API model name", () => {
     expect(getModel("kimi-coding", "kimi-for-coding").name).toBe("Kimi For Coding");
   });
 
-  it("falls back to the provider default when the requested model is missing", () => {
-    expect(getModel("github-copilot", "missing-model").id).toBe("gpt-4o");
+  it("falls back to the pi-ai provider default when the requested model is missing", () => {
+    expect(getModel("github-copilot", "missing-model").id).toBe(
+      firstRegistryModelId("github-copilot"),
+    );
   });
 
   it("exposes provider groups from the shared registry", () => {
