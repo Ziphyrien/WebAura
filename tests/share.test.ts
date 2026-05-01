@@ -1,7 +1,9 @@
 import { webcrypto } from "node:crypto";
-import { beforeAll, describe, expect, it } from "vite-plus/test";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test";
+import { db, setSetting } from "@webaura/db";
 import {
   buildNostrShareEvents,
+  browserNostrRelayDiscovery,
   buildShareSnapshot,
   createShareLink,
   NOSTR_PAYLOAD_LIMIT_BYTES,
@@ -33,6 +35,65 @@ class FakeRelayDiscovery implements NostrRelayDiscovery {
   async probeRelay(candidate: NostrRelayCandidate): Promise<NostrRelayProbeResult> {
     this.probes.push(candidate.url);
     return this.results.get(candidate.url) ?? {};
+  }
+}
+
+type FakeWebSocketMessage = { data: string };
+
+type FakeWebSocketHandler = (message: FakeWebSocketMessage) => void;
+
+class FakeWebSocket {
+  static readonly instances: FakeWebSocket[] = [];
+
+  readonly listeners = new Map<string, FakeWebSocketHandler[]>();
+  readonly sent: string[] = [];
+
+  onclose?: () => void;
+  onerror?: () => void;
+  onmessage?: FakeWebSocketHandler;
+  onopen?: () => void;
+
+  constructor(readonly url: string) {
+    FakeWebSocket.instances.push(this);
+    setTimeout(() => this.dispatch("open"), 0);
+  }
+
+  addEventListener(type: string, handler: FakeWebSocketHandler): void {
+    const handlers = this.listeners.get(type) ?? [];
+    handlers.push(handler);
+    this.listeners.set(type, handlers);
+  }
+
+  removeEventListener(type: string, handler: FakeWebSocketHandler): void {
+    const handlers = this.listeners.get(type) ?? [];
+    this.listeners.set(
+      type,
+      handlers.filter((item) => item !== handler),
+    );
+  }
+
+  close(): void {
+    this.onclose?.();
+  }
+
+  dispatch(type: string, data?: string): void {
+    const message = { data: data ?? "" };
+
+    for (const handler of this.listeners.get(type) ?? []) {
+      handler(message);
+    }
+
+    if (type === "open") {
+      this.onopen?.();
+    } else if (type === "error") {
+      this.onerror?.();
+    } else if (type === "message") {
+      this.onmessage?.(message);
+    }
+  }
+
+  send(data: string): void {
+    this.sent.push(data);
   }
 }
 
@@ -129,6 +190,12 @@ beforeAll(() => {
     configurable: true,
     value: webcrypto,
   });
+});
+
+afterEach(async () => {
+  vi.restoreAllMocks();
+  FakeWebSocket.instances.length = 0;
+  await db.settings.clear();
 });
 
 function encodeTestFragment(fragment: unknown): string {
@@ -340,6 +407,269 @@ describe("share links", () => {
     await expect(readShareFromFragment(hash, { relayTransport: transport })).rejects.toMatchObject({
       code: "missing_manifest",
     });
+  });
+
+  it("discovers NIP-66 relay candidates from the Nostr.watch relay", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+
+    const promise = browserNostrRelayDiscovery.discoverRelays();
+
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+    const socket = FakeWebSocket.instances[0]!;
+    expect(socket.url).toBe("wss://relay.nostr.watch");
+
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(1));
+    const request = JSON.parse(socket.sent[0]!) as [
+      string,
+      string,
+      { kinds: number[]; limit: number },
+    ];
+    expect(request[0]).toBe("REQ");
+    expect(request[2]).toEqual({ kinds: [30166], limit: 100 });
+
+    socket.dispatch(
+      "message",
+      JSON.stringify([
+        "EVENT",
+        request[1],
+        {
+          content: JSON.stringify({ limitation: { max_content_length: 20000 }, read: true }),
+          created_at: 1,
+          id: "nip66-event-1",
+          kind: 30166,
+          pubkey: "pubkey",
+          sig: "sig",
+          tags: [
+            ["d", "wss://relay-a.test/"],
+            ["r", "wss://relay-b.test"],
+            ["rtt-open", "120"],
+            ["rtt-read", "50"],
+            ["rtt-write", "80"],
+            ["R", "!payment"],
+            ["R", "!auth"],
+          ],
+        },
+      ]),
+    );
+    socket.dispatch("message", JSON.stringify(["EOSE", request[1]]));
+
+    await expect(promise).resolves.toEqual([
+      {
+        authRequired: false,
+        latencyMs: 50,
+        maxContentLength: 20000,
+        paymentRequired: false,
+        read: true,
+        url: "wss://relay-a.test",
+      },
+      {
+        authRequired: false,
+        latencyMs: 50,
+        maxContentLength: 20000,
+        paymentRequired: false,
+        read: true,
+        url: "wss://relay-b.test",
+      },
+    ]);
+    expect(fetchSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining("api.nostr.watch"),
+      expect.anything(),
+    );
+    expect(socket.sent).toContain(JSON.stringify(["CLOSE", request[1]]));
+  });
+
+  it("marks NIP-66 paid and auth-required relay candidates from requirement tags", async () => {
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+
+    const promise = browserNostrRelayDiscovery.discoverRelays();
+
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+    const socket = FakeWebSocket.instances[0]!;
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(1));
+    const request = JSON.parse(socket.sent[0]!) as [string, string, unknown];
+
+    socket.dispatch(
+      "message",
+      JSON.stringify([
+        "EVENT",
+        request[1],
+        {
+          content: "not json",
+          created_at: 1,
+          id: "nip66-event-2",
+          kind: 30166,
+          pubkey: "pubkey",
+          sig: "sig",
+          tags: [
+            ["d", "wss://paid-auth.test"],
+            ["R", "payment"],
+            ["R", "auth"],
+          ],
+        },
+      ]),
+    );
+    socket.dispatch("message", JSON.stringify(["EOSE", request[1]]));
+
+    await expect(promise).resolves.toEqual([
+      { authRequired: true, paymentRequired: true, url: "wss://paid-auth.test" },
+    ]);
+  });
+
+  it("probes relay read/write actively and fetches NIP-11 metadata through the configured HTTP proxy", async () => {
+    await db.settings.clear();
+    await setSetting("proxy.enabled", true);
+    await setSetting("proxy.url", "https://proxy.example/proxy/");
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          limitation: { max_content_length: 20000, max_message_length: 30000 },
+          payment_required: false,
+        }),
+        {
+          headers: { "Content-Type": "application/nostr+json" },
+          status: 200,
+        },
+      ),
+    );
+
+    const promise = browserNostrRelayDiscovery.probeRelay({ url: "wss://relay-a.test" });
+
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+    const socket = FakeWebSocket.instances[0]!;
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(1));
+    const readRequest = JSON.parse(socket.sent[0]!) as [string, string, unknown];
+    expect(readRequest[0]).toBe("REQ");
+    socket.dispatch("message", JSON.stringify(["EOSE", readRequest[1]]));
+
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(3));
+    const writeRequest = JSON.parse(socket.sent[2]!) as [string, NostrEvent];
+    expect(writeRequest[0]).toBe("EVENT");
+    socket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
+
+    await expect(promise).resolves.toMatchObject({
+      maxContentLength: 20000,
+      maxMessageLength: 30000,
+      paymentRequired: false,
+      read: true,
+      url: "wss://relay-a.test",
+      write: true,
+    });
+    expect(fetchSpy.mock.calls[0]?.[0]).toBe(
+      "https://proxy.example/proxy/?url=https%3A%2F%2Frelay-a.test%2F",
+    );
+    expect(fetchSpy.mock.calls[0]?.[1]).toMatchObject({
+      headers: { accept: "application/nostr+json" },
+    });
+  });
+
+  it("probes relay NIP-11 metadata directly when the HTTP proxy is disabled", async () => {
+    await db.settings.clear();
+    await setSetting("proxy.enabled", false);
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({}), {
+        headers: { "Content-Type": "application/nostr+json" },
+        status: 200,
+      }),
+    );
+
+    const promise = browserNostrRelayDiscovery.probeRelay({ url: "wss://relay-b.test/path" });
+
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+    const socket = FakeWebSocket.instances[0]!;
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(1));
+    const readRequest = JSON.parse(socket.sent[0]!) as [string, string, unknown];
+    socket.dispatch("message", JSON.stringify(["EOSE", readRequest[1]]));
+
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(3));
+    const writeRequest = JSON.parse(socket.sent[2]!) as [string, NostrEvent];
+    socket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
+
+    await expect(promise).resolves.toMatchObject({
+      read: true,
+      url: "wss://relay-b.test/path",
+      write: true,
+    });
+    expect(fetchSpy.mock.calls[0]?.[0]).toBe("https://relay-b.test/path");
+  });
+
+  it("keeps actively verified relays when NIP-11 metadata fetch fails", async () => {
+    await db.settings.clear();
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("metadata failed"));
+
+    const promise = browserNostrRelayDiscovery.probeRelay({ url: "wss://relay-c.test" });
+
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+    const socket = FakeWebSocket.instances[0]!;
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(1));
+    const readRequest = JSON.parse(socket.sent[0]!) as [string, string, unknown];
+    socket.dispatch("message", JSON.stringify(["EOSE", readRequest[1]]));
+
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(3));
+    const writeRequest = JSON.parse(socket.sent[2]!) as [string, NostrEvent];
+    socket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
+
+    await expect(promise).resolves.toMatchObject({
+      read: true,
+      url: "wss://relay-c.test",
+      write: true,
+    });
+  });
+
+  it("fails Nostr publishing without fallback when NIP-66 discovery returns no candidates", async () => {
+    const transport = new MemoryRelayTransport();
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    const snapshot = buildShareSnapshot([
+      {
+        content: "medium transcript ".repeat(1500),
+        id: "user-medium",
+        role: "user",
+        timestamp: 1,
+      },
+    ]);
+
+    const promise = createShareLink(snapshot, {
+      baseUrl: "https://example.test",
+      compression: "identity",
+      relayTransport: transport,
+    });
+
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+    const socket = FakeWebSocket.instances[0]!;
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(1));
+    const request = JSON.parse(socket.sent[0]!) as [string, string, unknown];
+    socket.dispatch("message", JSON.stringify(["EOSE", request[1]]));
+
+    await expect(promise).rejects.toMatchObject({ code: "publish_failed" });
+    expect(transport.publishedBatches).toHaveLength(0);
+  });
+
+  it("surfaces publish_failed without fallback when NIP-66 discovery is unavailable", async () => {
+    const transport = new MemoryRelayTransport();
+    vi.stubGlobal("WebSocket", FakeWebSocket);
+    const snapshot = buildShareSnapshot([
+      {
+        content: "medium transcript ".repeat(1500),
+        id: "user-medium",
+        role: "user",
+        timestamp: 1,
+      },
+    ]);
+
+    const promise = createShareLink(snapshot, {
+      baseUrl: "https://example.test",
+      compression: "identity",
+      relayTransport: transport,
+    });
+
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+    FakeWebSocket.instances[0]!.dispatch("error");
+
+    await expect(promise).rejects.toMatchObject({ code: "publish_failed" });
+    expect(transport.publishedBatches).toHaveLength(0);
   });
 
   it("discovers and ranks Nostr relays instead of using a static fallback pool", async () => {

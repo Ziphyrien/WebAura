@@ -1,5 +1,7 @@
 import { schnorr } from "@noble/curves/secp256k1";
 import { getAssistantText, getUserAttachments, getUserText } from "@webaura/pi/lib/chat-adapter";
+import { getProxyConfig } from "@webaura/pi/proxy/settings";
+import { buildProxiedUrl } from "@webaura/pi/proxy/url";
 import type { DisplayChatMessage } from "@webaura/pi/types/chat";
 
 export const SHARE_FRAGMENT_PREFIX = "wa1.";
@@ -13,14 +15,16 @@ const MIN_NOSTR_CHUNK_SIZE_BYTES = 1024;
 export const MIN_SUCCESSFUL_NOSTR_RELAYS = 2;
 const MAX_NOSTR_DISCOVERY_CANDIDATES = 24;
 const MAX_NOSTR_PUBLISH_RELAYS = 6;
+const TARGET_NOSTR_DISCOVERED_PUBLISH_RELAYS = 3;
+const NOSTR_RELAY_PROBE_BATCH_SIZE = 6;
 const NOSTR_RELAY_PROBE_TIMEOUT_MS = 5000;
 const NOSTR_DISCOVERY_REQUEST_TIMEOUT_MS = 8000;
+const NOSTR_RELAY_PROBE_EXPIRATION_SECONDS = 60 * 60;
+const NOSTR_WATCH_DISCOVERY_RELAY_URL = "wss://relay.nostr.watch";
+const NIP66_RELAY_DISCOVERY_KIND = 30166;
+const NIP66_DISCOVERY_LIMIT = 100;
 const MIN_NOSTR_RELAY_CONTENT_BYTES = Math.ceil((NOSTR_CHUNK_SIZE_BYTES * 4) / 3);
 const MIN_NOSTR_RELAY_MESSAGE_BYTES = NOSTR_CHUNK_SIZE_BYTES * 2;
-const NOSTR_WATCH_DISCOVERY_ENDPOINTS = [
-  "https://api.nostr.watch/v1/online",
-  "https://api.nostr.watch/v1/relays",
-] as const;
 
 const SHARE_EVENT_KIND = 30078;
 const TEXT_ENCODER = new TextEncoder();
@@ -926,7 +930,14 @@ async function resolvePublishRelays(options: {
   }
 
   const discovery = options.relayDiscovery ?? browserNostrRelayDiscovery;
-  const candidates = await discovery.discoverRelays();
+  let candidates: NostrRelayCandidate[];
+
+  try {
+    candidates = await discovery.discoverRelays();
+  } catch {
+    candidates = [];
+  }
+
   const relays = await selectDiscoveredPublishRelays(candidates, discovery);
 
   if (relays.length < MIN_SUCCESSFUL_NOSTR_RELAYS) {
@@ -948,20 +959,33 @@ async function selectDiscoveredPublishRelays(
     .sort(compareRelayCandidates)
     .slice(0, MAX_NOSTR_DISCOVERY_CANDIDATES);
 
-  const probed = await Promise.all(
-    uniqueCandidates.map(async (candidate) => {
-      try {
-        const result = await discovery.probeRelay(candidate);
-        return mergeProbeResult(candidate, result);
-      } catch {
-        return undefined;
-      }
-    }),
-  );
+  const verified: NostrRelayCandidate[] = [];
 
-  return probed
-    .filter((candidate): candidate is NostrRelayCandidate => candidate !== undefined)
-    .filter(isSuitablePublishRelay)
+  for (
+    let index = 0;
+    index < uniqueCandidates.length && verified.length < TARGET_NOSTR_DISCOVERED_PUBLISH_RELAYS;
+    index += NOSTR_RELAY_PROBE_BATCH_SIZE
+  ) {
+    const batch = uniqueCandidates.slice(index, index + NOSTR_RELAY_PROBE_BATCH_SIZE);
+    const probed = await Promise.all(
+      batch.map(async (candidate) => {
+        try {
+          const result = await discovery.probeRelay(candidate);
+          return mergeProbeResult(candidate, result);
+        } catch {
+          return undefined;
+        }
+      }),
+    );
+
+    verified.push(
+      ...probed
+        .filter((candidate): candidate is NostrRelayCandidate => candidate !== undefined)
+        .filter(isSuitablePublishRelay),
+    );
+  }
+
+  return verified
     .sort(compareRelayCandidates)
     .slice(0, MAX_NOSTR_PUBLISH_RELAYS)
     .map((candidate) => candidate.url);
@@ -1062,11 +1086,17 @@ function mergeProbeResult(
   result: NostrRelayProbeResult,
 ): NostrRelayCandidate {
   return {
-    authRequired: result.authRequired ?? candidate.authRequired,
+    authRequired:
+      result.authRequired === true || candidate.authRequired === true
+        ? true
+        : (result.authRequired ?? candidate.authRequired),
     latencyMs: result.latencyMs ?? candidate.latencyMs,
     maxContentLength: result.maxContentLength ?? candidate.maxContentLength,
     maxMessageLength: result.maxMessageLength ?? candidate.maxMessageLength,
-    paymentRequired: result.paymentRequired ?? candidate.paymentRequired,
+    paymentRequired:
+      result.paymentRequired === true || candidate.paymentRequired === true
+        ? true
+        : (result.paymentRequired ?? candidate.paymentRequired),
     read: result.read ?? candidate.read,
     url: normalizeRelayUrl(result.url ?? candidate.url) ?? candidate.url,
     write: result.write ?? candidate.write,
@@ -1368,26 +1398,7 @@ export const browserNostrRelayTransport: NostrRelayTransport = new BrowserNostrR
 
 class BrowserNostrRelayDiscovery implements NostrRelayDiscovery {
   async discoverRelays(): Promise<NostrRelayCandidate[]> {
-    if (typeof fetch === "undefined") {
-      throw new ShareError("publish_failed", "This browser cannot discover public Nostr relays.");
-    }
-
-    for (const endpoint of NOSTR_WATCH_DISCOVERY_ENDPOINTS) {
-      try {
-        const response = await fetchJsonWithTimeout(endpoint, NOSTR_DISCOVERY_REQUEST_TIMEOUT_MS, {
-          accept: "application/json",
-        });
-        const candidates = extractRelayCandidates(response);
-
-        if (candidates.length > 0) {
-          return candidates;
-        }
-      } catch {
-        // Try the next Nostr.watch endpoint before reporting discovery failure.
-      }
-    }
-
-    return [];
+    return discoverNip66RelayCandidates(NOSTR_WATCH_DISCOVERY_RELAY_URL);
   }
 
   async probeRelay(candidate: NostrRelayCandidate): Promise<NostrRelayProbeResult> {
@@ -1398,18 +1409,239 @@ class BrowserNostrRelayDiscovery implements NostrRelayDiscovery {
     }
 
     const startedAt = nowMs();
-    const metadata = await fetchRelayInformationDocument(url);
+    const activeProbe = await probeRelayReadWrite(url);
     const latencyMs = candidate.latencyMs ?? Math.max(0, Math.round(nowMs() - startedAt));
+
+    if (activeProbe.read !== true || activeProbe.write !== true) {
+      return {
+        ...activeProbe,
+        latencyMs,
+        url,
+      };
+    }
+
+    let metadata: NostrRelayProbeResult = {};
+
+    try {
+      metadata = await fetchRelayInformationDocument(url);
+    } catch {
+      // NIP-11 endpoints often fail through CORS/proxies. Active relay protocol checks are authoritative for read/write.
+    }
 
     return {
       ...metadata,
-      latencyMs,
+      authRequired: metadata.authRequired ?? activeProbe.authRequired,
+      latencyMs: metadata.latencyMs ?? latencyMs,
+      paymentRequired: metadata.paymentRequired ?? activeProbe.paymentRequired,
+      read: activeProbe.read,
       url,
+      write: activeProbe.write,
     };
   }
 }
 
 export const browserNostrRelayDiscovery: NostrRelayDiscovery = new BrowserNostrRelayDiscovery();
+
+async function discoverNip66RelayCandidates(relayUrl: string): Promise<NostrRelayCandidate[]> {
+  const socket = await openRelaySocket(relayUrl);
+  const subscriptionId = bytesToBase64Url(randomBytes(8));
+
+  return new Promise((resolve, reject) => {
+    const events: NostrEvent[] = [];
+    let settled = false;
+
+    const settle = (candidates: NostrRelayCandidate[]) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      window.clearTimeout(timeoutId);
+      socket.close();
+      resolve(candidates);
+    };
+
+    const fail = () => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      window.clearTimeout(timeoutId);
+      socket.close();
+      reject(new ShareError("relay_failed", `Could not read NIP-66 discovery from ${relayUrl}.`));
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      settle(extractNip66RelayCandidates(events));
+    }, NOSTR_DISCOVERY_REQUEST_TIMEOUT_MS);
+
+    socket.addEventListener("message", (message) => {
+      const parsed = parseRelayMessage(message.data);
+
+      if (!Array.isArray(parsed) || parsed[1] !== subscriptionId) {
+        return;
+      }
+
+      if (
+        parsed[0] === "EVENT" &&
+        isNostrEvent(parsed[2]) &&
+        parsed[2].kind === NIP66_RELAY_DISCOVERY_KIND
+      ) {
+        events.push(parsed[2]);
+      }
+
+      if (parsed[0] === "EOSE") {
+        socket.send(JSON.stringify(["CLOSE", subscriptionId]));
+        settle(extractNip66RelayCandidates(events));
+      }
+    });
+    socket.addEventListener("error", fail);
+    socket.send(
+      JSON.stringify([
+        "REQ",
+        subscriptionId,
+        { kinds: [NIP66_RELAY_DISCOVERY_KIND], limit: NIP66_DISCOVERY_LIMIT },
+      ]),
+    );
+  });
+}
+
+async function probeRelayReadWrite(relayUrl: string): Promise<NostrRelayProbeResult> {
+  const socket = await openRelaySocket(relayUrl);
+
+  try {
+    const readProbe = await probeRelayRead(socket);
+
+    if (readProbe.read !== true) {
+      return {
+        ...readProbe,
+        url: relayUrl,
+        write: false,
+      };
+    }
+
+    const writeProbe = await probeRelayWrite(socket);
+
+    return {
+      authRequired: writeProbe.authRequired ?? readProbe.authRequired,
+      paymentRequired: writeProbe.paymentRequired ?? readProbe.paymentRequired,
+      read: true,
+      url: relayUrl,
+      write: writeProbe.write,
+    };
+  } finally {
+    socket.close();
+  }
+}
+
+function probeRelayRead(socket: WebSocket): Promise<NostrRelayProbeResult> {
+  const subscriptionId = bytesToBase64Url(randomBytes(8));
+
+  return new Promise((resolve) => {
+    const finish = (result: NostrRelayProbeResult) => {
+      socket.removeEventListener("message", handleMessage);
+      window.clearTimeout(timeoutId);
+      socket.send(JSON.stringify(["CLOSE", subscriptionId]));
+      resolve(result);
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      finish({ read: false });
+    }, NOSTR_RELAY_PROBE_TIMEOUT_MS);
+
+    const handleMessage = (message: MessageEvent) => {
+      const parsed = parseRelayMessage(message.data);
+
+      if (!Array.isArray(parsed) || parsed[1] !== subscriptionId) {
+        return;
+      }
+
+      if (parsed[0] === "EVENT" || parsed[0] === "EOSE") {
+        finish({ read: true });
+      } else if (parsed[0] === "CLOSED") {
+        finish({
+          ...parseRelayRestrictionMessage(parsed[2]),
+          read: false,
+        });
+      }
+    };
+
+    socket.addEventListener("message", handleMessage);
+    socket.send(JSON.stringify(["REQ", subscriptionId, { kinds: [SHARE_EVENT_KIND], limit: 1 }]));
+  });
+}
+
+async function probeRelayWrite(socket: WebSocket): Promise<NostrRelayProbeResult> {
+  const event = await buildRelayWriteProbeEvent();
+
+  return new Promise((resolve) => {
+    const finish = (result: NostrRelayProbeResult) => {
+      socket.removeEventListener("message", handleMessage);
+      window.clearTimeout(timeoutId);
+      resolve(result);
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      finish({ write: false });
+    }, NOSTR_RELAY_PROBE_TIMEOUT_MS);
+
+    const handleMessage = (message: MessageEvent) => {
+      const parsed = parseRelayMessage(message.data);
+
+      if (!Array.isArray(parsed) || parsed[0] !== "OK" || parsed[1] !== event.id) {
+        return;
+      }
+
+      if (parsed[2] === true) {
+        finish({ write: true });
+      } else {
+        finish({
+          ...parseRelayRestrictionMessage(parsed[3]),
+          write: false,
+        });
+      }
+    };
+
+    socket.addEventListener("message", handleMessage);
+    socket.send(JSON.stringify(["EVENT", event]));
+  });
+}
+
+async function buildRelayWriteProbeEvent(): Promise<NostrEvent> {
+  const secretKey = schnorr.utils.randomSecretKey(randomBytes(48));
+  const pubkey = bytesToHex(schnorr.getPublicKey(secretKey));
+  const probeId = bytesToBase64Url(randomBytes(16));
+  const chunkBytes = randomBytes(NOSTR_CHUNK_SIZE_BYTES);
+  const hash = bytesToHex(await sha256(chunkBytes));
+  const expiresAt = Math.floor(Date.now() / 1000) + NOSTR_RELAY_PROBE_EXPIRATION_SECONDS;
+
+  return signEvent(
+    createUnsignedEvent({
+      content: bytesToBase64Url(chunkBytes),
+      pubkey,
+      tags: [
+        ["d", `${probeId}:chunk:0`],
+        ["client", SHARE_APP_ID],
+        ["webaura-share", probeId],
+        ["type", "probe"],
+        ["index", "0"],
+        ["sha256", hash],
+        ["expiration", String(expiresAt)],
+      ],
+    }),
+    secretKey,
+  );
+}
+
+function parseRelayRestrictionMessage(message: unknown): NostrRelayProbeResult {
+  const normalized = typeof message === "string" ? message.toLowerCase() : "";
+
+  return {
+    authRequired: normalized.includes("auth") ? true : undefined,
+    paymentRequired: normalized.includes("payment") ? true : undefined,
+  };
+}
 
 async function fetchJsonWithTimeout(
   url: string,
@@ -1437,8 +1669,9 @@ async function fetchJsonWithTimeout(
 
 async function fetchRelayInformationDocument(relayUrl: string): Promise<NostrRelayProbeResult> {
   const metadataUrl = relayUrlToMetadataUrl(relayUrl);
+  const requestUrl = await resolveRelayMetadataRequestUrl(metadataUrl);
   const startedAt = nowMs();
-  const response = await fetchJsonWithTimeout(metadataUrl, NOSTR_RELAY_PROBE_TIMEOUT_MS, {
+  const response = await fetchJsonWithTimeout(requestUrl, NOSTR_RELAY_PROBE_TIMEOUT_MS, {
     accept: "application/nostr+json",
   });
   const metadata = parseRelayCandidate(response, relayUrl) ?? { url: relayUrl };
@@ -1450,69 +1683,107 @@ async function fetchRelayInformationDocument(relayUrl: string): Promise<NostrRel
   };
 }
 
+async function resolveRelayMetadataRequestUrl(metadataUrl: string): Promise<string> {
+  const proxy = await getProxyConfig();
+  return proxy.enabled ? buildProxiedUrl(proxy.url, metadataUrl) : metadataUrl;
+}
+
 function relayUrlToMetadataUrl(relayUrl: string): string {
   const url = new URL(relayUrl);
   url.protocol = url.protocol === "ws:" ? "http:" : "https:";
   return url.toString();
 }
 
-function extractRelayCandidates(value: unknown): NostrRelayCandidate[] {
-  const candidates: NostrRelayCandidate[] = [];
-
-  collectRelayCandidates(value, candidates, 0);
-  return dedupeCandidates(candidates);
+function extractNip66RelayCandidates(events: readonly NostrEvent[]): NostrRelayCandidate[] {
+  return dedupeCandidates(events.flatMap((event) => parseNip66RelayDiscoveryEvent(event)));
 }
 
-function collectRelayCandidates(
-  value: unknown,
-  candidates: NostrRelayCandidate[],
-  depth: number,
-  keyedUrl?: string,
-): void {
-  if (depth > 4) {
-    return;
-  }
+function parseNip66RelayDiscoveryEvent(event: NostrEvent): NostrRelayCandidate[] {
+  const relayUrls = new Set<string>();
+  const tagCandidate: Partial<NostrRelayCandidate> = {};
 
-  if (typeof value === "string") {
-    const url = normalizeRelayUrl(value);
+  for (const tag of event.tags) {
+    const [name, value] = tag;
 
-    if (url) {
-      candidates.push({ url });
-    }
+    if (name === "d" || name === "r") {
+      const url = normalizeRelayUrl(value ?? "");
 
-    return;
-  }
-
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      collectRelayCandidates(item, candidates, depth + 1);
-    }
-
-    return;
-  }
-
-  if (!isRecord(value)) {
-    return;
-  }
-
-  const direct = parseRelayCandidate(value, keyedUrl);
-
-  if (direct) {
-    candidates.push(direct);
-  }
-
-  for (const [key, child] of Object.entries(value)) {
-    if (key === "relays" || key === "data" || key === "results") {
-      collectRelayCandidates(child, candidates, depth + 1);
+      if (url) {
+        relayUrls.add(url);
+      }
       continue;
     }
 
-    const url = normalizeRelayUrl(key);
+    if (name === "rtt-open" || name === "rtt-read" || name === "rtt-write") {
+      const latency = parseFiniteNumber(value);
 
-    if (url) {
-      collectRelayCandidates(child, candidates, depth + 1, url);
+      if (latency !== undefined) {
+        tagCandidate.latencyMs = Math.min(tagCandidate.latencyMs ?? latency, latency);
+      }
+      continue;
+    }
+
+    if (name === "R") {
+      applyNip66Requirement(value, tagCandidate);
     }
   }
+
+  const contentMetadata = parseNip66ContentMetadata(event.content);
+  const candidates: NostrRelayCandidate[] = [];
+
+  for (const url of relayUrls) {
+    candidates.push({
+      ...(parseRelayCandidate(contentMetadata, url) ?? { url }),
+      ...tagCandidate,
+      url,
+    });
+  }
+
+  return candidates;
+}
+
+function applyNip66Requirement(
+  requirement: string | undefined,
+  candidate: Partial<NostrRelayCandidate>,
+): void {
+  const normalized = requirement?.trim().toLowerCase();
+
+  if (!normalized) {
+    return;
+  }
+
+  if (normalized === "auth") {
+    candidate.authRequired = true;
+  } else if (normalized === "payment") {
+    candidate.paymentRequired = true;
+  } else if (normalized === "!auth") {
+    candidate.authRequired = false;
+  } else if (normalized === "!payment") {
+    candidate.paymentRequired = false;
+  }
+}
+
+function parseNip66ContentMetadata(content: string): unknown {
+  const trimmed = content.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return undefined;
+  }
+}
+
+function parseFiniteNumber(value: string | undefined): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function parseRelayCandidate(value: unknown, keyedUrl?: string): NostrRelayCandidate | undefined {

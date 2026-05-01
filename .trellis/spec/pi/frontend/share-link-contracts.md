@@ -42,8 +42,11 @@ export interface NostrRelayDiscovery {
 - Nostr relays receive encrypted chunk content plus public event metadata only.
 - Nostr shares use one fresh signing key per share and include the successful relay URLs in the fragment.
 - Nostr publish relays must be dynamically discovered and verified through `NostrRelayDiscovery` unless tests explicitly inject relays.
+- Browser Nostr.watch discovery must query `kind: 30166` NIP-66 events from `wss://relay.nostr.watch`; do not use old `api.nostr.watch` REST endpoints or proxy those endpoints.
+- NIP-11 relay metadata fetches should use the configured HTTP proxy when proxy settings are enabled, because relay metadata endpoints often fail browser CORS.
+- NIP-66 discovery data and NIP-11 metadata are only candidate hints. Publishing still requires explicit relay WebSocket read/write verification.
 - Do not keep or use a hardcoded publish relay fallback list. If discovery/probing cannot prove enough suitable relays, fail clearly instead of guessing.
-- Relay candidates requiring auth/payment, lacking explicit read/write verification, or advertising too-small content/message limits must not be used for publishing.
+- Relay candidates requiring auth/payment, failing explicit WebSocket read/write verification, or advertising too-small content/message limits must not be used for publishing.
 - Nostr chunks are published before the manifest.
 - Readers must validate Nostr event ids, pubkeys, Schnorr signatures, chunk descriptors, chunk sizes, chunk hashes, and total encrypted payload size before decrypting.
 
@@ -54,7 +57,7 @@ export interface NostrRelayDiscovery {
 - Malformed fragment or snapshot JSON -> `ShareError("invalid_link")`.
 - AES-GCM decrypt failure -> `ShareError("decrypt_failed")`.
 - Payload too large before publish or after decode -> `ShareError("oversized")`.
-- Nostr.watch discovery or relay probing cannot produce at least two verified publish relays -> `ShareError("publish_failed")`.
+- `wss://relay.nostr.watch` NIP-66 discovery fails, returns no usable candidates, or relay probing cannot produce at least two verified publish relays -> `ShareError("publish_failed")`.
 - Fewer than two successful relay writes -> `ShareError("publish_failed")`.
 - Missing/tampered manifest -> `ShareError("missing_manifest")`.
 - Missing/tampered chunk -> `ShareError("missing_chunks")`.
@@ -63,8 +66,8 @@ export interface NostrRelayDiscovery {
 ### 5. Good/Base/Bad Cases
 
 - Good: A short chat produces `/share#wa1...`, opens without network access, and renders the same sanitized transcript.
-- Base: A medium chat publishes encrypted chunks to multiple discovered, verified relays, records only successful relays in the link, and reads successfully when at least one copy of every event survives.
-- Bad: Discovery returns one relay or only unverified candidates; publish fails before sending any chunks instead of using a static fallback.
+- Base: A medium chat reads NIP-66 candidates from `wss://relay.nostr.watch`, verifies suitable relays, publishes encrypted chunks to multiple verified relays, records only successful relays in the link, and reads successfully when at least one copy of every event survives.
+- Bad: Nostr.watch relay discovery fails, returns one relay, or only returns unverified candidates; publish fails before sending any chunks instead of using a static fallback or old REST endpoint.
 - Bad: A relay returns an event with the requested id but invalid signature; the reader rejects it before assembling or decrypting payload bytes.
 
 ### 6. Tests Required
@@ -73,6 +76,11 @@ export interface NostrRelayDiscovery {
 - Assert URL mode link creation keeps plaintext out of the non-fragment URL and round-trips through `readShareFromFragment`.
 - Assert oversized payloads reject before publishing.
 - Assert Nostr publish order sends chunks before the manifest.
+- Assert Nostr discovery queries `wss://relay.nostr.watch` with a `kind: 30166` request.
+- Assert NIP-66 discovery parses relay URLs, latency hints, auth/payment hints, and JSON NIP-11 content.
+- Assert relay probing performs active WebSocket read/write verification.
+- Assert optional NIP-11 relay metadata fetches use the configured HTTP proxy when enabled and direct URLs when disabled.
+- Assert old `api.nostr.watch` REST endpoints are not fetched.
 - Assert Nostr discovery ranks verified low-latency candidates and filters paid/auth/small/unverified relays.
 - Assert Nostr publish fails without static fallback when discovery cannot produce enough verified relays.
 - Assert Nostr read tolerates partial relay failure.

@@ -7,6 +7,15 @@ import { toast } from "sonner";
 import { getFoldedToolResultIds } from "@webaura/pi/lib/chat-adapter";
 import { ChatComposer } from "./chat-composer";
 import { SessionUtilityActions } from "./session-utility-actions";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@webaura/ui/components/dialog";
+import { Button } from "@webaura/ui/components/button";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatMessage as ChatMessageBlock } from "./chat-message";
 import type { UserTurnInput } from "@webaura/pi/agent/user-turn-input";
@@ -20,7 +29,12 @@ import {
 import { StatusShimmer } from "@webaura/ui/components/ai-elements/shimmer";
 import { ProgressiveBlur } from "@webaura/ui/components/progressive-blur";
 import { copySessionToClipboard } from "@webaura/pi/lib/copy-session-markdown";
-import { buildShareSnapshot, createShareLink, ShareError } from "@webaura/pi/lib/share";
+import {
+  buildShareSnapshot,
+  createShareLink,
+  ShareError,
+  type CreatedShareLink,
+} from "@webaura/pi/lib/share";
 import { db } from "@webaura/db";
 import { runtimeClient } from "@webaura/pi/agent/runtime-client";
 import { getRuntimeCommandErrorMessage } from "@webaura/pi/agent/runtime-command-errors";
@@ -178,6 +192,9 @@ export function Chat(props: ChatProps) {
   const providerKeysResult = useLiveQuery(() => db.providerKeys.toArray(), []);
   const providerKeys = Array.isArray(providerKeysResult) ? providerKeysResult : [];
   const [draft, setDraft] = React.useState<EmptyChatDraft | undefined>(undefined);
+  const [manualShareLink, setManualShareLink] = React.useState<CreatedShareLink | undefined>(
+    undefined,
+  );
   const runtime = useRuntimeSession(props.sessionId);
   const { isStartingSession, startNewConversation } = useConversationStarter();
   const ownership = useSessionOwnership(
@@ -513,23 +530,38 @@ export function Chat(props: ChatProps) {
       title: activeSession?.title,
     });
 
-    void createShareLink(snapshot).then(
-      async (share) => {
-        await navigator.clipboard.writeText(share.link);
-        toast.success(
-          share.mode === "nostr" ? "Copied encrypted Nostr share link" : "Copied share link",
-        );
-      },
-      (error) => {
+    void createShareLink(snapshot)
+      .then(async (share) => {
+        try {
+          await navigator.clipboard.writeText(share.link);
+          toast.success(
+            share.mode === "nostr" ? "Copied encrypted Nostr share link" : "Copied share link",
+          );
+        } catch {
+          setManualShareLink(share);
+          toast.error("Share link created, but clipboard access was blocked");
+        }
+      })
+      .catch((error: unknown) => {
         if (error instanceof ShareError) {
           toast.error(error.message);
           return;
         }
 
         toast.error("Failed to create share link");
-      },
-    );
+      });
   }, [activeSession?.model, activeSession?.provider, activeSession?.title, draft?.model, messages]);
+
+  const handleCopyManualShareLink = React.useCallback(() => {
+    if (!manualShareLink) {
+      return;
+    }
+
+    void navigator.clipboard.writeText(manualShareLink.link).then(
+      () => toast.success("Copied share link"),
+      () => toast.error("Failed to copy share link"),
+    );
+  }, [manualShareLink]);
 
   if (loadedSessionState === undefined) {
     return <LoadingState label="Loading session..." />;
@@ -566,6 +598,37 @@ export function Chat(props: ChatProps) {
       className="relative flex size-full min-h-0 flex-col overflow-hidden"
       style={{ "--chat-input-height": `${promptHeight}px` } as React.CSSProperties}
     >
+      <Dialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setManualShareLink(undefined);
+          }
+        }}
+        open={manualShareLink !== undefined}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Share Link Ready</DialogTitle>
+            <DialogDescription>
+              Browser clipboard access was blocked after the encrypted share finished publishing.
+              Copy the generated link manually.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-sm border border-border bg-muted/40 p-2">
+            <textarea
+              className="h-28 w-full resize-none bg-transparent font-mono text-xs text-foreground outline-none"
+              readOnly
+              value={manualShareLink?.link ?? ""}
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleCopyManualShareLink} type="button">
+              Copy Link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Conversation className="min-h-0 flex-1">
         <ConversationContent
           className={`mx-auto w-full max-w-4xl px-4 py-6 ${
