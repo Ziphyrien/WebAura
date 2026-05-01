@@ -2,7 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import type { MouseEvent } from "react";
 
-import { Sidebar, SidebarFooter, SidebarHeader, SidebarRail } from "@webaura/ui/components/sidebar";
+import { Sidebar, SidebarFooter, SidebarRail } from "@webaura/ui/components/sidebar";
 import { ChatFooter } from "@webaura/ui/components/chat-footer";
 import { ChatSessionList } from "@webaura/ui/components/chat-session-list";
 import { listSessionLeases, listSessions } from "@webaura/db";
@@ -138,7 +138,6 @@ export function AppSidebar({ showGetPro = true }: { showGetPro?: boolean } = {})
 
   return (
     <Sidebar className="border-r-0">
-      <SidebarHeader className="h-14 shrink-0 justify-center border-b border-sidebar-border"></SidebarHeader>
       <ChatSessionList
         activeSessionId={activeSessionId}
         createSessionTarget={{
