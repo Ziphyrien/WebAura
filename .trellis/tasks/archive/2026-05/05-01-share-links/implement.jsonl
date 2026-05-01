@@ -1,0 +1,6 @@
+{"file":".trellis/spec/web/frontend/index.md","reason":"Share route and app-level client route implementation must follow web frontend conventions."}
+{"file":".trellis/spec/ui/frontend/index.md","reason":"Chat utility action and share dialog/page UI changes must follow shared UI package conventions."}
+{"file":".trellis/spec/pi/frontend/index.md","reason":"Share protocol, snapshot, crypto, and Nostr client helpers belong in the pi frontend package."}
+{"file":".trellis/spec/guides/index.md","reason":"Feature spans UI, routing, protocol helpers, and runtime display data; use shared cross-layer and reuse guidance."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Search existing copy/export/session helpers before adding new snapshot utilities."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Ensure share snapshot format, encoded link format, route parsing, and UI rendering stay consistent across layers."}

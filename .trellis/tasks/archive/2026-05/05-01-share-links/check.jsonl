@@ -1,0 +1,6 @@
+{"file":".trellis/spec/web/frontend/index.md","reason":"Verify share route integration and app frontend conventions."}
+{"file":".trellis/spec/ui/frontend/index.md","reason":"Verify shared UI component changes and interaction behavior."}
+{"file":".trellis/spec/pi/frontend/index.md","reason":"Verify protocol utilities, crypto boundaries, and type-safety in pi frontend package."}
+{"file":".trellis/spec/guides/index.md","reason":"Check cross-layer share data flow and reuse decisions."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Check for duplicate extraction/formatting logic that should reuse chat-adapter/copy helpers."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Check link schema, snapshot schema, and UI decoding path for boundary mismatches."}
