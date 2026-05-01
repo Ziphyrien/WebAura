@@ -1,5 +1,6 @@
-import { SparkleIcon } from "@phosphor-icons/react";
+import { SparkleIcon, LightbulbIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { CHAT_SUGGESTIONS } from "@webaura/ui/components/chat-suggestions";
+import { Card, CardHeader, CardTitle, CardContent } from "@webaura/ui/components/card";
 
 export function ChatEmptyState({
   onSuggestionClick,
@@ -7,33 +8,56 @@ export function ChatEmptyState({
   onSuggestionClick: (text: string) => void;
 }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-6">
-      <div className="flex w-full max-w-sm flex-col items-center gap-4 text-center">
-        <div className="flex flex-col items-center justify-center gap-2">
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <h2 className="font-geist-pixel-square text-2xl font-semibold tracking-tight text-foreground">
-              Ask plainly.
-            </h2>
-            <SparkleIcon className="size-6 shrink-0 text-muted-foreground" weight="fill" />
-            <h2 className="font-geist-pixel-square text-2xl font-semibold tracking-tight text-muted-foreground">
-              Think locally.
-            </h2>
+    <div className="flex flex-1 flex-col items-center justify-center px-4 md:px-8 mt-12 mb-8">
+      <div className="flex w-full max-w-2xl flex-col items-center gap-10 text-center">
+        {/* Hero Section */}
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1 mb-2">
+            <SparkleIcon className="size-3.5 text-primary animate-pulse" weight="fill" />
+            <span className="text-xs font-medium text-muted-foreground">
+              Local-first AI Assistant
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Start a normal AI chat. Your sessions and credentials stay in this browser.
+          <h1 className="bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
+            Welcome to WebAura
+          </h1>
+          <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8 mt-2">
+            All your sessions and credentials securely stay right here in your browser.
           </p>
         </div>
 
-        <div className="flex w-full flex-col">
+        {/* Suggestions Grid */}
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 mt-4 text-left">
           {CHAT_SUGGESTIONS.map((suggestion) => (
-            <button
-              className="w-full px-3 py-1.5 text-left text-sm text-muted-foreground/70 transition-colors hover:bg-muted/50 hover:text-foreground"
+            <Card
+              className="cursor-pointer transition-colors hover:bg-muted/50"
               key={suggestion}
               onClick={() => onSuggestionClick(suggestion)}
-              type="button"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSuggestionClick(suggestion);
+                }
+              }}
             >
-              {suggestion}
-            </button>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-muted-foreground leading-relaxed">
+                  {suggestion}
+                </CardTitle>
+                <LightbulbIcon
+                  className="size-4 text-muted-foreground shrink-0 ml-2"
+                  weight="duotone"
+                />
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-center text-xs text-muted-foreground opacity-70">
+                  Click to start
+                  <ArrowRightIcon className="ml-1 size-3" weight="bold" />
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
