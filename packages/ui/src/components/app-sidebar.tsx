@@ -1,10 +1,9 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
+import { useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import type { MouseEvent } from "react";
 
 import { Sidebar, SidebarFooter, SidebarHeader, SidebarRail } from "@webaura/ui/components/sidebar";
 import { ChatFooter } from "@webaura/ui/components/chat-footer";
-import { ChatLogo } from "@webaura/ui/components/chat-logo";
 import { ChatSessionList } from "@webaura/ui/components/chat-session-list";
 import { listSessionLeases, listSessions } from "@webaura/db";
 import { getCurrentTabId } from "@webaura/pi/agent/tab-id";
@@ -139,15 +138,7 @@ export function AppSidebar({ showGetPro = true }: { showGetPro?: boolean } = {})
 
   return (
     <Sidebar className="border-r-0">
-      <SidebarHeader className="h-14 shrink-0 justify-center border-b border-sidebar-border">
-        <Link
-          className="-m-1 flex w-full min-w-0 items-center justify-center rounded-md p-1 outline-none ring-offset-background transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
-          search={{ settings, sidebar }}
-          to="/"
-        >
-          <ChatLogo />
-        </Link>
-      </SidebarHeader>
+      <SidebarHeader className="h-14 shrink-0 justify-center border-b border-sidebar-border"></SidebarHeader>
       <ChatSessionList
         activeSessionId={activeSessionId}
         createSessionTarget={{
