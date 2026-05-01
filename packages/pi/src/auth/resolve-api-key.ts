@@ -142,16 +142,9 @@ function buildResolvedProviderAuth(
   }
 
   const credentials = parseOAuthCredentials(storedValue);
-  const apiKey =
-    credentials.providerId === "google-gemini-cli"
-      ? JSON.stringify({
-          projectId: credentials.projectId,
-          token: credentials.access,
-        })
-      : credentials.access;
 
   return {
-    apiKey,
+    apiKey: credentials.access,
     isOAuth: true,
     provider,
     storedValue,

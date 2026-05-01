@@ -2,7 +2,6 @@ import { getIsoNow } from "@webaura/pi/lib/dates";
 import { deleteProviderKey, getProviderKey, setProviderKey } from "@webaura/db";
 import { loginAnthropic } from "@webaura/pi/auth/providers/anthropic";
 import { loginGitHubCopilot } from "@webaura/pi/auth/providers/github-copilot";
-import { loginGeminiCli } from "@webaura/pi/auth/providers/google-gemini-cli";
 import { loginOpenAICodex } from "@webaura/pi/auth/providers/openai-codex";
 import {
   isOAuthProviderId,
@@ -37,8 +36,6 @@ export async function oauthLogin(
       return await loginAnthropic(redirectUri, options);
     case "github-copilot":
       return await loginGitHubCopilot(onDeviceCode ?? (() => {}), options);
-    case "google-gemini-cli":
-      return await loginGeminiCli(redirectUri, options);
     case "openai-codex":
       return await loginOpenAICodex(redirectUri, options);
   }

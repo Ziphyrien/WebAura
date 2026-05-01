@@ -14,7 +14,6 @@ export interface ProxyRequestOptions {
 }
 
 export interface OAuthRequestOptions extends ProxyRequestOptions {
-  googleProjectId?: string;
   onManualRedirect?: (request: ManualOAuthRedirectRequest) => Promise<string>;
 }
 

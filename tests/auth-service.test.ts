@@ -5,11 +5,9 @@ const getProviderKey = vi.fn();
 const setProviderKey = vi.fn();
 const loginAnthropic = vi.fn();
 const loginGitHubCopilot = vi.fn();
-const loginGeminiCli = vi.fn();
 const loginOpenAICodex = vi.fn();
 const refreshAnthropic = vi.fn();
 const refreshGitHubCopilot = vi.fn();
-const refreshGeminiCli = vi.fn();
 const refreshOpenAICodex = vi.fn();
 
 vi.mock("@webaura/db", () => ({
@@ -28,11 +26,6 @@ vi.mock("@/auth/providers/github-copilot", () => ({
   refreshGitHubCopilot,
 }));
 
-vi.mock("@/auth/providers/google-gemini-cli", () => ({
-  loginGeminiCli,
-  refreshGeminiCli,
-}));
-
 vi.mock("@/auth/providers/openai-codex", () => ({
   loginOpenAICodex,
   refreshOpenAICodex,
@@ -45,11 +38,9 @@ describe("auth service", () => {
     setProviderKey.mockReset();
     loginAnthropic.mockReset();
     loginGitHubCopilot.mockReset();
-    loginGeminiCli.mockReset();
     loginOpenAICodex.mockReset();
     refreshAnthropic.mockReset();
     refreshGitHubCopilot.mockReset();
-    refreshGeminiCli.mockReset();
     refreshOpenAICodex.mockReset();
   });
 
@@ -61,31 +52,31 @@ describe("auth service", () => {
   });
 
   it("stores credentials returned by browser OAuth login", async () => {
-    loginGeminiCli.mockResolvedValue({
+    loginOpenAICodex.mockResolvedValue({
       access: "access",
+      accountId: "acct-1",
       expires: Date.now() + 60_000,
-      projectId: "project-1",
-      providerId: "google-gemini-cli",
+      providerId: "openai-codex",
       refresh: "refresh",
     });
 
     const { loginAndStoreOAuthProvider } = await import("@/auth/auth-service");
 
     await expect(
-      loginAndStoreOAuthProvider("google-gemini-cli", "https://example.com/callback"),
+      loginAndStoreOAuthProvider("openai-codex", "https://example.com/callback"),
     ).resolves.toEqual({
       access: "access",
+      accountId: "acct-1",
       expires: expect.any(Number),
-      projectId: "project-1",
-      providerId: "google-gemini-cli",
+      providerId: "openai-codex",
       refresh: "refresh",
     });
-    expect(setProviderKey.mock.calls[0]?.[0]).toBe("google-gemini-cli");
+    expect(setProviderKey.mock.calls[0]?.[0]).toBe("openai-codex");
     expect(JSON.parse(String(setProviderKey.mock.calls[0]?.[1]))).toEqual({
       access: "access",
+      accountId: "acct-1",
       expires: expect.any(Number),
-      projectId: "project-1",
-      providerId: "google-gemini-cli",
+      providerId: "openai-codex",
       refresh: "refresh",
     });
   });

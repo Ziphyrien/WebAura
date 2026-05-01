@@ -15,7 +15,6 @@ const setProviderApiKey = vi.fn();
 
 const state = vi.hoisted(() => ({
   failLogin: false,
-  geminiRequiresProject: false,
   holdLogin: false,
   requireManualRedirect: false,
   providerKeys: [] as ProviderKeyRecord[],
@@ -50,23 +49,16 @@ vi.mock("@webaura/db", () => ({
 }));
 
 vi.mock("@webaura/pi/models/provider-registry", () => ({
-  getOAuthProvidersForSettings: () => [
-    "anthropic",
-    "github-copilot",
-    "google-gemini-cli",
-    "openai-codex",
-  ],
+  getOAuthProvidersForSettings: () => ["anthropic", "github-copilot", "openai-codex"],
   getProviderGroupMetadata: (provider: string) => ({
     label:
       provider === "anthropic"
         ? "Anthropic"
         : provider === "github-copilot"
           ? "GitHub Copilot"
-          : provider === "google-gemini-cli"
-            ? "Google Gemini CLI"
-            : provider === "openai-codex"
-              ? "OpenAI Codex"
-              : provider,
+          : provider === "openai-codex"
+            ? "OpenAI Codex"
+            : provider,
   }),
   getSortedApiKeyProvidersForSettings: () => [] as string[],
 }));
@@ -95,8 +87,6 @@ vi.mock("@webaura/pi/auth/auth-service", () => ({
         return "Anthropic (Claude Pro/Max)";
       case "github-copilot":
         return "GitHub Copilot";
-      case "google-gemini-cli":
-        return "Google Gemini";
       case "openai-codex":
         return "OpenAI Codex";
       default:
@@ -108,7 +98,6 @@ vi.mock("@webaura/pi/auth/auth-service", () => ({
     redirectUri: string,
     onDeviceCode?: (info: { userCode: string; verificationUri: string }) => void,
     options?: {
-      googleProjectId?: string;
       onManualRedirect?: (request: {
         authUrl: string;
         instructions: string;
@@ -134,14 +123,6 @@ vi.mock("@webaura/pi/auth/auth-service", () => ({
         placeholder: "http://localhost/callback",
         provider,
       });
-    }
-
-    if (
-      state.geminiRequiresProject &&
-      provider === "google-gemini-cli" &&
-      !options?.googleProjectId
-    ) {
-      throw new Error("This Google account requires a Google Cloud project ID.");
     }
 
     if (state.failLogin) {
@@ -220,7 +201,6 @@ describe("provider settings", () => {
     loginAndStoreOAuthProvider.mockReset();
     setProviderApiKey.mockReset();
     state.failLogin = false;
-    state.geminiRequiresProject = false;
     state.holdLogin = false;
     state.requireManualRedirect = false;
     state.providerKeys = [];
@@ -284,37 +264,6 @@ describe("provider settings", () => {
     expect(await screen.findByText("Complete device sign-in")).toBeTruthy();
     expect(screen.getByText("ABCD-1234")).toBeTruthy();
     expect(screen.getByText("https://github.com/login/device")).toBeTruthy();
-  });
-
-  it("only asks for a Google Cloud project ID after Gemini reports it is required", async () => {
-    state.geminiRequiresProject = true;
-    const { ProviderSettings } = await import("@/components/provider-settings");
-    render(React.createElement(ProviderSettings));
-
-    expect(screen.queryByPlaceholderText("Optional Google Cloud project ID")).toBeNull();
-
-    fireEvent.click(screen.getAllByRole("button", { name: "Sign in" })[2]);
-
-    expect(
-      await screen.findByText("This Google account requires a Google Cloud project ID."),
-    ).toBeTruthy();
-    fireEvent.change(screen.getByPlaceholderText("Optional Google Cloud project ID"), {
-      target: {
-        value: "project-1",
-      },
-    });
-    fireEvent.click(screen.getAllByRole("button", { name: "Sign in" })[2]);
-
-    await waitFor(() => {
-      expect(loginAndStoreOAuthProvider).toHaveBeenLastCalledWith(
-        "google-gemini-cli",
-        "http://localhost:3000/auth/callback",
-        {
-          googleProjectId: "project-1",
-          proxyUrl: "https://proxy.example/proxy",
-        },
-      );
-    });
   });
 
   it("shows an inline error when browser OAuth fails", async () => {

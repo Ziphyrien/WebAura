@@ -13,8 +13,8 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@mariozechner/pi-agent-core": "0.70.2",
-    "@mariozechner/pi-ai": "0.70.2",
+    "@mariozechner/pi-agent-core": "0.71.0",
+    "@mariozechner/pi-ai": "0.71.0",
     "@webaura/db": "workspace:*",
     "@webaura/env": "workspace:*",
     "comlink": "^4.4.2",

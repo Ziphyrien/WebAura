@@ -202,62 +202,6 @@ describe("provider stream", () => {
     expect(result.finalMessage && "id" in result.finalMessage).toBe(true);
   });
 
-  it("keeps google gemini requests direct while still delegating to pi-ai", async () => {
-    getProxyConfig.mockResolvedValue({
-      enabled: true,
-      url: "https://proxy.example/proxy",
-    });
-    streamSimple.mockImplementation((model) =>
-      createMockStream((stream) => {
-        const message = createAssistant(model, {
-          content: [{ text: "Gemini", type: "text" }],
-        });
-
-        stream.push({ partial: message, type: "start" });
-        stream.push({
-          message,
-          reason: "stop",
-          type: "done",
-        });
-        stream.end(message);
-      }),
-    );
-
-    const { streamChatWithPiAgent } = await import("@/agent/provider-stream");
-    const model = getModel("google-gemini-cli", "gemini-2.5-pro");
-    const apiKey = JSON.stringify({
-      projectId: "project-1",
-      token: "google-access",
-    });
-    const stream = await streamChatWithPiAgent(
-      model,
-      {
-        messages: [],
-        systemPrompt: "system",
-        tools: [],
-      },
-      {
-        apiKey,
-        reasoning: "medium",
-        sessionId: "session-4",
-        signal: new AbortController().signal,
-      },
-    );
-    const result = await collectProviderStream(stream);
-
-    expect(streamSimple).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseUrl: model.baseUrl,
-        id: model.id,
-      }),
-      expect.any(Object),
-      expect.objectContaining({
-        apiKey,
-      }),
-    );
-    expect(result.finalMessage?.content).toEqual([{ text: "Gemini", type: "text" }]);
-  });
-
   it("emits a diagnostic error when the delegated stream ends with an error event", async () => {
     getProxyConfig.mockResolvedValue({
       enabled: false,

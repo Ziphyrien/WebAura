@@ -214,28 +214,6 @@ describe("resolveStoredApiKey", () => {
     );
   });
 
-  it("returns the google oauth payload as token and project json", async () => {
-    const { resolveStoredApiKey } = await import("@/auth/resolve-api-key");
-
-    const result = await resolveStoredApiKey(
-      JSON.stringify({
-        access: "google-access",
-        expires: Date.now() + 120_000,
-        projectId: "project-1",
-        providerId: "google-gemini-cli",
-        refresh: "google-refresh",
-      }),
-      "google-gemini-cli",
-    );
-
-    expect(result).toBe(
-      JSON.stringify({
-        projectId: "project-1",
-        token: "google-access",
-      }),
-    );
-  });
-
   it("returns undefined when no provider key is stored", async () => {
     const { resolveApiKeyForProvider } = await import("@/auth/resolve-api-key");
 

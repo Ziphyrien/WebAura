@@ -85,11 +85,9 @@ export function ProviderSettings(props: { onNavigateToProxy?: () => void }) {
     {},
   );
   const [loggingInProvider, setLoggingInProvider] = React.useState<OAuthProviderId | undefined>();
-  const [googleProjectId, setGoogleProjectId] = React.useState("");
   const [manualRedirectPrompt, setManualRedirectPrompt] = React.useState<
     ManualRedirectPrompt | undefined
   >();
-  const [showGoogleProjectId, setShowGoogleProjectId] = React.useState(false);
   const manualRedirectPromiseRef = React.useRef<
     | {
         reject: (error: Error) => void;
@@ -127,9 +125,6 @@ export function ProviderSettings(props: { onNavigateToProxy?: () => void }) {
     try {
       const oauthOptions: OAuthRequestOptions = {
         ...(proxyConfig.enabled ? { proxyUrl: proxyConfig.url } : {}),
-        ...(provider === "google-gemini-cli" && googleProjectId.trim()
-          ? { googleProjectId: googleProjectId.trim() }
-          : {}),
         ...(provider === "anthropic" || provider === "openai-codex"
           ? {
               onManualRedirect: (request: ManualOAuthRedirectRequest) =>
@@ -161,16 +156,9 @@ export function ProviderSettings(props: { onNavigateToProxy?: () => void }) {
       }));
       setManualRedirectPrompt(undefined);
       manualRedirectPromiseRef.current = undefined;
-      if (provider === "google-gemini-cli") {
-        setShowGoogleProjectId(false);
-        setGoogleProjectId("");
-      }
       toast.success(`Connected to ${getOAuthProviderName(provider)}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not complete sign-in";
-      if (provider === "google-gemini-cli" && message.includes("Google Cloud project ID")) {
-        setShowGoogleProjectId(true);
-      }
       setLoginErrors((current) => ({
         ...current,
         [provider]: message,
@@ -243,19 +231,6 @@ export function ProviderSettings(props: { onNavigateToProxy?: () => void }) {
                       {getOAuthProviderName(provider)}
                     </ItemTitle>
                     <ItemDescription>{connected ? "Connected" : "Not connected"}</ItemDescription>
-                    {provider === "google-gemini-cli" && !connected && showGoogleProjectId ? (
-                      <div className="mt-3 max-w-md space-y-1.5">
-                        <Input
-                          autoComplete="off"
-                          onChange={(event) => setGoogleProjectId(event.target.value)}
-                          placeholder="Optional Google Cloud project ID"
-                          value={googleProjectId}
-                        />
-                        <div className="text-[11px] text-muted-foreground">
-                          Required for Workspace or policy-managed Google accounts.
-                        </div>
-                      </div>
-                    ) : null}
                   </ItemContent>
                   <ItemActions className="ml-auto shrink-0">
                     {connected ? (

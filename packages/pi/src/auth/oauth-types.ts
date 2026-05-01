@@ -1,9 +1,4 @@
-export const OAUTH_PROVIDER_IDS = [
-  "anthropic",
-  "github-copilot",
-  "google-gemini-cli",
-  "openai-codex",
-] as const;
+export const OAUTH_PROVIDER_IDS = ["anthropic", "github-copilot", "openai-codex"] as const;
 
 export type OAuthProviderId = (typeof OAUTH_PROVIDER_IDS)[number];
 
@@ -11,7 +6,6 @@ export interface OAuthCredentials {
   access: string;
   accountId?: string;
   expires: number;
-  projectId?: string;
   providerId: OAuthProviderId;
   refresh: string;
 }
@@ -20,7 +14,6 @@ interface OAuthCredentialsDraft {
   access?: string;
   accountId?: string;
   expires?: number;
-  projectId?: string;
   providerId?: string;
   refresh?: string;
 }
@@ -61,10 +54,6 @@ function validateDraft(credentials: OAuthCredentialsDraft): OAuthCredentials {
 
   if (providerId === "openai-codex") {
     normalized.accountId = requireString(credentials.accountId, "accountId");
-  }
-
-  if (providerId === "google-gemini-cli") {
-    normalized.projectId = requireString(credentials.projectId, "projectId");
   }
 
   return normalized;

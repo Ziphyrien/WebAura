@@ -55,19 +55,6 @@ export const PROVIDER_CONFIGS: Partial<Record<KnownProvider, ProviderConfig>> = 
   google: {
     apiKeySettings: { order: 50 },
   },
-  "google-antigravity": {
-    apiKeySettings: { hidden: true },
-  },
-  "google-gemini-cli": {
-    apiKeySettings: { hidden: true },
-    description: "Cloud Code Assist OAuth for Gemini models",
-    label: "Gemini",
-    modelSelector: { order: 30 },
-    oauth: {
-      label: "Google Gemini",
-      order: 40,
-    },
-  },
   "google-vertex": {
     apiKeySettings: { hidden: true },
   },
