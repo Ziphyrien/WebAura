@@ -20,6 +20,7 @@ import {
 import { StatusShimmer } from "@webaura/ui/components/ai-elements/shimmer";
 import { ProgressiveBlur } from "@webaura/ui/components/progressive-blur";
 import { copySessionToClipboard } from "@webaura/pi/lib/copy-session-markdown";
+import { buildShareSnapshot, createShareLink, ShareError } from "@webaura/pi/lib/share";
 import { db } from "@webaura/db";
 import { runtimeClient } from "@webaura/pi/agent/runtime-client";
 import { getRuntimeCommandErrorMessage } from "@webaura/pi/agent/runtime-command-errors";
@@ -505,6 +506,31 @@ export function Chat(props: ChatProps) {
     );
   }, [messages]);
 
+  const handleShareSession = React.useCallback(() => {
+    const snapshot = buildShareSnapshot(messages, {
+      model: activeSession?.model ?? draft?.model,
+      provider: activeSession?.provider,
+      title: activeSession?.title,
+    });
+
+    void createShareLink(snapshot).then(
+      async (share) => {
+        await navigator.clipboard.writeText(share.link);
+        toast.success(
+          share.mode === "nostr" ? "Copied encrypted Nostr share link" : "Copied share link",
+        );
+      },
+      (error) => {
+        if (error instanceof ShareError) {
+          toast.error(error.message);
+          return;
+        }
+
+        toast.error("Failed to create share link");
+      },
+    );
+  }, [activeSession?.model, activeSession?.provider, activeSession?.title, draft?.model, messages]);
+
   if (loadedSessionState === undefined) {
     return <LoadingState label="Loading session..." />;
   }
@@ -604,7 +630,9 @@ export function Chat(props: ChatProps) {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
         <div className="mx-auto w-full max-w-4xl px-4">
           <div className="pointer-events-auto flex items-center justify-end pb-2">
-            {messages.length > 0 ? <SessionUtilityActions onCopy={handleCopySession} /> : null}
+            {messages.length > 0 ? (
+              <SessionUtilityActions onCopy={handleCopySession} onShare={handleShareSession} />
+            ) : null}
           </div>
         </div>
 

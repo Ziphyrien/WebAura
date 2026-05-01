@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ShareRouteImport } from './routes/share'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatIndexRouteImport } from './routes/chat.index'
 import { Route as ChatSessionIdRouteImport } from './routes/chat.$sessionId'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 
+const ShareRoute = ShareRouteImport.update({
+  id: '/share',
+  path: '/share',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -44,12 +50,14 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
+  '/share': typeof ShareRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat/': typeof ChatIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/share': typeof ShareRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat': typeof ChatIndexRoute
@@ -58,19 +66,27 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
+  '/share': typeof ShareRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/chat/$sessionId': typeof ChatSessionIdRoute
   '/chat/': typeof ChatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chat' | '/auth/callback' | '/chat/$sessionId' | '/chat/'
+  fullPaths:
+    | '/'
+    | '/chat'
+    | '/share'
+    | '/auth/callback'
+    | '/chat/$sessionId'
+    | '/chat/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/callback' | '/chat/$sessionId' | '/chat'
+  to: '/' | '/share' | '/auth/callback' | '/chat/$sessionId' | '/chat'
   id:
     | '__root__'
     | '/'
     | '/chat'
+    | '/share'
     | '/auth/callback'
     | '/chat/$sessionId'
     | '/chat/'
@@ -79,11 +95,19 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChatRoute: typeof ChatRouteWithChildren
+  ShareRoute: typeof ShareRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/share': {
+      id: '/share'
+      path: '/share'
+      fullPath: '/share'
+      preLoaderRoute: typeof ShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat': {
       id: '/chat'
       path: '/chat'
@@ -137,6 +161,7 @@ const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChatRoute: ChatRouteWithChildren,
+  ShareRoute: ShareRoute,
   AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport
