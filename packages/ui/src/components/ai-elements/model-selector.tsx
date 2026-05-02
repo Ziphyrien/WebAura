@@ -145,14 +145,16 @@ export type ModelSelectorLogoProps = Omit<ComponentProps<"img">, "src" | "alt"> 
     | (string & {});
 };
 
+const PROVIDER_LOGO_ALIASES: Record<string, string> = {
+  "azure-openai-responses": "azure",
+  fireworks: "fireworks-ai",
+  "kimi-coding": "moonshotai",
+  "openai-codex": "openai",
+  "vercel-ai-gateway": "vercel",
+};
+
 function resolveLogoProvider(provider: string): string {
-  if (provider === "openai-codex") {
-    return "openai";
-  }
-  if (provider === "kimi-coding") {
-    return "moonshotai";
-  }
-  return provider;
+  return PROVIDER_LOGO_ALIASES[provider] ?? provider;
 }
 
 export const ModelSelectorLogo = ({ provider, className, ...props }: ModelSelectorLogoProps) => {
