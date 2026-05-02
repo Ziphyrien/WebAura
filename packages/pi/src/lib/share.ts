@@ -19,6 +19,7 @@ const TARGET_NOSTR_DISCOVERED_PUBLISH_RELAYS = 3;
 const NOSTR_RELAY_PROBE_BATCH_SIZE = 6;
 const NOSTR_RELAY_PROBE_TIMEOUT_MS = 5000;
 const NOSTR_DISCOVERY_REQUEST_TIMEOUT_MS = 8000;
+const NOSTR_PUBLISH_EVENT_ATTEMPTS = 3;
 const NOSTR_RELAY_PROBE_EXPIRATION_SECONDS = 60 * 60;
 const NOSTR_WATCH_DISCOVERY_RELAY_URL = "wss://relay.nostr.watch";
 const NIP66_RELAY_DISCOVERY_KIND = 30166;
@@ -291,11 +292,14 @@ export function getSharePayloadSize(snapshot: ShareSnapshot): number {
 }
 
 function bytesToBase64Url(bytes: Uint8Array): string {
-  let binary = "";
+  const chunks: string[] = [];
+  const chunkSize = 8192;
 
-  for (let index = 0; index < bytes.length; index += 1) {
-    binary += String.fromCharCode(bytes[index] ?? 0);
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    chunks.push(String.fromCharCode(...bytes.subarray(offset, offset + chunkSize)));
   }
+
+  const binary = chunks.join("");
 
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
@@ -863,7 +867,7 @@ function splitBytes(bytes: Uint8Array, chunkSize: number): Uint8Array[] {
   const chunks: Uint8Array[] = [];
 
   for (let offset = 0; offset < bytes.byteLength; offset += chunkSize) {
-    chunks.push(bytes.slice(offset, offset + chunkSize));
+    chunks.push(bytes.subarray(offset, offset + chunkSize));
   }
 
   return chunks;
@@ -1275,12 +1279,13 @@ async function fetchEventsFromRelays(
   transport: NostrRelayTransport,
 ): Promise<Map<string, NostrEvent>> {
   const events = new Map<string, NostrEvent>();
+  const requestedEventIds = new Set(eventIds);
 
   await Promise.all(
     relays.map(async (relayUrl) => {
       try {
         for (const event of await transport.fetchEvents(relayUrl, eventIds)) {
-          if (eventIds.includes(event.id)) {
+          if (requestedEventIds.has(event.id)) {
             events.set(event.id, event);
           }
         }
@@ -1349,12 +1354,38 @@ class BrowserNostrRelayTransport implements NostrRelayTransport {
 
     return new Promise((resolve, reject) => {
       const events: NostrEvent[] = [];
-      const timeoutId = window.setTimeout(() => {
+      let settled = false;
+
+      function cleanup(): void {
+        socket.removeEventListener("message", handleMessage);
+        socket.removeEventListener("error", fail);
+        socket.removeEventListener("close", fail);
+        window.clearTimeout(timeoutId);
+      }
+
+      function settle(): void {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        cleanup();
         socket.close();
         resolve(events);
-      }, 8000);
+      }
 
-      socket.addEventListener("message", (message) => {
+      function fail(): void {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        cleanup();
+        socket.close();
+        reject(new ShareError("relay_failed", `Could not read from ${relayUrl}.`));
+      }
+
+      function handleMessage(message: MessageEvent): void {
         const parsed = parseRelayMessage(message.data);
 
         if (!Array.isArray(parsed) || parsed[1] !== subscriptionId) {
@@ -1366,30 +1397,71 @@ class BrowserNostrRelayTransport implements NostrRelayTransport {
         }
 
         if (parsed[0] === "EOSE") {
-          window.clearTimeout(timeoutId);
-          socket.send(JSON.stringify(["CLOSE", subscriptionId]));
-          socket.close();
-          resolve(events);
+          settle();
         }
-      });
-      socket.addEventListener("error", () => {
-        window.clearTimeout(timeoutId);
-        socket.close();
-        reject(new ShareError("relay_failed", `Could not read from ${relayUrl}.`));
-      });
+      }
+
+      const timeoutId = window.setTimeout(settle, 8000);
+
+      socket.addEventListener("message", handleMessage);
+      socket.addEventListener("error", fail);
+      socket.addEventListener("close", fail);
       socket.send(JSON.stringify(["REQ", subscriptionId, { ids: eventIds }]));
     });
   }
 
   async publishEvents(relayUrl: string, events: readonly NostrEvent[]): Promise<void> {
-    const socket = await openRelaySocket(relayUrl);
+    let pendingEvents = [...events];
+    let lastError: unknown;
 
-    try {
-      for (const event of events) {
-        await publishEvent(socket, relayUrl, event);
+    for (
+      let attempt = 1;
+      attempt <= NOSTR_PUBLISH_EVENT_ATTEMPTS && pendingEvents.length > 0;
+      attempt += 1
+    ) {
+      let socket: WebSocket;
+
+      try {
+        socket = await openRelaySocket(relayUrl);
+      } catch (error) {
+        lastError = error;
+        continue;
       }
-    } finally {
-      socket.close();
+
+      try {
+        const results = await Promise.all(
+          pendingEvents.map(async (event) => {
+            try {
+              await publishEvent(socket, relayUrl, event);
+              return { event, published: true as const };
+            } catch (error) {
+              return { error, event, published: false as const };
+            }
+          }),
+        );
+
+        pendingEvents = results.flatMap((result) => {
+          if (result.published) {
+            return [];
+          }
+
+          lastError = result.error;
+          return [result.event];
+        });
+      } finally {
+        socket.close();
+      }
+    }
+
+    if (pendingEvents.length > 0) {
+      if (lastError instanceof ShareError) {
+        throw lastError;
+      }
+
+      throw new ShareError(
+        "relay_failed",
+        `Could not publish ${pendingEvents.length} share event(s) to ${relayUrl}.`,
+      );
     }
   }
 }
@@ -1450,33 +1522,36 @@ async function discoverNip66RelayCandidates(relayUrl: string): Promise<NostrRela
     const events: NostrEvent[] = [];
     let settled = false;
 
-    const settle = (candidates: NostrRelayCandidate[]) => {
+    function cleanup(): void {
+      socket.removeEventListener("message", handleMessage);
+      socket.removeEventListener("error", fail);
+      socket.removeEventListener("close", fail);
+      window.clearTimeout(timeoutId);
+    }
+
+    function settle(candidates: NostrRelayCandidate[]): void {
       if (settled) {
         return;
       }
 
       settled = true;
-      window.clearTimeout(timeoutId);
+      cleanup();
       socket.close();
       resolve(candidates);
-    };
+    }
 
-    const fail = () => {
+    function fail(): void {
       if (settled) {
         return;
       }
 
       settled = true;
-      window.clearTimeout(timeoutId);
+      cleanup();
       socket.close();
       reject(new ShareError("relay_failed", `Could not read NIP-66 discovery from ${relayUrl}.`));
-    };
+    }
 
-    const timeoutId = window.setTimeout(() => {
-      settle(extractNip66RelayCandidates(events));
-    }, NOSTR_DISCOVERY_REQUEST_TIMEOUT_MS);
-
-    socket.addEventListener("message", (message) => {
+    function handleMessage(message: MessageEvent): void {
       const parsed = parseRelayMessage(message.data);
 
       if (!Array.isArray(parsed) || parsed[1] !== subscriptionId) {
@@ -1495,8 +1570,15 @@ async function discoverNip66RelayCandidates(relayUrl: string): Promise<NostrRela
         socket.send(JSON.stringify(["CLOSE", subscriptionId]));
         settle(extractNip66RelayCandidates(events));
       }
-    });
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      settle(extractNip66RelayCandidates(events));
+    }, NOSTR_DISCOVERY_REQUEST_TIMEOUT_MS);
+
+    socket.addEventListener("message", handleMessage);
     socket.addEventListener("error", fail);
+    socket.addEventListener("close", fail);
     socket.send(
       JSON.stringify([
         "REQ",
@@ -1508,20 +1590,27 @@ async function discoverNip66RelayCandidates(relayUrl: string): Promise<NostrRela
 }
 
 async function probeRelayReadWrite(relayUrl: string): Promise<NostrRelayProbeResult> {
-  const socket = await openRelaySocket(relayUrl);
+  const readSocket = await openRelaySocket(relayUrl);
+  let readProbe: NostrRelayProbeResult;
 
   try {
-    const readProbe = await probeRelayRead(socket);
+    readProbe = await probeRelayRead(readSocket);
+  } finally {
+    readSocket.close();
+  }
 
-    if (readProbe.read !== true) {
-      return {
-        ...readProbe,
-        url: relayUrl,
-        write: false,
-      };
-    }
+  if (readProbe.read !== true) {
+    return {
+      ...readProbe,
+      url: relayUrl,
+      write: false,
+    };
+  }
 
-    const writeProbe = await probeRelayWrite(socket);
+  const writeSocket = await openRelaySocket(relayUrl);
+
+  try {
+    const writeProbe = await probeRelayWrite(writeSocket);
 
     return {
       authRequired: writeProbe.authRequired ?? readProbe.authRequired,
@@ -1531,7 +1620,7 @@ async function probeRelayReadWrite(relayUrl: string): Promise<NostrRelayProbeRes
       write: writeProbe.write,
     };
   } finally {
-    socket.close();
+    writeSocket.close();
   }
 }
 
@@ -1539,11 +1628,23 @@ function probeRelayRead(socket: WebSocket): Promise<NostrRelayProbeResult> {
   const subscriptionId = bytesToBase64Url(randomBytes(8));
 
   return new Promise((resolve) => {
+    let settled = false;
+
     const finish = (result: NostrRelayProbeResult) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
       socket.removeEventListener("message", handleMessage);
+      socket.removeEventListener("error", handleFail);
+      socket.removeEventListener("close", handleFail);
       window.clearTimeout(timeoutId);
-      socket.send(JSON.stringify(["CLOSE", subscriptionId]));
       resolve(result);
+    };
+
+    const handleFail = () => {
+      finish({ read: false });
     };
 
     const timeoutId = window.setTimeout(() => {
@@ -1568,6 +1669,8 @@ function probeRelayRead(socket: WebSocket): Promise<NostrRelayProbeResult> {
     };
 
     socket.addEventListener("message", handleMessage);
+    socket.addEventListener("error", handleFail);
+    socket.addEventListener("close", handleFail);
     socket.send(JSON.stringify(["REQ", subscriptionId, { kinds: [SHARE_EVENT_KIND], limit: 1 }]));
   });
 }
@@ -1576,10 +1679,23 @@ async function probeRelayWrite(socket: WebSocket): Promise<NostrRelayProbeResult
   const event = await buildRelayWriteProbeEvent();
 
   return new Promise((resolve) => {
+    let settled = false;
+
     const finish = (result: NostrRelayProbeResult) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
       socket.removeEventListener("message", handleMessage);
+      socket.removeEventListener("error", handleFail);
+      socket.removeEventListener("close", handleFail);
       window.clearTimeout(timeoutId);
       resolve(result);
+    };
+
+    const handleFail = () => {
+      finish({ write: false });
     };
 
     const timeoutId = window.setTimeout(() => {
@@ -1604,6 +1720,8 @@ async function probeRelayWrite(socket: WebSocket): Promise<NostrRelayProbeResult
     };
 
     socket.addEventListener("message", handleMessage);
+    socket.addEventListener("error", handleFail);
+    socket.addEventListener("close", handleFail);
     socket.send(JSON.stringify(["EVENT", event]));
   });
 }
@@ -1926,30 +2044,60 @@ function openRelaySocket(relayUrl: string): Promise<WebSocket> {
 
 function publishEvent(socket: WebSocket, relayUrl: string, event: NostrEvent): Promise<void> {
   return new Promise((resolve, reject) => {
-    const timeoutId = window.setTimeout(() => {
-      reject(new ShareError("relay_failed", `Timed out publishing to ${relayUrl}.`));
-    }, 8000);
+    let settled = false;
 
-    const handleMessage = (message: MessageEvent) => {
+    function cleanup(): void {
+      socket.removeEventListener("message", handleMessage);
+      socket.removeEventListener("error", handleFail);
+      socket.removeEventListener("close", handleFail);
+      window.clearTimeout(timeoutId);
+    }
+
+    function succeed(): void {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      cleanup();
+      resolve();
+    }
+
+    function fail(error: ShareError): void {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      cleanup();
+      reject(error);
+    }
+
+    function handleFail(): void {
+      fail(new ShareError("relay_failed", `Could not publish to ${relayUrl}.`));
+    }
+
+    function handleMessage(message: MessageEvent): void {
       const parsed = parseRelayMessage(message.data);
 
       if (!Array.isArray(parsed) || parsed[0] !== "OK" || parsed[1] !== event.id) {
         return;
       }
 
-      socket.removeEventListener("message", handleMessage);
-      window.clearTimeout(timeoutId);
-
       if (parsed[2] === true) {
-        resolve();
+        succeed();
       } else {
-        reject(
-          new ShareError("relay_failed", `Relay rejected a share event: ${String(parsed[3])}`),
-        );
+        fail(new ShareError("relay_failed", `Relay rejected a share event: ${String(parsed[3])}`));
       }
-    };
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      fail(new ShareError("relay_failed", `Timed out publishing to ${relayUrl}.`));
+    }, 8000);
 
     socket.addEventListener("message", handleMessage);
+    socket.addEventListener("error", handleFail);
+    socket.addEventListener("close", handleFail);
     socket.send(JSON.stringify(["EVENT", event]));
   });
 }
