@@ -9,7 +9,6 @@
       "@webaura/db": ["../db/src/index.ts"],
       "@webaura/db/session-leases": ["../db/src/session-leases.ts"],
       "@webaura/db/session-runtime": ["../db/src/session-runtime.ts"],
-      "@webaura/env/*": ["../env/src/*"],
       "@webaura/ui/*": ["../ui/src/*"]
     }
   },

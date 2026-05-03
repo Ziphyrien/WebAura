@@ -17,7 +17,6 @@
     "@mariozechner/pi-ai": "*",
     "@noble/curves": "^1.9.7",
     "@webaura/db": "workspace:*",
-    "@webaura/env": "workspace:*",
     "comlink": "^4.4.2",
     "dexie-react-hooks": "^4.2.0",
     "docx-preview": "^0.3.7",

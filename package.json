@@ -7,8 +7,6 @@
       "packages/*"
     ],
     "catalog": {
-      "dotenv": "^17.2.2",
-      "zod": "^4.1.13",
       "@types/node": "^22.13.14",
       "lucide-react": "^0.546.0",
       "next-themes": "^0.4.6",
@@ -35,11 +33,6 @@
     "release": "changeset publish",
     "prepare": "vp config",
     "test": "vp test run"
-  },
-  "dependencies": {
-    "@webaura/env": "workspace:*",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",

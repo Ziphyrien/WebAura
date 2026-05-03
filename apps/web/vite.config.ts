@@ -3,8 +3,29 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vite-plus";
+import { defineConfig, type PluginOption } from "vite-plus";
 import { comlink } from "vite-plugin-comlink";
+
+const asPlugin = (plugin: unknown): PluginOption => plugin as PluginOption;
+
+const plugins: PluginOption[] = [
+  asPlugin(comlink()),
+  asPlugin(nitro()),
+  asPlugin(tailwindcss()),
+  asPlugin(
+    tanstackStart({
+      importProtection: {
+        behavior: {
+          build: "mock",
+        },
+        mockAccess: "off",
+      },
+    }),
+  ),
+  asPlugin(viteReact()),
+];
+
+const workerPlugins = () => [asPlugin(comlink())];
 
 export default defineConfig({
   optimizeDeps: {
@@ -19,26 +40,9 @@ export default defineConfig({
       "@braintree/sanitize-url",
     ],
   },
-  plugins: [
-    comlink(),
-    nitro(),
-    tailwindcss(),
-    tanstackStart({
-      importProtection: {
-        behavior: {
-          build: "mock",
-        },
-        mockAccess: "off",
-      },
-    }),
-    viteReact(),
-  ],
+  plugins,
   resolve: {
     alias: {
-      "@webaura/env/server": fileURLToPath(
-        new URL("../../packages/env/src/server.ts", import.meta.url),
-      ),
-      "@webaura/env/web": fileURLToPath(new URL("../../packages/env/src/web.ts", import.meta.url)),
       "@webaura/pi/agent/runtime-worker-client": fileURLToPath(
         new URL("./src/agent/runtime-worker-client.ts", import.meta.url),
       ),
@@ -50,6 +54,6 @@ export default defineConfig({
   },
   worker: {
     format: "es",
-    plugins: () => [comlink()],
+    plugins: workerPlugins,
   },
 });

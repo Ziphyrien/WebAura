@@ -15,19 +15,16 @@
     "@tanstack/react-start": "^1.166.15",
     "@tanstack/router-plugin": "^1.166.13",
     "@webaura/db": "workspace:*",
-    "@webaura/env": "workspace:*",
     "@webaura/extensions": "workspace:*",
     "@webaura/pi": "workspace:*",
     "@webaura/ui": "workspace:*",
-    "dotenv": "catalog:",
     "lucide-react": "^1.0.1",
     "next-themes": "catalog:",
     "nitro": "latest",
     "react": "catalog:",
     "react-dom": "catalog:",
     "sonner": "catalog:",
-    "tailwindcss": "catalog:",
-    "zod": "catalog:"
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",

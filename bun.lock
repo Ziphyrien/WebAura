@@ -4,11 +4,6 @@
   "workspaces": {
     "": {
       "name": "webaura",
-      "dependencies": {
-        "@webaura/env": "workspace:*",
-        "dotenv": "catalog:",
-        "zod": "catalog:",
-      },
       "devDependencies": {
         "@changesets/cli": "^2.30.0",
         "@types/node": "catalog:",
@@ -37,11 +32,9 @@
         "@tanstack/react-start": "^1.166.15",
         "@tanstack/router-plugin": "^1.166.13",
         "@webaura/db": "workspace:*",
-        "@webaura/env": "workspace:*",
         "@webaura/extensions": "workspace:*",
         "@webaura/pi": "workspace:*",
         "@webaura/ui": "workspace:*",
-        "dotenv": "catalog:",
         "lucide-react": "^1.0.1",
         "next-themes": "catalog:",
         "nitro": "latest",
@@ -49,7 +42,6 @@
         "react-dom": "catalog:",
         "sonner": "catalog:",
         "tailwindcss": "catalog:",
-        "zod": "catalog:",
       },
       "devDependencies": {
         "@testing-library/dom": "^10.4.1",
@@ -81,20 +73,6 @@
         "typescript": "^5",
       },
     },
-    "packages/env": {
-      "name": "@webaura/env",
-      "version": "0.0.0",
-      "dependencies": {
-        "@t3-oss/env-core": "^0.13.1",
-        "dotenv": "catalog:",
-        "zod": "catalog:",
-      },
-      "devDependencies": {
-        "@types/node": "catalog:",
-        "@webaura/config": "workspace:*",
-        "typescript": "^5",
-      },
-    },
     "packages/extensions": {
       "name": "@webaura/extensions",
       "version": "0.0.0",
@@ -122,7 +100,6 @@
         "@mariozechner/pi-ai": "*",
         "@noble/curves": "^1.9.7",
         "@webaura/db": "workspace:*",
-        "@webaura/env": "workspace:*",
         "comlink": "^4.4.2",
         "dexie-react-hooks": "^4.2.0",
         "docx-preview": "^0.3.7",
@@ -209,7 +186,6 @@
     "@types/node": "^22.13.14",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
-    "dotenv": "^17.2.2",
     "lucide-react": "^0.546.0",
     "next-themes": "^0.4.6",
     "react": "^19.2.3",
@@ -219,7 +195,6 @@
     "vite": "npm:@voidzero-dev/vite-plus-core@latest",
     "vite-plus": "latest",
     "vitest": "npm:@voidzero-dev/vite-plus-test@latest",
-    "zod": "^4.1.13",
   },
   "packages": {
     "@1natsu/wait-element": ["@1natsu/wait-element@4.1.2", "", { "dependencies": { "defu": "^6.1.4", "many-keys-map": "^2.0.1" } }, "sha512-qWxSJD+Q5b8bKOvESFifvfZ92DuMsY+03SBNjTO34ipJLP6mZ9yK4bQz/vlh48aEQXoJfaZBqUwKL5BdI5iiWw=="],
@@ -1150,8 +1125,6 @@
 
     "@swc/helpers": ["@swc/helpers@0.5.15", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g=="],
 
-    "@t3-oss/env-core": ["@t3-oss/env-core@0.13.11", "", { "peerDependencies": { "arktype": "^2.1.0", "typescript": ">=5.0.0", "valibot": "^1.0.0-beta.7 || ^1.0.0", "zod": "^3.24.0 || ^4.0.0" }, "optionalPeers": ["arktype", "typescript", "valibot", "zod"] }, "sha512-sM7GYY+KL7H/Hl0BE0inWfk3nRHZOLhmVn7sHGxaZt9FAR6KqREXAE+6TqKfiavfXmpRxO/OZ2QgKRd+oiBYRQ=="],
-
     "@tabby_ai/hijri-converter": ["@tabby_ai/hijri-converter@1.0.5", "", {}, "sha512-r5bClKrcIusDoo049dSL8CawnHR6mRdDwhlQuIgZRNty68q0x8k3Lf1BtPAMxRf/GgnHBnIO4ujd3+GQdLWzxQ=="],
 
     "@tailwindcss/node": ["@tailwindcss/node@4.2.2", "", { "dependencies": { "@jridgewell/remapping": "^2.3.5", "enhanced-resolve": "^5.19.0", "jiti": "^2.6.1", "lightningcss": "1.32.0", "magic-string": "^0.30.21", "source-map-js": "^1.2.1", "tailwindcss": "4.2.2" } }, "sha512-pXS+wJ2gZpVXqFaUEjojq7jzMpTGf8rU6ipJz5ovJV6PUGmlJ+jvIwGrzdHdQ80Sg+wmQxUFuoW1UAAwHNEdFA=="],
@@ -1407,8 +1380,6 @@
     "@webaura/config": ["@webaura/config@workspace:packages/config"],
 
     "@webaura/db": ["@webaura/db@workspace:packages/db"],
-
-    "@webaura/env": ["@webaura/env@workspace:packages/env"],
 
     "@webaura/extensions": ["@webaura/extensions@workspace:packages/extensions"],
 
