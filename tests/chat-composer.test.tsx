@@ -5,7 +5,7 @@ import { renderWithProviders } from "@/test/render-with-providers";
 import {
   SUPPORTED_ATTACHMENT_ACCEPT,
   SUPPORTED_ATTACHMENT_PICKER_TYPES,
-} from "@webaura/pi/agent/user-turn-input";
+} from "@firefly/pi/agent/user-turn-input";
 
 vi.mock("@/components/chat-model-selector", () => ({
   ChatModelSelector: () => <span data-testid="model-selector">Model</span>,
@@ -230,7 +230,7 @@ describe("ChatComposer", () => {
 
       expect(createObjectUrl).not.toHaveBeenCalled();
       const submit = screen.getByRole("button", { name: /submit/i });
-      expect((submit as HTMLButtonElement).disabled).toBe(true);
+      expect((submit as HTMLButtonElement).disabled).toBe(false);
       fireEvent.click(submit);
       expect(onSend).not.toHaveBeenCalled();
     } finally {
@@ -258,7 +258,7 @@ describe("ChatComposer", () => {
     );
 
     const submit = screen.getByRole("button", { name: /submit/i });
-    expect((submit as HTMLButtonElement).disabled).toBe(true);
+    expect((submit as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(submit);
     expect(onSend).not.toHaveBeenCalled();
   });

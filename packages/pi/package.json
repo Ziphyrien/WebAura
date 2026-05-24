@@ -1,5 +1,5 @@
 {
-  "name": "@webaura/pi",
+  "name": "@firefly/pi",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,8 +15,8 @@
   "dependencies": {
     "@earendil-works/pi-agent-core": "^0.74.0",
     "@earendil-works/pi-ai": "^0.74.0",
+    "@firefly/db": "workspace:*",
     "@noble/curves": "^1.9.7",
-    "@webaura/db": "workspace:*",
     "comlink": "^4.4.2",
     "dexie-react-hooks": "^4.2.0",
     "docx-preview": "^0.3.7",
@@ -28,8 +28,8 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@firefly/config": "workspace:*",
     "@types/react": "catalog:",
-    "@webaura/config": "workspace:*",
     "typescript": "^5"
   }
 }

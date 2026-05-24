@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge } from "@webaura/ui/components/badge";
-import { cn } from "@webaura/ui/lib/utils";
+import { Badge } from "@firefly/ui/components/badge";
+import { cn } from "@firefly/ui/lib/utils";
 import { ArrowRightIcon, MinusIcon, PackageIcon, PlusIcon } from "lucide-react";
 import type { HTMLAttributes } from "react";
 import { createContext, useContext, useMemo } from "react";

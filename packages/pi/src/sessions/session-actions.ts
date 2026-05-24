@@ -1,7 +1,7 @@
-import type { ProviderGroupId, ProviderId } from "@webaura/pi/types/models";
-import type { SessionData } from "@webaura/db";
-import { deleteSession, getSetting, listProviderKeys, setSetting } from "@webaura/db";
-import { runtimeClient } from "@webaura/pi/agent/runtime-client";
+import type { ProviderGroupId, ProviderId } from "@firefly/pi/types/models";
+import type { SessionData } from "@firefly/db";
+import { deleteSession, getSetting, listProviderKeys, setSetting } from "@firefly/db";
+import { runtimeClient } from "@firefly/pi/agent/runtime-client";
 import {
   getCanonicalProvider,
   getConnectedProviders,
@@ -12,8 +12,8 @@ import {
   getVisibleProviderGroups,
   hasModelForGroup,
   isProviderGroupId,
-} from "@webaura/pi/models/catalog";
-import { createSession, persistSessionSnapshot } from "@webaura/pi/sessions/session-service";
+} from "@firefly/pi/models/catalog";
+import { createSession, persistSessionSnapshot } from "@firefly/pi/sessions/session-service";
 
 function isProviderId(value: string): value is ProviderId {
   return getProviderGroups().includes(value as ProviderGroupId);

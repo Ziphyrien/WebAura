@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   setSetting: vi.fn(),
 }));
 
-vi.mock("@webaura/db", () => ({
+vi.mock("@firefly/db", () => ({
   deleteSetting: mocks.deleteSetting,
   getSetting: mocks.getSetting,
   setSetting: mocks.setSetting,

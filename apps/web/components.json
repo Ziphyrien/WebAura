@@ -15,8 +15,8 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@webaura/ui/lib/utils",
-    "ui": "@webaura/ui/components"
+    "utils": "@firefly/ui/lib/utils",
+    "ui": "@firefly/ui/components"
   },
   "menuColor": "default-translucent",
   "menuAccent": "subtle",

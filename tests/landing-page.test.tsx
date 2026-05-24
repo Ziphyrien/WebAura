@@ -8,7 +8,7 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-vi.mock("@webaura/ui/components/button", () => ({
+vi.mock("@firefly/ui/components/button", () => ({
   Button: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) =>
     asChild ? children : <button type="button">{children}</button>,
 }));

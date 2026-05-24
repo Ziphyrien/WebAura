@@ -1,19 +1,19 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
+import { Button } from "@firefly/ui/components/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@webaura/ui/components/collapsible";
-import { Input } from "@webaura/ui/components/input";
+} from "@firefly/ui/components/collapsible";
+import { Input } from "@firefly/ui/components/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@webaura/ui/components/tooltip";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/tooltip";
+import { cn } from "@firefly/ui/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo, useState } from "react";

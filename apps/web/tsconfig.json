@@ -22,12 +22,12 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@webaura/ui/*": ["../../packages/ui/src/*"],
-      "@webaura/pi/*": ["../../packages/pi/src/*"],
-      "@webaura/db": ["../../packages/db/src/index.ts"],
-      "@webaura/db/session-leases": ["../../packages/db/src/session-leases.ts"],
-      "@webaura/db/session-runtime": ["../../packages/db/src/session-runtime.ts"],
-      "@webaura/extensions/*": ["../../packages/extensions/src/*"]
+      "@firefly/ui/*": ["../../packages/ui/src/*"],
+      "@firefly/pi/*": ["../../packages/pi/src/*"],
+      "@firefly/db": ["../../packages/db/src/index.ts"],
+      "@firefly/db/session-leases": ["../../packages/db/src/session-leases.ts"],
+      "@firefly/db/session-runtime": ["../../packages/db/src/session-runtime.ts"],
+      "@firefly/extensions/*": ["../../packages/extensions/src/*"]
     }
   }
 }

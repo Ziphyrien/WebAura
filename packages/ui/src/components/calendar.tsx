@@ -1,8 +1,8 @@
 import * as React from "react";
 import { DayPicker, getDefaultClassNames, type DayButton, type Locale } from "react-day-picker";
 
-import { cn } from "@webaura/ui/lib/utils";
-import { Button, buttonVariants } from "@webaura/ui/components/button";
+import { cn } from "@firefly/ui/lib/utils";
+import { Button, buttonVariants } from "@firefly/ui/components/button";
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react";
 
 function Calendar({

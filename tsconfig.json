@@ -1,3 +1,3 @@
 {
-  "extends": "@webaura/config/tsconfig.base.json"
+  "extends": "@firefly/config/tsconfig.base.json"
 }

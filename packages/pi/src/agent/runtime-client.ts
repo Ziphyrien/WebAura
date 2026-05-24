@@ -1,13 +1,13 @@
-import type { UserTurnInput } from "@webaura/pi/agent/user-turn-input";
-import type { ProviderGroupId, ThinkingLevel } from "@webaura/pi/types/models";
-import type { SessionData } from "@webaura/db";
+import type { UserTurnInput } from "@firefly/pi/agent/user-turn-input";
+import type { ProviderGroupId, ThinkingLevel } from "@firefly/pi/types/models";
+import type { SessionData } from "@firefly/db";
 import {
   BusyRuntimeError,
   MissingSessionRuntimeError,
-} from "@webaura/pi/agent/runtime-command-errors";
-import { getRuntimeWorker } from "@webaura/pi/agent/runtime-worker-client";
-import type { SessionRunner } from "@webaura/pi/agent/session-runner";
-import { WorkerBackedAgentHost } from "@webaura/pi/agent/worker-backed-agent-host";
+} from "@firefly/pi/agent/runtime-command-errors";
+import { getRuntimeWorker } from "@firefly/pi/agent/runtime-worker-client";
+import type { SessionRunner } from "@firefly/pi/agent/session-runner";
+import { WorkerBackedAgentHost } from "@firefly/pi/agent/worker-backed-agent-host";
 import {
   claimSessionLease,
   LEASE_HEARTBEAT_MS,
@@ -15,15 +15,15 @@ import {
   releaseOwnedSessionLeases,
   releaseSessionLease,
   renewSessionLease,
-} from "@webaura/db/session-leases";
-import { loadSession } from "@webaura/pi/sessions/session-service";
-import { reconcileInterruptedSession } from "@webaura/pi/sessions/session-notices";
-import { loadSessionViewModel } from "@webaura/pi/sessions/session-view-model";
+} from "@firefly/db/session-leases";
+import { loadSession } from "@firefly/pi/sessions/session-service";
+import { reconcileInterruptedSession } from "@firefly/pi/sessions/session-notices";
+import { loadSessionViewModel } from "@firefly/pi/sessions/session-view-model";
 import {
   type ActiveSessionViewState,
   deriveActiveSessionViewState,
   deriveRecoveryIntent,
-} from "@webaura/pi/sessions/session-view-state";
+} from "@firefly/pi/sessions/session-view-state";
 
 export type InterruptedResumeMode = "continue" | "retry";
 
@@ -123,7 +123,7 @@ export class RuntimeClient {
       .waitForTurn()
       .catch((error) => {
         if (error instanceof Error && !isSessionLockedMessage(error)) {
-          console.error("[webaura:runtime] turn_watch_failed", {
+          console.error("[firefly:runtime] turn_watch_failed", {
             error,
             sessionId,
           });

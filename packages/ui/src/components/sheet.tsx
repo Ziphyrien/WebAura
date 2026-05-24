@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 
-import { cn } from "@webaura/ui/lib/utils";
-import { Button } from "@webaura/ui/components/button";
+import { cn } from "@firefly/ui/lib/utils";
+import { Button } from "@firefly/ui/components/button";
 import { XIcon } from "lucide-react";
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {

@@ -1,9 +1,9 @@
-import type { SystemMessage } from "@webaura/pi/types/chat";
+import type { SystemMessage } from "@firefly/pi/types/chat";
 import {
   BusyRuntimeError,
   MissingSessionRuntimeError,
   StreamInterruptedRuntimeError,
-} from "@webaura/pi/agent/runtime-command-errors";
+} from "@firefly/pi/agent/runtime-command-errors";
 
 export type RuntimeErrorKind =
   | "missing_session"

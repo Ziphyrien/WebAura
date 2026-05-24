@@ -1,5 +1,5 @@
-import { MissingSessionRuntimeError } from "@webaura/pi/agent/runtime-command-errors";
-import { SessionWorkerCoordinator } from "@webaura/pi/agent/session-worker-coordinator";
+import { MissingSessionRuntimeError } from "@firefly/pi/agent/runtime-command-errors";
+import { SessionWorkerCoordinator } from "@firefly/pi/agent/session-worker-coordinator";
 import type {
   AppendSessionNoticeInput,
   ConfigureSessionInput,
@@ -7,8 +7,8 @@ import type {
   SetThinkingLevelInput,
   StartTurnInput,
   TurnCompletionResult,
-} from "@webaura/pi/agent/runtime-worker-types";
-import type { SessionData } from "@webaura/db";
+} from "@firefly/pi/agent/runtime-worker-types";
+import type { SessionData } from "@firefly/db";
 
 const COORDINATOR_STALE_MS = 20 * 60_000;
 

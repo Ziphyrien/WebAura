@@ -1,4 +1,4 @@
-import { cn } from "@webaura/ui/lib/utils";
+import { cn } from "@firefly/ui/lib/utils";
 import { NodeToolbar, Position } from "@xyflow/react";
 import type { ComponentProps } from "react";
 

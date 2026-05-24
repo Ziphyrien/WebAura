@@ -8,7 +8,7 @@ const loginOpenAICodex = vi.fn();
 const refreshGitHubCopilot = vi.fn();
 const refreshOpenAICodex = vi.fn();
 
-vi.mock("@webaura/db", () => ({
+vi.mock("@firefly/db", () => ({
   deleteProviderKey,
   getProviderKey,
   setProviderKey,

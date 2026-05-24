@@ -1,5 +1,5 @@
-import { githubExtensionSettings } from "@webaura/extensions/github";
-import type { ExtensionSettingsEntry } from "@webaura/ui/components/extensions-settings";
+import { githubExtensionSettings } from "@firefly/extensions/github";
+import type { ExtensionSettingsEntry } from "@firefly/ui/components/extensions-settings";
 
 export const WEB_EXTENSION_SETTINGS = [
   githubExtensionSettings,

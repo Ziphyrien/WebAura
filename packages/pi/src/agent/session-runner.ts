@@ -1,5 +1,5 @@
-import type { UserTurnInput } from "@webaura/pi/agent/user-turn-input";
-import type { ProviderGroupId, ThinkingLevel } from "@webaura/pi/types/models";
+import type { UserTurnInput } from "@firefly/pi/agent/user-turn-input";
+import type { ProviderGroupId, ThinkingLevel } from "@firefly/pi/types/models";
 
 export interface SessionRunner {
   abort(): void | Promise<void>;

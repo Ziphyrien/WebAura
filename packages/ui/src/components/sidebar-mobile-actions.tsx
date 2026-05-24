@@ -1,8 +1,8 @@
 "use client";
 
 import { Settings } from "lucide-react";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@webaura/ui/components/sidebar";
-import { useSettingsDialog } from "@webaura/ui/components/settings-state";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@firefly/ui/components/sidebar";
+import { useSettingsDialog } from "@firefly/ui/components/settings-state";
 
 /** Mobile sidebar only: links and actions that are hidden from the header on small screens. */
 export function SidebarMobileActions() {

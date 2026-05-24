@@ -7,11 +7,11 @@ import {
   setGithubPersonalAccessToken,
   validateGithubPersonalAccessToken,
 } from "./token";
-import { Alert, AlertDescription } from "@webaura/ui/components/alert";
-import { Button } from "@webaura/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@webaura/ui/components/card";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@webaura/ui/components/field";
-import { Input } from "@webaura/ui/components/input";
+import { Alert, AlertDescription } from "@firefly/ui/components/alert";
+import { Button } from "@firefly/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@firefly/ui/components/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@firefly/ui/components/field";
+import { Input } from "@firefly/ui/components/input";
 
 function GithubTokenSettings(props: { disabled?: boolean }) {
   const [token, setToken] = React.useState("");

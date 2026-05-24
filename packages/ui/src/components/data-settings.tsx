@@ -4,9 +4,9 @@ import * as React from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Download, Trash2 } from "lucide-react";
-import { runtimeClient } from "@webaura/pi/agent/runtime-client";
-import { deleteAllLocalData, exportAllChatData } from "@webaura/db";
-import { Button } from "@webaura/ui/components/button";
+import { runtimeClient } from "@firefly/pi/agent/runtime-client";
+import { deleteAllLocalData, exportAllChatData } from "@firefly/db";
+import { Button } from "@firefly/ui/components/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,14 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@webaura/ui/components/alert-dialog";
+} from "@firefly/ui/components/alert-dialog";
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
-} from "@webaura/ui/components/item";
+} from "@firefly/ui/components/item";
 
 function downloadJson(filename: string, data: unknown) {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -74,7 +74,7 @@ export function DataSettings(_props: { canRequestSync?: boolean; syncEnabled?: b
     try {
       const payload = await exportAllChatData();
       const day = payload.exportedAt.slice(0, 10);
-      downloadJson(`webaura-chat-export-${day}.json`, payload);
+      downloadJson(`firefly-chat-export-${day}.json`, payload);
       toast.success("Chat data exported");
     } catch (error) {
       console.error(error);

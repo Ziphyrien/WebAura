@@ -1,6 +1,6 @@
-import type { JsonValue } from "@webaura/pi/types/common";
-import { buildProxiedUrl } from "@webaura/pi/proxy/url";
-import type { OAuthProviderId } from "@webaura/pi/auth/oauth-types";
+import type { JsonValue } from "@firefly/pi/types/common";
+import { buildProxiedUrl } from "@firefly/pi/proxy/url";
+import type { OAuthProviderId } from "@firefly/pi/auth/oauth-types";
 
 export interface ManualOAuthRedirectRequest {
   authUrl: string;

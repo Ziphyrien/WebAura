@@ -8,23 +8,23 @@ Nostr.watch's old public REST endpoints are not usable for free browser relay di
 
 Checked on 2026-05-01 from the local workspace.
 
-| URL | Result | Notes |
-|-----|--------|-------|
-| `https://api.nostr.watch/v1/online` | HTTP 502 | Not usable. |
-| `https://api.nostr.watch/v1/relays` | HTTP 502 | Not usable. |
-| `https://api.nostr.watch/v1/offline` | HTTP 502 | Not usable. |
-| `https://api.nostr.watch/v1/online?public=true` | HTTP 502 | Not usable. |
-| `https://api.nostr.watch/v1/relays?public=true` | HTTP 502 | Not usable. |
-| `https://api.nostr.watch/v2/online` | HTTP 404 JSON | `NOT_FOUND`. |
-| `https://api.nostr.watch/v2/relays` | HTTP 402 JSON | `Payment Required`; not suitable for free discovery. |
-| `https://nostr.watch/api/v1/online` | HTTP 200 HTML | App shell, not JSON API. |
-| `https://nostr.watch/api/v1/relays` | HTTP 200 HTML | App shell, not JSON API. |
-| `https://nostr.watch/api/online` | HTTP 200 HTML | App shell, not JSON API. |
-| `https://nostr.watch/api/relays` | HTTP 200 HTML | App shell, not JSON API. |
-| `https://api.nostr.watch/relays?limit=5` | HTTP 200 HTML | App shell, not JSON API. |
-| `https://api.nostr.watch/docs` | HTTP 200 HTML | App shell, not OpenAPI JSON/docs endpoint. |
-| `https://rstate.nostr.watch/*` | DNS failure | No public host found. |
-| `https://relay-state.nostr.watch/*` | DNS failure | No public host found. |
+| URL                                             | Result        | Notes                                                |
+| ----------------------------------------------- | ------------- | ---------------------------------------------------- |
+| `https://api.nostr.watch/v1/online`             | HTTP 502      | Not usable.                                          |
+| `https://api.nostr.watch/v1/relays`             | HTTP 502      | Not usable.                                          |
+| `https://api.nostr.watch/v1/offline`            | HTTP 502      | Not usable.                                          |
+| `https://api.nostr.watch/v1/online?public=true` | HTTP 502      | Not usable.                                          |
+| `https://api.nostr.watch/v1/relays?public=true` | HTTP 502      | Not usable.                                          |
+| `https://api.nostr.watch/v2/online`             | HTTP 404 JSON | `NOT_FOUND`.                                         |
+| `https://api.nostr.watch/v2/relays`             | HTTP 402 JSON | `Payment Required`; not suitable for free discovery. |
+| `https://nostr.watch/api/v1/online`             | HTTP 200 HTML | App shell, not JSON API.                             |
+| `https://nostr.watch/api/v1/relays`             | HTTP 200 HTML | App shell, not JSON API.                             |
+| `https://nostr.watch/api/online`                | HTTP 200 HTML | App shell, not JSON API.                             |
+| `https://nostr.watch/api/relays`                | HTTP 200 HTML | App shell, not JSON API.                             |
+| `https://api.nostr.watch/relays?limit=5`        | HTTP 200 HTML | App shell, not JSON API.                             |
+| `https://api.nostr.watch/docs`                  | HTTP 200 HTML | App shell, not OpenAPI JSON/docs endpoint.           |
+| `https://rstate.nostr.watch/*`                  | DNS failure   | No public host found.                                |
+| `https://relay-state.nostr.watch/*`             | DNS failure   | No public host found.                                |
 
 ## Nostr.watch Repository Findings
 
@@ -37,12 +37,12 @@ Checked on 2026-05-01 from the local workspace.
 
 Queried kind `30166` events via WebSocket Nostr relay protocol.
 
-| Relay | Result | Notes |
-|-------|--------|-------|
-| `wss://history.nostr.watch` | WebSocket error | Not usable in this probe. |
-| `wss://relay.nostr.watch` | Success | Returned `kind: 30166` events with relay URL in `d`, RTT tags, NIP tags, and NIP-11 JSON in content. |
-| `wss://relay.damus.io` | Success | Returned some `kind: 30166` events, but using it as a seed would be a hardcoded non-Nostr.watch fallback. |
-| `wss://nos.lol` | Success | Returned some `kind: 30166` events, but using it as a seed would be a hardcoded non-Nostr.watch fallback. |
+| Relay                       | Result          | Notes                                                                                                     |
+| --------------------------- | --------------- | --------------------------------------------------------------------------------------------------------- |
+| `wss://history.nostr.watch` | WebSocket error | Not usable in this probe.                                                                                 |
+| `wss://relay.nostr.watch`   | Success         | Returned `kind: 30166` events with relay URL in `d`, RTT tags, NIP tags, and NIP-11 JSON in content.      |
+| `wss://relay.damus.io`      | Success         | Returned some `kind: 30166` events, but using it as a seed would be a hardcoded non-Nostr.watch fallback. |
+| `wss://nos.lol`             | Success         | Returned some `kind: 30166` events, but using it as a seed would be a hardcoded non-Nostr.watch fallback. |
 
 Example `wss://relay.nostr.watch` tags from a returned event:
 
@@ -58,7 +58,7 @@ Example `wss://relay.nostr.watch` tags from a returned event:
 ]
 ```
 
-## NIP-66 Semantics Relevant To WebAura
+## NIP-66 Semantics Relevant To Firefly
 
 NIP-66 defines relay discovery/liveness events:
 

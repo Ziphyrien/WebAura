@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
+import { Button } from "@firefly/ui/components/button";
 import {
   Card,
   CardAction,
@@ -9,13 +9,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@webaura/ui/components/card";
+} from "@firefly/ui/components/card";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@webaura/ui/components/collapsible";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/collapsible";
+import { cn } from "@firefly/ui/lib/utils";
 import { ChevronsUpDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { createContext, useContext, useMemo } from "react";

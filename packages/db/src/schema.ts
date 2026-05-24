@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 
-export const DB_NAME = "webaura-store";
+export const DB_NAME = "firefly-store";
 
 export function registerAppDbSchema(db: Dexie): void {
   db.version(10).stores({

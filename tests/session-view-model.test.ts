@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vite-plus/test";
 import { loadSessionViewModel } from "@/sessions/session-view-model";
-import { db, deleteAllLocalData, putSession, putSessionRuntime } from "@webaura/db";
+import { db, deleteAllLocalData, putSession, putSessionRuntime } from "@firefly/db";
 import type { AssistantMessage } from "@/types/chat";
 import type { MessageRow, SessionData, SessionRuntimeRow } from "@/types/storage";
 import { createEmptyUsage } from "@/types/models";

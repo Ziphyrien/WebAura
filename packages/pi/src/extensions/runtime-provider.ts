@@ -1,5 +1,5 @@
-import { EMPTY_EXTENSION_RUNTIME } from "@webaura/pi/extensions/runtime";
-import type { ExtensionRuntimeSnapshot } from "@webaura/pi/extensions/types";
+import { EMPTY_EXTENSION_RUNTIME } from "@firefly/pi/extensions/runtime";
+import type { ExtensionRuntimeSnapshot } from "@firefly/pi/extensions/types";
 
 export type ExtensionRuntimeResolver = () => Promise<ExtensionRuntimeSnapshot>;
 

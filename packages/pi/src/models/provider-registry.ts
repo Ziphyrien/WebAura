@@ -1,11 +1,11 @@
 import { getProviders as getRegistryProviders } from "@earendil-works/pi-ai";
-import { isOAuthProviderId, type OAuthProviderId } from "@webaura/pi/auth/oauth-types";
+import { isOAuthProviderId, type OAuthProviderId } from "@firefly/pi/auth/oauth-types";
 import type {
   KnownProvider,
   ProviderGroupDefinition,
   ProviderGroupId,
   ProviderId,
-} from "@webaura/pi/types/models";
+} from "@firefly/pi/types/models";
 
 const UNORDERED = 10_000;
 

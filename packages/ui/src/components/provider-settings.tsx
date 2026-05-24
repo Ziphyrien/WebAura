@@ -1,28 +1,28 @@
 import * as React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import type { ProviderGroupId, ProviderId } from "@webaura/pi/types/models";
+import type { ProviderGroupId, ProviderId } from "@firefly/pi/types/models";
 import {
   disconnectProvider,
   getOAuthProviderName,
   loginAndStoreOAuthProvider,
   setProviderApiKey,
   type OAuthProviderId,
-} from "@webaura/pi/auth/auth-service";
-import { isOAuthCredentials } from "@webaura/pi/auth/oauth-types";
-import type { ManualOAuthRedirectRequest, OAuthRequestOptions } from "@webaura/pi/auth/oauth-utils";
-import { db } from "@webaura/db";
+} from "@firefly/pi/auth/auth-service";
+import { isOAuthCredentials } from "@firefly/pi/auth/oauth-types";
+import type { ManualOAuthRedirectRequest, OAuthRequestOptions } from "@firefly/pi/auth/oauth-utils";
+import { db } from "@firefly/db";
 import {
   getOAuthProvidersForSettings,
   getProviderGroupMetadata,
   getSortedApiKeyProvidersForSettings,
-} from "@webaura/pi/models/provider-registry";
+} from "@firefly/pi/models/provider-registry";
 import {
   DEFAULT_PROXY_URL,
   PROXY_ENABLED_KEY,
   PROXY_URL_KEY,
   proxyConfigFromSettingsRows,
-} from "@webaura/pi/proxy/settings";
+} from "@firefly/pi/proxy/settings";
 import { Button } from "./button";
 import { Input } from "./input";
 import { Label } from "./label";

@@ -5,7 +5,7 @@
 ### 1. Scope / Trigger
 
 - Trigger: Share links cross the chat UI, route parsing, browser crypto, and Nostr relay transport boundaries.
-- Scope: `@webaura/pi/lib/share` owns share snapshot creation, link encoding, encryption, Nostr event assembly, relay publishing, relay reading, and payload validation.
+- Scope: `@firefly/pi/lib/share` owns share snapshot creation, link encoding, encryption, Nostr event assembly, relay publishing, relay reading, and payload validation.
 - Non-goals: Do not add backend APIs, database schema, accounts, edit/delete flows, stats, or durable-storage promises for this share mechanism.
 
 ### 2. Signatures
@@ -34,7 +34,7 @@ export interface NostrRelayDiscovery {
 
 ### 3. Contracts
 
-- URL mode is selected when the encoded WebAura fragment is `<= 16KB`.
+- URL mode is selected when the encoded Firefly fragment is `<= 16KB`.
 - Nostr mode is selected when compressed payload bytes are `> 16KB` and `<= 300KB`.
 - Payloads `> 300KB` must throw `ShareError` with `code: "oversized"` before any relay publish attempt.
 - The URL path/query must not contain plaintext conversation content or the encryption key.
@@ -52,7 +52,7 @@ export interface NostrRelayDiscovery {
 
 ### 4. Validation & Error Matrix
 
-- Missing WebAura fragment prefix -> `ShareError("invalid_link")`.
+- Missing Firefly fragment prefix -> `ShareError("invalid_link")`.
 - Unsupported share version -> `ShareError("unsupported_version")`.
 - Malformed fragment or snapshot JSON -> `ShareError("invalid_link")`.
 - AES-GCM decrypt failure -> `ShareError("decrypt_failed")`.

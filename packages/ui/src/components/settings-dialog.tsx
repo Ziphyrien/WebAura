@@ -1,18 +1,18 @@
 import * as React from "react";
 import { useRouterState } from "@tanstack/react-router";
-import type { SettingsSection } from "@webaura/ui/lib/search-state";
+import type { SettingsSection } from "@firefly/ui/lib/search-state";
 import { BadgeCheck, Sparkles, Palette, Receipt, Globe, Database, HelpCircle } from "lucide-react";
-import { CostsPanel } from "@webaura/ui/components/costs-panel";
-import { DataSettings } from "@webaura/ui/components/data-settings";
+import { CostsPanel } from "@firefly/ui/components/costs-panel";
+import { DataSettings } from "@firefly/ui/components/data-settings";
 import {
   ExtensionsSettings,
   type ExtensionSettingsEntry,
-} from "@webaura/ui/components/extensions-settings";
-import { ProviderSettings } from "@webaura/ui/components/provider-settings";
-import { ProxySettings } from "@webaura/ui/components/proxy-settings";
-import { AppearanceSettings } from "@webaura/ui/components/appearance-settings";
-import { Dialog, DialogContent, DialogTitle } from "@webaura/ui/components/dialog";
-import { Tabs, TabsList, TabsTrigger } from "@webaura/ui/components/tabs";
+} from "@firefly/ui/components/extensions-settings";
+import { ProviderSettings } from "@firefly/ui/components/provider-settings";
+import { ProxySettings } from "@firefly/ui/components/proxy-settings";
+import { AppearanceSettings } from "@firefly/ui/components/appearance-settings";
+import { Dialog, DialogContent, DialogTitle } from "@firefly/ui/components/dialog";
+import { Tabs, TabsList, TabsTrigger } from "@firefly/ui/components/tabs";
 import {
   Sidebar,
   SidebarContent,
@@ -22,9 +22,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-} from "@webaura/ui/components/sidebar";
-import { useSelectedSessionSummary } from "@webaura/pi/hooks/use-selected-session-summary";
-import { useSettingsDialog } from "@webaura/ui/components/settings-state";
+} from "@firefly/ui/components/sidebar";
+import { useSelectedSessionSummary } from "@firefly/pi/hooks/use-selected-session-summary";
+import { useSettingsDialog } from "@firefly/ui/components/settings-state";
 
 type SettingsSectionItem = {
   description: string;
@@ -71,7 +71,7 @@ const SETTINGS_SECTIONS: Array<SettingsSectionItem> = [
     label: "Data",
   },
   {
-    description: "How WebAura runs browser-native AI modules locally",
+    description: "How Firefly runs browser-native AI modules locally",
     icon: HelpCircle,
     id: "about",
     label: "About",
@@ -194,7 +194,7 @@ function AboutPanel() {
     <div className="space-y-5">
       <div className="space-y-5 text-sm leading-relaxed">
         <p className="text-foreground">
-          WebAura is a local-first AI workspace that runs in your browser. The default experience is
+          Firefly is a local-first AI workspace that runs in your browser. The default experience is
           plain AI chat; optional extensions can register AI-callable tools while keeping your own
           credentials in your own browser.
         </p>

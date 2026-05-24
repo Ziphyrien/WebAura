@@ -197,10 +197,17 @@ describe("settings dialog", () => {
     cleanup();
   });
 
-  it("does not restore the previous section when dialog open state echoes true", async () => {
+  it("does not close when dialog open state echoes true", async () => {
     const { AppSettingsDialog } = await import("@/components/settings-dialog");
+    const { SettingsDialogProvider } = await import("@/components/settings-state");
 
-    render(React.createElement(AppSettingsDialog));
+    render(
+      React.createElement(
+        SettingsDialogProvider,
+        undefined,
+        React.createElement(AppSettingsDialog),
+      ),
+    );
 
     expect(state.dialogOnOpenChange).toBeTypeOf("function");
 

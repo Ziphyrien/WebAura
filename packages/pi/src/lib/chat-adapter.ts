@@ -1,4 +1,4 @@
-import { linkToolResults } from "@webaura/pi/agent/tool-result-linker";
+import { linkToolResults } from "@firefly/pi/agent/tool-result-linker";
 import type {
   AssistantMessage,
   ChatAttachment,
@@ -8,7 +8,7 @@ import type {
   ToolCall,
   ToolResultMessage,
   UserMessage,
-} from "@webaura/pi/types/chat";
+} from "@firefly/pi/types/chat";
 
 export function getUserText(message: UserMessage): string {
   if (typeof message.displayText === "string") {

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import { getFoldedToolResultIds } from "@webaura/pi/lib/chat-adapter";
+import { getFoldedToolResultIds } from "@firefly/pi/lib/chat-adapter";
 import { ChatComposer } from "./chat-composer";
 import { SessionUtilityActions } from "./session-utility-actions";
 import {
@@ -14,48 +14,48 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@webaura/ui/components/dialog";
-import { Button } from "@webaura/ui/components/button";
+} from "@firefly/ui/components/dialog";
+import { Button } from "@firefly/ui/components/button";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatMessage as ChatMessageBlock } from "./chat-message";
-import type { UserTurnInput } from "@webaura/pi/agent/user-turn-input";
-import type { ProviderGroupId, ThinkingLevel } from "@webaura/pi/types/models";
-import type { AssistantMessage, DisplayChatMessage } from "@webaura/pi/types/chat";
+import type { UserTurnInput } from "@firefly/pi/agent/user-turn-input";
+import type { ProviderGroupId, ThinkingLevel } from "@firefly/pi/types/models";
+import type { AssistantMessage, DisplayChatMessage } from "@firefly/pi/types/chat";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from "@webaura/ui/components/ai-elements/conversation";
-import { Spinner } from "@webaura/ui/components/spinner";
-import { StatusShimmer } from "@webaura/ui/components/ai-elements/shimmer";
-import { ProgressiveBlur } from "@webaura/ui/components/progressive-blur";
+} from "@firefly/ui/components/ai-elements/conversation";
+import { Spinner } from "@firefly/ui/components/spinner";
+import { StatusShimmer } from "@firefly/ui/components/ai-elements/shimmer";
+import { ProgressiveBlur } from "@firefly/ui/components/progressive-blur";
 import {
   buildShareSnapshot,
   createShareLink,
   ShareError,
   type CreatedShareLink,
-} from "@webaura/pi/lib/share";
-import { db } from "@webaura/db";
-import { runtimeClient } from "@webaura/pi/agent/runtime-client";
-import { getRuntimeCommandErrorMessage } from "@webaura/pi/agent/runtime-command-errors";
-import { useRuntimeSession } from "@webaura/pi/hooks/use-runtime-session";
-import { useSessionOwnership } from "@webaura/pi/hooks/use-session-ownership";
+} from "@firefly/pi/lib/share";
+import { db } from "@firefly/db";
+import { runtimeClient } from "@firefly/pi/agent/runtime-client";
+import { getRuntimeCommandErrorMessage } from "@firefly/pi/agent/runtime-command-errors";
+import { useRuntimeSession } from "@firefly/pi/hooks/use-runtime-session";
+import { useSessionOwnership } from "@firefly/pi/hooks/use-session-ownership";
 import {
   getCanonicalProvider,
   getConnectedProviders,
   getDefaultModelForGroup,
   getDefaultProviderGroup,
   getVisibleProviderGroups,
-} from "@webaura/pi/models/catalog";
+} from "@firefly/pi/models/catalog";
 import {
   persistLastUsedSessionSettings,
   resolveProviderDefaults,
-} from "@webaura/pi/sessions/session-actions";
-import { reconcileInterruptedSession } from "@webaura/pi/sessions/session-notices";
+} from "@firefly/pi/sessions/session-actions";
+import { reconcileInterruptedSession } from "@firefly/pi/sessions/session-notices";
 import {
   loadSessionViewModel,
   type SessionViewModel,
-} from "@webaura/pi/sessions/session-view-model";
+} from "@firefly/pi/sessions/session-view-model";
 import {
   deriveActiveSessionViewState,
   deriveBannerState,
@@ -63,8 +63,8 @@ import {
   deriveRecoveryIntent,
   deriveResumeAction,
   shouldDisplayConversationStreaming,
-} from "@webaura/pi/sessions/session-view-state";
-import { useConversationStarter } from "@webaura/ui/hooks/use-conversation-starter";
+} from "@firefly/pi/sessions/session-view-state";
+import { useConversationStarter } from "@firefly/ui/hooks/use-conversation-starter";
 
 type EmptyChatDraft = {
   model: string;
@@ -394,14 +394,14 @@ export function Chat(props: ChatProps) {
         });
 
         if (outcome.kind === "reconciled") {
-          console.info("[webaura:runtime] interrupted_session_reconciled", {
+          console.info("[firefly:runtime] interrupted_session_reconciled", {
             lastProgressAt: outcome.lastProgressAt,
             sessionId: activeSession.id,
             trigger,
           });
         }
       } catch (error) {
-        console.error("[webaura:runtime] stale_stream_reconcile_failed", {
+        console.error("[firefly:runtime] stale_stream_reconcile_failed", {
           error,
           sessionId: activeSession.id,
           trigger,
@@ -464,7 +464,7 @@ export function Chat(props: ChatProps) {
   const reportRuntimeFailure = React.useCallback(
     (error: Error) => {
       toast.error(getRuntimeCommandErrorMessage(error));
-      console.error("[webaura:runtime] command_failed", {
+      console.error("[firefly:runtime] command_failed", {
         message: error.message,
         sessionId: activeSession?.id,
       });
@@ -763,7 +763,6 @@ export function Chat(props: ChatProps) {
                   });
                 }}
                 providerGroup={currentProviderGroup}
-                showNewChatAction={activeSession !== undefined}
                 thinkingLevel={currentThinkingLevel}
                 utilityActions={
                   messages.length > 0 ? (

@@ -6,7 +6,7 @@ import type {
   ToolResultMessage as PiToolResultMessage,
   UserMessage as PiUserMessage,
 } from "@earendil-works/pi-ai";
-import type { JsonValue } from "@webaura/pi/types/common";
+import type { JsonValue } from "@firefly/pi/types/common";
 export type { StopReason } from "@earendil-works/pi-ai";
 
 export type TextContent = PiTextContent;

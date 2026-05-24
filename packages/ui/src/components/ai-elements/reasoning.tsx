@@ -5,8 +5,8 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@webaura/ui/components/collapsible";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/collapsible";
+import { cn } from "@firefly/ui/lib/utils";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
 import { math } from "@streamdown/math";

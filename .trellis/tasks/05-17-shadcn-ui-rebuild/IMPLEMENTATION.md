@@ -71,8 +71,8 @@ Trellis/spec records:
 - `tailwind.baseColor`: `neutral` -> `zinc`
 - `iconLibrary`: `phosphor` -> `lucide`
 - monorepo aliases preserved:
-  - `ui`: `@webaura/ui/components`
-  - `utils`: `@webaura/ui/lib/utils`
+  - `ui`: `@firefly/ui/components`
+  - `utils`: `@firefly/ui/lib/utils`
 
 ## Theme Changes
 

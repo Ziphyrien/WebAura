@@ -2,7 +2,7 @@
 
 ## Goal
 
-Replace the broken Nostr.watch REST discovery path with NIP-66 relay discovery events from `wss://relay.nostr.watch`. This avoids unusable `api.nostr.watch` REST endpoints, avoids proxying a failing/paid API, and preserves the rule that WebAura must fail clearly instead of guessing or using static relay fallbacks.
+Replace the broken Nostr.watch REST discovery path with NIP-66 relay discovery events from `wss://relay.nostr.watch`. This avoids unusable `api.nostr.watch` REST endpoints, avoids proxying a failing/paid API, and preserves the rule that Firefly must fail clearly instead of guessing or using static relay fallbacks.
 
 ## Requirements
 
@@ -34,7 +34,7 @@ Replace the broken Nostr.watch REST discovery path with NIP-66 relay discovery e
 - Tests prove old REST endpoints are not used.
 - Tests prove no fallback publishing happens when NIP-66 discovery fails or yields insufficient verified candidates.
 - No server, DB, static relay fallback, or proxy-to-REST logic is introduced.
-- Targeted share tests and `@webaura/pi` type-check pass.
+- Targeted share tests and `@firefly/pi` type-check pass.
 
 ## Technical Approach
 
@@ -42,7 +42,7 @@ Replace the broken Nostr.watch REST discovery path with NIP-66 relay discovery e
 - Reuse existing `openRelaySocket()`, relay message parsing, candidate normalization, and later probe/selection pipeline where practical.
 - Add helper(s) to map NIP-66 events into `NostrRelayCandidate` objects.
 - Use a bounded request timeout and limit when requesting kind `30166` events.
-- Keep `probeRelay()` as active relay protocol verification: open the candidate relay WebSocket, confirm it accepts reads, confirm it accepts a signed short WebAura probe event, then optionally fetch NIP-11 HTTP metadata through `getProxyConfig()` and `buildProxiedUrl()` when proxy settings are enabled.
+- Keep `probeRelay()` as active relay protocol verification: open the candidate relay WebSocket, confirm it accepts reads, confirm it accepts a signed short Firefly probe event, then optionally fetch NIP-11 HTTP metadata through `getProxyConfig()` and `buildProxiedUrl()` when proxy settings are enabled.
 
 ## Decision (ADR-lite)
 
@@ -50,7 +50,7 @@ Replace the broken Nostr.watch REST discovery path with NIP-66 relay discovery e
 
 **Decision**: Stop using Nostr.watch REST discovery. Use `wss://relay.nostr.watch` and NIP-66 discovery events as the Nostr.watch-backed candidate source.
 
-**Consequences**: Discovery no longer depends on a broken/paid REST API or CORS proxy. It does depend on one Nostr.watch relay as the discovery source; if it is unavailable, WebAura fails clearly instead of guessing.
+**Consequences**: Discovery no longer depends on a broken/paid REST API or CORS proxy. It does depend on one Nostr.watch relay as the discovery source; if it is unavailable, Firefly fails clearly instead of guessing.
 
 ## Out of Scope
 

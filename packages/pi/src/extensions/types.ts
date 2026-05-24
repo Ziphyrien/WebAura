@@ -42,7 +42,7 @@ export interface ExtensionAPI {
   ): void;
 }
 
-export interface WebAuraExtension {
+export interface FireflyExtension {
   defaultEnabled?: boolean;
   manifest: ExtensionManifest;
   register(api: ExtensionAPI): void | Promise<void>;
@@ -61,12 +61,12 @@ export type ExtensionPackageSource =
 
 export interface ExtensionPackage {
   defaultEnabled?: boolean;
-  loadRuntime(): Promise<WebAuraExtension>;
+  loadRuntime(): Promise<FireflyExtension>;
   manifest: ExtensionManifest;
   source: ExtensionPackageSource;
 }
 
-/** Metadata WebAura can persist before a user-uploaded package is loaded or enabled. */
+/** Metadata Firefly can persist before a user-uploaded package is loaded or enabled. */
 export interface UploadedExtensionPackageDescriptor {
   entrypoints: {
     runtime: string;

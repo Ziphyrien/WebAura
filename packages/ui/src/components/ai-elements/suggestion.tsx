@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
-import { ScrollArea, ScrollBar } from "@webaura/ui/components/scroll-area";
-import { cn } from "@webaura/ui/lib/utils";
+import { Button } from "@firefly/ui/components/button";
+import { ScrollArea, ScrollBar } from "@firefly/ui/components/scroll-area";
+import { cn } from "@firefly/ui/lib/utils";
 import type { ComponentProps } from "react";
 import { useCallback } from "react";
 

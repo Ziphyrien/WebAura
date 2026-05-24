@@ -1,6 +1,6 @@
 # Icon Libraries Research for Developer Tools
 
-Comprehensive comparison of icon libraries suitable for WebAura's UI rebuild, focusing on visual style, completeness, bundle size, and React/shadcn compatibility.
+Comprehensive comparison of icon libraries suitable for Firefly's UI rebuild, focusing on visual style, completeness, bundle size, and React/shadcn compatibility.
 
 ---
 
@@ -321,7 +321,7 @@ npm install @heroicons/react
 
 ---
 
-## Recommendation for WebAura
+## Recommendation for Firefly
 
 ### Current State
 
@@ -412,7 +412,7 @@ import { Home, Settings, User } from "lucide-react";
 
 ## Final Recommendation
 
-**For WebAura's shadcn/ui rebuild:**
+**For Firefly's shadcn/ui rebuild:**
 
 ### Primary Choice: **Lucide Icons** ⭐
 

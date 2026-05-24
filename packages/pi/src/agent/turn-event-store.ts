@@ -3,16 +3,16 @@ import {
   mergeDailyCostAggregate,
   putSessionRuntime,
   runConversationTransaction,
-} from "@webaura/db";
-import { normalizeSessionRuntime } from "@webaura/db/session-runtime";
-import { toMessageRow } from "@webaura/pi/agent/session-adapter";
-import { buildSystemMessage, classifyRuntimeError } from "@webaura/pi/agent/runtime-errors";
-import { getDateKey, getIsoNow } from "@webaura/pi/lib/dates";
-import { createId } from "@webaura/pi/lib/ids";
-import { buildPersistedSession } from "@webaura/pi/sessions/session-service";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@webaura/db";
-import type { AssistantMessage, ToolResultMessage, UserMessage } from "@webaura/pi/types/chat";
-import type { ProviderId } from "@webaura/pi/types/models";
+} from "@firefly/db";
+import { normalizeSessionRuntime } from "@firefly/db/session-runtime";
+import { toMessageRow } from "@firefly/pi/agent/session-adapter";
+import { buildSystemMessage, classifyRuntimeError } from "@firefly/pi/agent/runtime-errors";
+import { getDateKey, getIsoNow } from "@firefly/pi/lib/dates";
+import { createId } from "@firefly/pi/lib/ids";
+import { buildPersistedSession } from "@firefly/pi/sessions/session-service";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@firefly/db";
+import type { AssistantMessage, ToolResultMessage, UserMessage } from "@firefly/pi/types/chat";
+import type { ProviderId } from "@firefly/pi/types/models";
 
 export type TurnEnvelope = {
   turnId: string;

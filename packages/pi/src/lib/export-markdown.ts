@@ -1,5 +1,5 @@
-import { getUserText } from "@webaura/pi/lib/chat-adapter";
-import type { DisplayChatMessage } from "@webaura/pi/types/chat";
+import { getUserText } from "@firefly/pi/lib/chat-adapter";
+import type { DisplayChatMessage } from "@firefly/pi/types/chat";
 
 function formatMessageContent(message: DisplayChatMessage): string {
   if (message.role === "user") {

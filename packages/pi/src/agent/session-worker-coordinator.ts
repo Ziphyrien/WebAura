@@ -3,13 +3,13 @@ import type { AgentEvent, AgentTool, StreamFn } from "@earendil-works/pi-agent-c
 import {
   BusyRuntimeError,
   StreamInterruptedRuntimeError,
-} from "@webaura/pi/agent/runtime-command-errors";
+} from "@firefly/pi/agent/runtime-command-errors";
 import {
   normalizeAssistantDraft,
   normalizeMessages,
   buildInitialAgentState,
-} from "@webaura/pi/agent/session-adapter";
-import { TurnEventStore } from "@webaura/pi/agent/turn-event-store";
+} from "@firefly/pi/agent/session-adapter";
+import { TurnEventStore } from "@firefly/pi/agent/turn-event-store";
 import {
   type AppendSessionNoticeInput,
   type ConfigureSessionInput,
@@ -17,25 +17,25 @@ import {
   type SetThinkingLevelInput,
   type StartTurnInput,
   type TurnCompletionResult,
-} from "@webaura/pi/agent/runtime-worker-types";
-import { webMessageTransformer } from "@webaura/pi/agent/message-transformer";
-import { streamChatWithPiAgent } from "@webaura/pi/agent/provider-stream";
-import { clampThinkingLevel } from "@webaura/pi/agent/thinking-levels";
-import { resolveApiKeyForProvider } from "@webaura/pi/auth/resolve-api-key";
-import { EMPTY_EXTENSION_RUNTIME } from "@webaura/pi/extensions/runtime";
-import { resolveEnabledExtensionRuntime } from "@webaura/pi/extensions/runtime-provider";
-import { buildExtensionSystemPrompt } from "@webaura/pi/extensions/system-prompt";
-import type { ExtensionRuntimeSnapshot } from "@webaura/pi/extensions/types";
-import { putSession } from "@webaura/db";
-import { getIsoNow } from "@webaura/pi/lib/dates";
-import { getCanonicalProvider, getModel } from "@webaura/pi/models/catalog";
+} from "@firefly/pi/agent/runtime-worker-types";
+import { webMessageTransformer } from "@firefly/pi/agent/message-transformer";
+import { streamChatWithPiAgent } from "@firefly/pi/agent/provider-stream";
+import { clampThinkingLevel } from "@firefly/pi/agent/thinking-levels";
+import { resolveApiKeyForProvider } from "@firefly/pi/auth/resolve-api-key";
+import { EMPTY_EXTENSION_RUNTIME } from "@firefly/pi/extensions/runtime";
+import { resolveEnabledExtensionRuntime } from "@firefly/pi/extensions/runtime-provider";
+import { buildExtensionSystemPrompt } from "@firefly/pi/extensions/system-prompt";
+import type { ExtensionRuntimeSnapshot } from "@firefly/pi/extensions/types";
+import { putSession } from "@firefly/db";
+import { getIsoNow } from "@firefly/pi/lib/dates";
+import { getCanonicalProvider, getModel } from "@firefly/pi/models/catalog";
 import {
   loadSessionWithMessages,
   buildPersistedSession,
-} from "@webaura/pi/sessions/session-service";
-import type { ProviderId } from "@webaura/pi/types/models";
-import type { AssistantMessage, ToolResultMessage } from "@webaura/pi/types/chat";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@webaura/db";
+} from "@firefly/pi/sessions/session-service";
+import type { ProviderId } from "@firefly/pi/types/models";
+import type { AssistantMessage, ToolResultMessage } from "@firefly/pi/types/chat";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@firefly/db";
 
 const TURN_IDLE_TIMEOUT_MS = 15 * 60_000;
 const TURN_IDLE_POLL_MS = 30_000;

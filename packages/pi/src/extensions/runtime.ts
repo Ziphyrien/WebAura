@@ -1,12 +1,12 @@
-import { createExtensionRuntimeSnapshot } from "@webaura/pi/extensions/registry";
-import { getExtensionEnabled } from "@webaura/pi/extensions/settings";
-import { loadExtensionPackageRuntime } from "@webaura/pi/extensions/packages";
+import { createExtensionRuntimeSnapshot } from "@firefly/pi/extensions/registry";
+import { getExtensionEnabled } from "@firefly/pi/extensions/settings";
+import { loadExtensionPackageRuntime } from "@firefly/pi/extensions/packages";
 import type {
   ExtensionManifest,
   ExtensionPackage,
   ExtensionRuntimeSnapshot,
-  WebAuraExtension,
-} from "@webaura/pi/extensions/types";
+  FireflyExtension,
+} from "@firefly/pi/extensions/types";
 
 export const EMPTY_EXTENSION_RUNTIME: ExtensionRuntimeSnapshot = {
   enabledExtensions: [],
@@ -33,7 +33,7 @@ export async function getExtensionCatalog(
 export async function getEnabledExtensionRuntime(
   extensionPackages: readonly ExtensionPackage[],
 ): Promise<ExtensionRuntimeSnapshot> {
-  const enabledExtensions: WebAuraExtension[] = [];
+  const enabledExtensions: FireflyExtension[] = [];
 
   for (const extensionPackage of extensionPackages) {
     if (await getExtensionEnabled(extensionPackage)) {

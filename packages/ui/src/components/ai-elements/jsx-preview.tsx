@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@webaura/ui/lib/utils";
+import { cn } from "@firefly/ui/lib/utils";
 import { AlertCircle } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import {

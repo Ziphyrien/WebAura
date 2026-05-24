@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { Type } from "typebox";
-import { deleteAllLocalData } from "@webaura/db";
-import { githubExtensionPackage } from "@webaura/extensions/github";
-import { createExtensionRuntimeSnapshot } from "@webaura/pi/extensions/registry";
-import { getEnabledExtensionRuntime, getExtensionCatalog } from "@webaura/pi/extensions/runtime";
-import { setExtensionEnabled } from "@webaura/pi/extensions/settings";
-import type { ExtensionPackage, WebAuraExtension } from "@webaura/pi/extensions/types";
+import { deleteAllLocalData } from "@firefly/db";
+import { githubExtensionPackage } from "@firefly/extensions/github";
+import { createExtensionRuntimeSnapshot } from "@firefly/pi/extensions/registry";
+import { getEnabledExtensionRuntime, getExtensionCatalog } from "@firefly/pi/extensions/runtime";
+import { setExtensionEnabled } from "@firefly/pi/extensions/settings";
+import type { ExtensionPackage, FireflyExtension } from "@firefly/pi/extensions/types";
 
-const customExtension: WebAuraExtension = {
+const customExtension: FireflyExtension = {
   manifest: {
     description: "Test extension",
     id: "test-extension",

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { toast } from "sonner";
-import { DEFAULT_PROXY_URL, getProxyConfig, setProxyConfig } from "@webaura/pi/proxy/settings";
+import { DEFAULT_PROXY_URL, getProxyConfig, setProxyConfig } from "@firefly/pi/proxy/settings";
 import { Button } from "./button";
 import { Input } from "./input";
 import { Label } from "./label";

@@ -1,9 +1,9 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { Message } from "@earendil-works/pi-ai";
-import { linkToolResults } from "@webaura/pi/agent/tool-result-linker";
-import type { AssistantMessage, ToolResultMessage } from "@webaura/pi/types/chat";
-import type { JsonValue } from "@webaura/pi/types/common";
-import type { MessageRow } from "@webaura/db";
+import { linkToolResults } from "@firefly/pi/agent/tool-result-linker";
+import type { AssistantMessage, ToolResultMessage } from "@firefly/pi/types/chat";
+import type { JsonValue } from "@firefly/pi/types/common";
+import type { MessageRow } from "@firefly/db";
 
 function isLlmMessage(message: AgentMessage): message is Message {
   return (

@@ -569,7 +569,7 @@ Savings: 70%
 
 ---
 
-## 10. Current Project Context (WebAura)
+## 10. Current Project Context (Firefly)
 
 ### Existing Configuration
 
@@ -699,4 +699,4 @@ Savings: 70%
 
 _Research compiled: 2026-05-17_  
 _Task: shadcn UI rebuild — typography optimization_  
-_Context: WebAura monorepo, developer-focused interface_
+_Context: Firefly monorepo, developer-focused interface_

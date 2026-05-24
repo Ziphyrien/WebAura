@@ -1,13 +1,13 @@
 import type { AgentMessage, AgentState, AgentTool } from "@earendil-works/pi-agent-core";
 import type { Message, Model } from "@earendil-works/pi-ai";
-import { SYSTEM_PROMPT } from "@webaura/pi/agent/system-prompt";
+import { SYSTEM_PROMPT } from "@firefly/pi/agent/system-prompt";
 import type {
   AssistantMessage,
   ChatMessage,
   ToolResultMessage,
   UserMessage,
-} from "@webaura/pi/types/chat";
-import type { MessageRow, MessageStatus, SessionData } from "@webaura/db";
+} from "@firefly/pi/types/chat";
+import type { MessageRow, MessageStatus, SessionData } from "@firefly/db";
 
 function isLlmMessage(message: AgentMessage): message is Message {
   return (

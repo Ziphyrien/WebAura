@@ -5,8 +5,8 @@ import {
   getUserText,
   isSystemMessage,
   isToolResultMessage,
-} from "@webaura/pi/lib/chat-adapter";
-import type { DisplayChatMessage } from "@webaura/pi/types/chat";
+} from "@firefly/pi/lib/chat-adapter";
+import type { DisplayChatMessage } from "@firefly/pi/types/chat";
 import {
   Message,
   MessageBranch,
@@ -17,40 +17,40 @@ import {
   MessageBranchSelector,
   MessageContent,
   MessageResponse,
-} from "@webaura/ui/components/ai-elements/message";
+} from "@firefly/ui/components/ai-elements/message";
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from "@webaura/ui/components/ai-elements/reasoning";
-import { StatusShimmer } from "@webaura/ui/components/ai-elements/shimmer";
+} from "@firefly/ui/components/ai-elements/reasoning";
+import { StatusShimmer } from "@firefly/ui/components/ai-elements/shimmer";
 import {
   Source,
   Sources,
   SourcesContent,
   SourcesTrigger,
-} from "@webaura/ui/components/ai-elements/sources";
-import { ToolExecution } from "@webaura/ui/components/tool-execution";
-import { ToolResultBubble } from "@webaura/ui/components/tool-result-bubble";
+} from "@firefly/ui/components/ai-elements/sources";
+import { ToolExecution } from "@firefly/ui/components/tool-execution";
+import { ToolResultBubble } from "@firefly/ui/components/tool-result-bubble";
 import {
   Attachment,
   AttachmentInfo,
   AttachmentPreview,
   Attachments,
-} from "@webaura/ui/components/ai-elements/attachments";
+} from "@firefly/ui/components/ai-elements/attachments";
 import {
   Item,
   ItemContent,
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "@webaura/ui/components/item";
+} from "@firefly/ui/components/item";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@webaura/ui/components/collapsible";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/collapsible";
+import { cn } from "@firefly/ui/lib/utils";
 
 function getAttachmentUrl(
   message: Extract<DisplayChatMessage, { role: "user" }>,

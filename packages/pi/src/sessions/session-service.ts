@@ -4,29 +4,29 @@ import {
   getSessionMessages,
   getSessionRuntime,
   putSession,
-} from "@webaura/db";
-import { loadSessionLeaseState } from "@webaura/db/session-leases";
-import { normalizeSessionRuntime } from "@webaura/db/session-runtime";
-import { getIsoNow } from "@webaura/pi/lib/dates";
-import { createId } from "@webaura/pi/lib/ids";
-import { getCanonicalProvider } from "@webaura/pi/models/catalog";
+} from "@firefly/db";
+import { loadSessionLeaseState } from "@firefly/db/session-leases";
+import { normalizeSessionRuntime } from "@firefly/db/session-runtime";
+import { getIsoNow } from "@firefly/pi/lib/dates";
+import { createId } from "@firefly/pi/lib/ids";
+import { getCanonicalProvider } from "@firefly/pi/models/catalog";
 import {
   normalizePersistedSessionState,
   normalizeSessionProviderGroup,
-} from "@webaura/pi/sessions/session-state-normalization";
+} from "@firefly/pi/sessions/session-state-normalization";
 import {
   createEmptyUsage,
   type ProviderGroupId,
   type ThinkingLevel,
-} from "@webaura/pi/types/models";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@webaura/db";
+} from "@firefly/pi/types/models";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@firefly/db";
 
 export {
   aggregateSessionUsage,
   buildPersistedSession,
   normalizeSessionProviderGroup,
   shouldSaveSession,
-} from "@webaura/pi/sessions/session-state-normalization";
+} from "@firefly/pi/sessions/session-state-normalization";
 
 export function createSession(params: {
   model: string;

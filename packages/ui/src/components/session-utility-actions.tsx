@@ -1,5 +1,5 @@
 import { Check, Loader2, Share2 } from "lucide-react";
-import { Button } from "@webaura/ui/components/button";
+import { Button } from "@firefly/ui/components/button";
 import { useEffect, useState } from "react";
 
 type SessionUtilityActionProps = {

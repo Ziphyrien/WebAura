@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vite-plus/test";
 
-vi.mock("@webaura/ui/components/chat", () => ({
+vi.mock("@firefly/ui/components/chat", () => ({
   Chat: (props: { sessionId?: string }) => (
     <div data-testid="chat-view">{props.sessionId ? `session:${props.sessionId}` : "global"}</div>
   ),

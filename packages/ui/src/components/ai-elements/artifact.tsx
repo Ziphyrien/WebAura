@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
+import { Button } from "@firefly/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@webaura/ui/components/tooltip";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/tooltip";
+import { cn } from "@firefly/ui/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import { XIcon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes } from "react";

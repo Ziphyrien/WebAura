@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
-import { cn } from "@webaura/ui/lib/utils";
+import { Button } from "@firefly/ui/components/button";
+import { cn } from "@firefly/ui/lib/utils";
 import Ansi from "ansi-to-react";
 import { CheckIcon, CopyIcon, TerminalIcon, Trash2Icon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes } from "react";

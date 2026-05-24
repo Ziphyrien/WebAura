@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
+import { Button } from "@firefly/ui/components/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@webaura/ui/components/collapsible";
-import { ScrollArea } from "@webaura/ui/components/scroll-area";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/collapsible";
+import { ScrollArea } from "@firefly/ui/components/scroll-area";
+import { cn } from "@firefly/ui/lib/utils";
 import { ChevronDownIcon, PaperclipIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 

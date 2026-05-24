@@ -1,10 +1,10 @@
-import { defineExtensionPackage } from "@webaura/pi/extensions/packages";
+import { defineExtensionPackage } from "@firefly/pi/extensions/packages";
 import {
   GITHUB_EXTENSION_DEFAULT_ENABLED,
   GITHUB_EXTENSION_ID,
   githubExtensionManifest,
 } from "./manifest";
-import type { ExtensionSettingsEntry } from "@webaura/ui/components/extensions-settings";
+import type { ExtensionSettingsEntry } from "@firefly/ui/components/extensions-settings";
 
 export const githubExtensionPackage = defineExtensionPackage({
   defaultEnabled: GITHUB_EXTENSION_DEFAULT_ENABLED,

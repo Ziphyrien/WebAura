@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vite-plus/test";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -11,24 +11,24 @@ vi.mock("@tanstack/react-router", () => ({
   }: React.PropsWithChildren<Record<string, unknown>>) => React.createElement("a", props, children),
 }));
 
-vi.mock("@webaura/ui/components/button", () => ({
+vi.mock("@firefly/ui/components/button", () => ({
   Button: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) =>
     asChild ? children : React.createElement("button", undefined, children),
 }));
 
-vi.mock("@webaura/ui/components/separator", () => ({
+vi.mock("@firefly/ui/components/separator", () => ({
   Separator: () => null,
 }));
 
-vi.mock("@webaura/ui/components/sidebar", () => ({
+vi.mock("@firefly/ui/components/sidebar", () => ({
   SidebarTrigger: () => React.createElement("button", { type: "button" }, "Sidebar"),
 }));
 
-vi.mock("@webaura/ui/components/theme-toggle", () => ({
+vi.mock("@firefly/ui/components/theme-toggle", () => ({
   ThemeToggle: () => React.createElement("button", { type: "button" }, "Theme"),
 }));
 
-vi.mock("@webaura/ui/components/tooltip", () => ({
+vi.mock("@firefly/ui/components/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children),
   TooltipContent: ({ children }: { children: React.ReactNode }) =>
@@ -38,13 +38,11 @@ vi.mock("@webaura/ui/components/tooltip", () => ({
 }));
 
 describe("AppHeader", () => {
-  it("shows standard chat actions without a header brand", async () => {
+  it("renders no top header chrome", async () => {
     const { AppHeader } = await import("@/components/app-header");
 
-    render(<AppHeader />);
+    const { container } = render(<AppHeader />);
 
-    expect(screen.queryByText("WebAura")).toBeNull();
-    expect(screen.getByText("Theme")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Open settings" })).toBeTruthy();
+    expect(container.childElementCount).toBe(0);
   });
 });

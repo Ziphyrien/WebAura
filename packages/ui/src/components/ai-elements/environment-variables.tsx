@@ -1,9 +1,9 @@
 "use client";
 
-import { Badge } from "@webaura/ui/components/badge";
-import { Button } from "@webaura/ui/components/button";
-import { Switch } from "@webaura/ui/components/switch";
-import { cn } from "@webaura/ui/lib/utils";
+import { Badge } from "@firefly/ui/components/badge";
+import { Button } from "@firefly/ui/components/button";
+import { Switch } from "@firefly/ui/components/switch";
+import { cn } from "@firefly/ui/lib/utils";
 import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes } from "react";
 import {

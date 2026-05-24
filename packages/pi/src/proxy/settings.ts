@@ -1,4 +1,4 @@
-import { deleteSetting, getSetting, setSetting } from "@webaura/db";
+import { deleteSetting, getSetting, setSetting } from "@firefly/db";
 
 export interface ProxyConfig {
   enabled: boolean;

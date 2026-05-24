@@ -11,8 +11,8 @@ import {
 } from "./client";
 import { getGithubPersonalAccessToken } from "./token";
 import { GITHUB_EXTENSION_DEFAULT_ENABLED, githubExtensionManifest } from "./manifest";
-import type { JsonValue } from "@webaura/pi/types/common";
-import type { WebAuraExtension } from "@webaura/pi/extensions/types";
+import type { JsonValue } from "@firefly/pi/types/common";
+import type { FireflyExtension } from "@firefly/pi/extensions/types";
 
 type RepoOperation =
   | "blob"
@@ -2084,7 +2084,7 @@ async function runActionsTool(params: {
   });
 }
 
-export const githubExtension: WebAuraExtension = {
+export const githubExtension: FireflyExtension = {
   defaultEnabled: GITHUB_EXTENSION_DEFAULT_ENABLED,
   manifest: githubExtensionManifest,
   register(api) {

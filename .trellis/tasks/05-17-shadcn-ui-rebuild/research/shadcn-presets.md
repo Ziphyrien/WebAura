@@ -32,7 +32,7 @@ shadcn/ui provides **5 named visual styles** that control border radius, padding
 - **Visual feel**: Soft, relaxed, friendly, approachable
 - **Use case**: When you want the UI to feel warm and inviting
 
-### 4. Lyra (Current WebAura Style)
+### 4. Lyra (Current Firefly Style)
 
 - **Characteristics**: Zero border radius, sharp edges, boxy and precise
 - **Best for**: Developer tools, terminals, technical interfaces, code editors
@@ -60,7 +60,7 @@ Both are headless primitive libraries. shadcn/ui rebuilt every component for Bas
 - Mature, battle-tested (older library)
 - Larger community, more Stack Overflow answers
 - Uses `asChild` prop for custom triggers
-- Current WebAura choice
+- Current Firefly choice
 
 **Base UI**:
 
@@ -69,7 +69,7 @@ Both are headless primitive libraries. shadcn/ui rebuilt every component for Bas
 - Uses `render` prop for custom triggers
 - Considered the "safer long-term bet" by community
 
-**WebAura Status**: Currently using Radix UI. Switching would require component updates but is supported by the CLI.
+**Firefly Status**: Currently using Radix UI. Switching would require component updates but is supported by the CLI.
 
 ## Base Colors (Gray Palettes)
 
@@ -77,7 +77,7 @@ shadcn/ui offers **7 base gray colors** that control the neutral tones throughou
 
 ### Available Base Colors
 
-1. **Neutral** (Current WebAura)
+1. **Neutral** (Current Firefly)
    - Pure achromatic gray (hue = 0, chroma = 0)
    - No color undertones
    - Most versatile, works with any accent color
@@ -128,7 +128,7 @@ All shadcn/ui colors use OKLCH (Oklab Lightness Chroma Hue):
 
 **Key advantage**: Lightness steps feel visually even across the scale. Neutral base colors have chroma near zero (0.031-0.034 max) to stay in neutral territory while maintaining subtle hue.
 
-## Current WebAura Configuration
+## Current Firefly Configuration
 
 From `packages/ui/components.json` and `globals.css`:
 
@@ -160,14 +160,14 @@ shadcn/ui supports multiple font families through the preset system:
 
 **Common choices**:
 
-- **Geist** (Current WebAura): Modern, clean, excellent readability
+- **Geist** (Current Firefly): Modern, clean, excellent readability
 - **Inter**: Versatile, professional, widely used
 - **JetBrains Mono**: Monospace, developer-focused
 - **Plus Jakarta Sans**: Rounded, friendly
 - **Onest**: Modern geometric sans
 - **Manrope**: Balanced, professional
 
-**Current WebAura pairing**:
+**Current Firefly pairing**:
 
 - Sans: Geist Variable (body text)
 - Heading: Inter Variable (headings)
@@ -200,13 +200,13 @@ shadcn/ui uses semantic color tokens that map to CSS variables:
 - `chart-1` through `chart-5` - Chart palette
 - `sidebar-*` - Sidebar-specific tokens
 
-**Current WebAura issue**: All colors are achromatic (chroma = 0), resulting in a purely grayscale interface with no color personality.
+**Current Firefly issue**: All colors are achromatic (chroma = 0), resulting in a purely grayscale interface with no color personality.
 
 ## Preset Codes
 
 shadcn/ui encodes entire configurations into 7-character base62 strings (e.g., `bJzmtL6J8`).
 
-**Current WebAura preset**: `bJzmtL6J8`
+**Current Firefly preset**: `bJzmtL6J8`
 
 **Encoding includes**:
 
@@ -250,7 +250,7 @@ The CLI offers three strategies:
 
    Only updates `components.json` and CSS variables, leaves component code unchanged.
 
-## Recommendations for WebAura
+## Recommendations for Firefly
 
 ### Visual Style Options
 

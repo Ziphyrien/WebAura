@@ -1,4 +1,4 @@
-import { Chat } from "@webaura/ui/components/chat";
+import { Chat } from "@firefly/ui/components/chat";
 
 export function ChatPage() {
   return <Chat />;

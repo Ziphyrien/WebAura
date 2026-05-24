@@ -6,9 +6,9 @@ import {
   ToolHeader,
   ToolInput,
   ToolOutput,
-} from "@webaura/ui/components/ai-elements/tool";
-import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@webaura/pi/agent/runtime-errors";
-import type { ToolCall, ToolResultMessage } from "@webaura/pi/types/chat";
+} from "@firefly/ui/components/ai-elements/tool";
+import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@firefly/pi/agent/runtime-errors";
+import type { ToolCall, ToolResultMessage } from "@firefly/pi/types/chat";
 
 interface ReadDetails {
   path: string;

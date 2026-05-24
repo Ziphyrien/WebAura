@@ -1,20 +1,20 @@
-import { getIsoNow } from "@webaura/pi/lib/dates";
-import { deleteProviderKey, getProviderKey, setProviderKey } from "@webaura/db";
-import { loginGitHubCopilot } from "@webaura/pi/auth/providers/github-copilot";
-import { loginOpenAICodex } from "@webaura/pi/auth/providers/openai-codex";
+import { getIsoNow } from "@firefly/pi/lib/dates";
+import { deleteProviderKey, getProviderKey, setProviderKey } from "@firefly/db";
+import { loginGitHubCopilot } from "@firefly/pi/auth/providers/github-copilot";
+import { loginOpenAICodex } from "@firefly/pi/auth/providers/openai-codex";
 import {
   isOAuthProviderId,
   serializeOAuthCredentials,
   type OAuthCredentials,
   type OAuthProviderId,
-} from "@webaura/pi/auth/oauth-types";
-import type { OAuthRequestOptions } from "@webaura/pi/auth/oauth-utils";
-import type { ProviderAuthKind, ProviderAuthState } from "@webaura/pi/types/auth";
-import type { ProviderId } from "@webaura/pi/types/models";
-import { getOAuthProviderLabel } from "@webaura/pi/models/provider-registry";
+} from "@firefly/pi/auth/oauth-types";
+import type { OAuthRequestOptions } from "@firefly/pi/auth/oauth-utils";
+import type { ProviderAuthKind, ProviderAuthState } from "@firefly/pi/types/auth";
+import type { ProviderId } from "@firefly/pi/types/models";
+import { getOAuthProviderLabel } from "@firefly/pi/models/provider-registry";
 
-export { oauthRefresh } from "@webaura/pi/auth/oauth-refresh";
-export type { OAuthProviderId } from "@webaura/pi/auth/oauth-types";
+export { oauthRefresh } from "@firefly/pi/auth/oauth-refresh";
+export type { OAuthProviderId } from "@firefly/pi/auth/oauth-types";
 
 export function isOAuthProvider(provider: string): provider is OAuthProviderId {
   return isOAuthProviderId(provider);

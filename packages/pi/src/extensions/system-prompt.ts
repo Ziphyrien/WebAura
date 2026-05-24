@@ -1,5 +1,5 @@
-import { SYSTEM_PROMPT } from "@webaura/pi/agent/system-prompt";
-import type { ExtensionManifest } from "@webaura/pi/extensions/types";
+import { SYSTEM_PROMPT } from "@firefly/pi/agent/system-prompt";
+import type { ExtensionManifest } from "@firefly/pi/extensions/types";
 
 function formatExtensionCapabilities(extension: ExtensionManifest): string {
   const capabilities = extension.capabilities?.filter((capability) => capability.trim()) ?? [];

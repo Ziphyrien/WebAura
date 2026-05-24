@@ -1,5 +1,5 @@
 {
-  "name": "@webaura/extensions",
+  "name": "@firefly/extensions",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,17 +14,17 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@webaura/db": "workspace:*",
-    "@webaura/pi": "workspace:*",
-    "@webaura/ui": "workspace:*",
+    "@firefly/db": "workspace:*",
+    "@firefly/pi": "workspace:*",
+    "@firefly/ui": "workspace:*",
     "lucide-react": "^1.0.1",
     "react": "catalog:",
     "sonner": "catalog:",
     "typebox": "1.1.24"
   },
   "devDependencies": {
+    "@firefly/config": "workspace:*",
     "@types/react": "catalog:",
-    "@webaura/config": "workspace:*",
     "typescript": "^5",
     "vite": "catalog:"
   }

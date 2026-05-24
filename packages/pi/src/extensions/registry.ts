@@ -7,8 +7,8 @@ import type {
   ExtensionRuntimeSnapshot,
   AnyRegisteredExtensionTool,
   ExtensionToolDefinition,
-  WebAuraExtension,
-} from "@webaura/pi/extensions/types";
+  FireflyExtension,
+} from "@firefly/pi/extensions/types";
 
 const EXTENSION_ID_PATTERN = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)*$/;
 const TOOL_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
@@ -73,7 +73,7 @@ class ExtensionToolRegistry implements ExtensionAPI {
 }
 
 export async function collectExtensionTools(
-  extensions: WebAuraExtension[],
+  extensions: FireflyExtension[],
 ): Promise<AnyRegisteredExtensionTool[]> {
   const registeredToolNames = new Set<string>();
   const tools: AnyRegisteredExtensionTool[] = [];
@@ -89,7 +89,7 @@ export async function collectExtensionTools(
 }
 
 export async function createExtensionRuntimeSnapshot(
-  extensions: WebAuraExtension[],
+  extensions: FireflyExtension[],
 ): Promise<ExtensionRuntimeSnapshot> {
   const tools = await collectExtensionTools(extensions);
 

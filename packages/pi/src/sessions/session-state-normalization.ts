@@ -1,15 +1,15 @@
-import { normalizeSessionRuntime } from "@webaura/db/session-runtime-normalization";
-import { linkToolResults } from "@webaura/pi/agent/tool-result-linker";
-import { StreamInterruptedRuntimeError } from "@webaura/pi/agent/runtime-command-errors";
-import { getCanonicalProvider, getDefaultProviderGroup } from "@webaura/pi/models/catalog";
+import { normalizeSessionRuntime } from "@firefly/db/session-runtime-normalization";
+import { linkToolResults } from "@firefly/pi/agent/tool-result-linker";
+import { StreamInterruptedRuntimeError } from "@firefly/pi/agent/runtime-command-errors";
+import { getCanonicalProvider, getDefaultProviderGroup } from "@firefly/pi/models/catalog";
 import {
   buildPreview,
   generateTitle,
   hasPersistableExchange,
-} from "@webaura/pi/sessions/session-metadata";
-import { createEmptyUsage, type Usage } from "@webaura/pi/types/models";
-import type { AssistantMessage, ChatMessage } from "@webaura/pi/types/chat";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@webaura/db";
+} from "@firefly/pi/sessions/session-metadata";
+import { createEmptyUsage, type Usage } from "@firefly/pi/types/models";
+import type { AssistantMessage, ChatMessage } from "@firefly/pi/types/chat";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@firefly/db";
 
 function mergeUsage(left: Usage, right: Usage): Usage {
   return {

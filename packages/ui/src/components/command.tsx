@@ -3,15 +3,15 @@
 import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
 
-import { cn } from "@webaura/ui/lib/utils";
+import { cn } from "@firefly/ui/lib/utils";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@webaura/ui/components/dialog";
-import { InputGroup, InputGroupAddon } from "@webaura/ui/components/input-group";
+} from "@firefly/ui/components/dialog";
+import { InputGroup, InputGroupAddon } from "@firefly/ui/components/input-group";
 import { SearchIcon, CheckIcon } from "lucide-react";
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {

@@ -1,6 +1,12 @@
-# WebAura
+# Firefly
 
-Local-first AI tools, running in your browser.
+> "My thoughts, like spark-riding fireflies, shimmer in the deep silence of your own starry sky."
+>
+> 思想如点点萤火，在属于你自己的寂静星空中闪烁。
+
+Firefly is named after that image: a small, living light moving through a quiet sky. It frames the product as a local-first AI workspace that does not try to dominate your attention, but stays close to your thoughts, catching sparks, shaping context, and illuminating the work already in front of you.
+
+A quiet browser workspace for thoughts that arrive as sparks.
 
 ---
 
@@ -8,7 +14,7 @@ Local-first AI tools, running in your browser.
 
 **We don’t run a backend that stores your chats or credentials.** Session history, model choice, app settings, extension credentials, provider keys / OAuth, and usage totals live **only in this browser** (IndexedDB via [Dexie](https://github.com/dexie/Dexie.js)).
 
-**The app still uses the network:** Model requests go directly to the providers you configure, unless you explicitly route them through **Settings -> Proxy**. Optional extensions may call their own network services when enabled. WebAura does not load third-party analytics or event tracking.
+**The app still uses the network:** Model requests go directly to the providers you configure, unless you explicitly route them through **Settings -> Proxy**. Optional extensions may call their own network services when enabled. Firefly does not load third-party analytics or event tracking.
 
 ---
 
@@ -29,13 +35,11 @@ Local-first AI tools, running in your browser.
 - **Local first** - Agent work runs in a per-tab `DedicatedWorker`; durable state stays on the main thread through IndexedDB.
 - **Resilient** - Lease ownership, runtime recovery, and interrupted-turn repair all stay inside the browser runtime.
 
-Inspired by [Sitegeist](https://sitegeist.ai), [btca](https://github.com/davis7dotsh/better-context), and [repogrep](https://repogrep.com).
-
 ---
 
 ## AI Disclosure
 
-This codebase has been built with substantial AI assistance. Very little is hand-written; **GPT-5.4** was used heavily to create and iterate on the repository.
+This codebase has been built with substantial AI assistance.
 
 ---
 
@@ -45,7 +49,7 @@ This codebase has been built with substantial AI assistance. Very little is hand
 
 ## Copyright
 
-WebAura is a fork of gitinspect by Jeremy Osih.
+Firefly is a fork of gitinspect by Jeremy Osih.
 
 Copyright (C) 2026 Ziphyrien and contributors.
 Original project: <https://github.com/jeremyosih/gitinspect>

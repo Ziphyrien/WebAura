@@ -1,6 +1,6 @@
 import { webcrypto } from "node:crypto";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test";
-import { db, setSetting } from "@webaura/db";
+import { db, setSetting } from "@firefly/db";
 import {
   buildNostrShareEvents,
   browserNostrRelayDiscovery,
@@ -16,9 +16,9 @@ import {
   type NostrRelayDiscovery,
   type NostrRelayProbeResult,
   type NostrRelayTransport,
-} from "@webaura/pi/lib/share";
-import { createEmptyUsage } from "@webaura/pi/types/models";
-import type { DisplayChatMessage } from "@webaura/pi/types/chat";
+} from "@firefly/pi/lib/share";
+import { createEmptyUsage } from "@firefly/pi/types/models";
+import type { DisplayChatMessage } from "@firefly/pi/types/chat";
 
 class FakeRelayDiscovery implements NostrRelayDiscovery {
   readonly probes: string[] = [];
@@ -543,10 +543,12 @@ describe("share links", () => {
     expect(readRequest[0]).toBe("REQ");
     socket.dispatch("message", JSON.stringify(["EOSE", readRequest[1]]));
 
-    await vi.waitFor(() => expect(socket.sent).toHaveLength(3));
-    const writeRequest = JSON.parse(socket.sent[2]!) as [string, NostrEvent];
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(2));
+    const writeSocket = FakeWebSocket.instances[1]!;
+    await vi.waitFor(() => expect(writeSocket.sent).toHaveLength(1));
+    const writeRequest = JSON.parse(writeSocket.sent[0]!) as [string, NostrEvent];
     expect(writeRequest[0]).toBe("EVENT");
-    socket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
+    writeSocket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
 
     await expect(promise).resolves.toMatchObject({
       maxContentLength: 20000,
@@ -583,9 +585,11 @@ describe("share links", () => {
     const readRequest = JSON.parse(socket.sent[0]!) as [string, string, unknown];
     socket.dispatch("message", JSON.stringify(["EOSE", readRequest[1]]));
 
-    await vi.waitFor(() => expect(socket.sent).toHaveLength(3));
-    const writeRequest = JSON.parse(socket.sent[2]!) as [string, NostrEvent];
-    socket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(2));
+    const writeSocket = FakeWebSocket.instances[1]!;
+    await vi.waitFor(() => expect(writeSocket.sent).toHaveLength(1));
+    const writeRequest = JSON.parse(writeSocket.sent[0]!) as [string, NostrEvent];
+    writeSocket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
 
     await expect(promise).resolves.toMatchObject({
       read: true,
@@ -608,9 +612,11 @@ describe("share links", () => {
     const readRequest = JSON.parse(socket.sent[0]!) as [string, string, unknown];
     socket.dispatch("message", JSON.stringify(["EOSE", readRequest[1]]));
 
-    await vi.waitFor(() => expect(socket.sent).toHaveLength(3));
-    const writeRequest = JSON.parse(socket.sent[2]!) as [string, NostrEvent];
-    socket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
+    await vi.waitFor(() => expect(FakeWebSocket.instances).toHaveLength(2));
+    const writeSocket = FakeWebSocket.instances[1]!;
+    await vi.waitFor(() => expect(writeSocket.sent).toHaveLength(1));
+    const writeRequest = JSON.parse(writeSocket.sent[0]!) as [string, NostrEvent];
+    writeSocket.dispatch("message", JSON.stringify(["OK", writeRequest[1].id, true, ""]));
 
     await expect(promise).resolves.toMatchObject({
       read: true,

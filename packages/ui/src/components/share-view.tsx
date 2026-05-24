@@ -1,15 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { readShareFromFragment, ShareError, type ShareSnapshot } from "@webaura/pi/lib/share";
-import type { DisplayChatMessage } from "@webaura/pi/types/chat";
-import { ChatMessage } from "@webaura/ui/components/chat-message";
+import { readShareFromFragment, ShareError, type ShareSnapshot } from "@firefly/pi/lib/share";
+import type { DisplayChatMessage } from "@firefly/pi/types/chat";
+import { ChatMessage } from "@firefly/ui/components/chat-message";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from "@webaura/ui/components/ai-elements/conversation";
-import { Button } from "@webaura/ui/components/button";
+} from "@firefly/ui/components/ai-elements/conversation";
+import { Button } from "@firefly/ui/components/button";
 
 function assertNever(value: never): never {
   throw new Error(`Unexpected value: ${String(value)}`);
@@ -88,12 +88,12 @@ function getErrorMessage(error: unknown): string {
       case "missing_chunks":
         return "Some encrypted Nostr chunks are missing or invalid. Try again later or ask for a new share link.";
       case "oversized":
-        return "This shared conversation is larger than WebAura can open safely.";
+        return "This shared conversation is larger than Firefly can open safely.";
       case "publish_failed":
       case "relay_failed":
-        return "WebAura could not read enough data from the public relays in this link.";
+        return "Firefly could not read enough data from the public relays in this link.";
       case "unsupported_version":
-        return "This share link was created by an unsupported WebAura version.";
+        return "This share link was created by an unsupported Firefly version.";
       case "invalid_link":
         return error.message;
       default:

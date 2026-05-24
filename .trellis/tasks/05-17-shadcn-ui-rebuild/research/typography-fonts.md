@@ -1,6 +1,6 @@
 # Font Pairing and Typography Research
 
-## Current WebAura Typography
+## Current Firefly Typography
 
 **Configuration**:
 
@@ -36,7 +36,7 @@
 - "Geist Pixel" variant for bitmap-inspired, futuristic headlines
 - Seamless integration between Geist Sans and Geist Mono
 
-**Why it works for WebAura**:
+**Why it works for Firefly**:
 
 - Developer-focused aesthetic
 - Excellent readability in data-heavy interfaces
@@ -257,7 +257,7 @@ code: 0.875rem (14px), font-mono
 3. **Font contrast**: Different typeface for headings vs body
 4. **Color contrast**: Use semantic tokens (foreground vs muted-foreground)
 
-### Current WebAura Hierarchy
+### Current Firefly Hierarchy
 
 From `globals.css`:
 
@@ -352,7 +352,7 @@ shadcn/ui v4 introduced `registry:font` type for font management:
 - CSS variable setup
 - Tailwind configuration
 
-## Recommendations for WebAura
+## Recommendations for Firefly
 
 ### Recommendation 1: Keep Current with Refinements (Low Risk)
 

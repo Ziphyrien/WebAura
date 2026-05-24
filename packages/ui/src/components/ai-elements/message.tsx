@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
-import { ButtonGroup, ButtonGroupText } from "@webaura/ui/components/button-group";
+import { Button } from "@firefly/ui/components/button";
+import { ButtonGroup, ButtonGroupText } from "@firefly/ui/components/button-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@webaura/ui/components/tooltip";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/tooltip";
+import { cn } from "@firefly/ui/lib/utils";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
 import { math } from "@streamdown/math";

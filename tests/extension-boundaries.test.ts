@@ -19,7 +19,7 @@ describe("extension architecture boundaries", () => {
     );
 
     expect(files.join("\n")).not.toMatch(
-      /@webaura\/extensions|extensions\/built-ins|github-token|repo\/github-token/,
+      /@firefly\/extensions|extensions\/built-ins|github-token|repo\/github-token/,
     );
   });
 
@@ -33,7 +33,7 @@ describe("extension architecture boundaries", () => {
     );
 
     expect(files.join("\n")).not.toMatch(
-      /@webaura\/extensions|GithubTokenSettings|github-token-settings|Settings -> GitHub/,
+      /@firefly\/extensions|GithubTokenSettings|github-token-settings|Settings -> GitHub/,
     );
   });
 
@@ -52,10 +52,10 @@ describe("extension architecture boundaries", () => {
     const runtimeInstall = await readProjectFile("apps/web/src/extensions/runtime.ts");
     const uiInstall = await readProjectFile("apps/web/src/extensions/ui.tsx");
 
-    expect(runtimeInstall).toContain("@webaura/extensions/github");
-    expect(uiInstall).toContain("@webaura/extensions/github");
+    expect(runtimeInstall).toContain("@firefly/extensions/github");
+    expect(uiInstall).toContain("@firefly/extensions/github");
     expect(`${runtimeInstall}\n${uiInstall}`).not.toMatch(
-      /@webaura\/extensions\/github\/(runtime|token|ui|manifest)/,
+      /@firefly\/extensions\/github\/(runtime|token|ui|manifest)/,
     );
   });
 });

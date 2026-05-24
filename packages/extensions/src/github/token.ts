@@ -1,10 +1,10 @@
-import { deleteSetting, getSetting, setSetting } from "@webaura/db";
+import { deleteSetting, getSetting, setSetting } from "@firefly/db";
 
 const GITHUB_PAT_KEY = "extensions.github.pat";
 const LEGACY_GITHUB_PAT_KEY = "github.pat";
 
 export const GITHUB_CREATE_PAT_URL =
-  "https://github.com/settings/personal-access-tokens/new?name=WebAura&description=Optional%20token%20for%20WebAura%20GitHub%20extension&expires_in=none";
+  "https://github.com/settings/personal-access-tokens/new?name=Firefly&description=Optional%20token%20for%20Firefly%20GitHub%20extension&expires_in=none";
 
 export type GithubTokenValidation = { ok: true; login: string } | { ok: false; message: string };
 

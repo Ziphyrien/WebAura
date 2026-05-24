@@ -3,8 +3,8 @@ import {
   getModel as getRegistryModel,
   getModels as getRegistryModels,
 } from "@earendil-works/pi-ai";
-import type { ModelDefinition, ProviderGroupId, ProviderId, Usage } from "@webaura/pi/types/models";
-import { isOAuthCredentials, parseOAuthCredentials } from "@webaura/pi/auth/oauth-types";
+import type { ModelDefinition, ProviderGroupId, ProviderId, Usage } from "@firefly/pi/types/models";
+import { isOAuthCredentials, parseOAuthCredentials } from "@firefly/pi/auth/oauth-types";
 import {
   getAtlasProviderGroups,
   getCanonicalProvider,
@@ -12,7 +12,7 @@ import {
   getProviderGroupMetadata,
   getRuntimeSupportedProviders,
   isProviderGroupId,
-} from "@webaura/pi/models/provider-registry";
+} from "@firefly/pi/models/provider-registry";
 
 const SUPPORTED_PROVIDERS = getRuntimeSupportedProviders();
 

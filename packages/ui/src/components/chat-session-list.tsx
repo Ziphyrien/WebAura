@@ -2,7 +2,7 @@ import type { MouseEvent } from "react";
 import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { subDays, startOfDay } from "date-fns";
-import type { SessionData } from "@webaura/db";
+import type { SessionData } from "@firefly/db";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@webaura/ui/components/alert-dialog";
+} from "@firefly/ui/components/alert-dialog";
 import {
   SidebarContent,
   SidebarGroup,
@@ -22,7 +22,7 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@webaura/ui/components/sidebar";
+} from "@firefly/ui/components/sidebar";
 import { Trash2, X } from "lucide-react";
 
 type SessionRouteSearch = Record<string, never>;

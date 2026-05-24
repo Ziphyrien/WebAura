@@ -1,4 +1,4 @@
-import { ShareView } from "@webaura/ui/components/share-view";
+import { ShareView } from "@firefly/ui/components/share-view";
 
 export function SharePage() {
   return <ShareView />;

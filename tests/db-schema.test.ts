@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 import { afterEach, describe, expect, it } from "vite-plus/test";
-import { DB_NAME, registerAppDbSchema } from "@webaura/db";
+import { DB_NAME, registerAppDbSchema } from "@firefly/db";
 
 const dbs: Dexie[] = [];
 
@@ -21,12 +21,12 @@ describe("db schema", () => {
     );
   });
 
-  it("uses the WebAura browser store", () => {
-    expect(DB_NAME).toBe("webaura-store");
+  it("uses the Firefly browser store", () => {
+    expect(DB_NAME).toBe("firefly-store");
   });
 
   it("registers local chat storage tables without repository state", async () => {
-    const db = createDb(`webaura-schema-${String(Date.now())}`);
+    const db = createDb(`firefly-schema-${String(Date.now())}`);
     await db.open();
 
     expect(db.tables.map((table) => table.name).sort()).toEqual([

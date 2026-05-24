@@ -1,18 +1,18 @@
-import { deleteSessionLease } from "@webaura/db";
-import { loadSessionLeaseState } from "@webaura/db/session-leases";
+import { deleteSessionLease } from "@firefly/db";
+import { loadSessionLeaseState } from "@firefly/db/session-leases";
 import {
   getRuntimeWorker,
   getRuntimeWorkerIfAvailable,
-} from "@webaura/pi/agent/runtime-worker-client";
-import { StreamInterruptedRuntimeError } from "@webaura/pi/agent/runtime-command-errors";
-import { TurnEventStore } from "@webaura/pi/agent/turn-event-store";
-import { loadSessionWithMessages } from "@webaura/pi/sessions/session-service";
-import { loadSessionViewModel } from "@webaura/pi/sessions/session-view-model";
+} from "@firefly/pi/agent/runtime-worker-client";
+import { StreamInterruptedRuntimeError } from "@firefly/pi/agent/runtime-command-errors";
+import { TurnEventStore } from "@firefly/pi/agent/turn-event-store";
+import { loadSessionWithMessages } from "@firefly/pi/sessions/session-service";
+import { loadSessionViewModel } from "@firefly/pi/sessions/session-view-model";
 import {
   deriveActiveSessionViewState,
   deriveRecoveryIntent,
   deriveRecoverySkipReason,
-} from "@webaura/pi/sessions/session-view-state";
+} from "@firefly/pi/sessions/session-view-state";
 
 export type InterruptedRecoveryResult =
   | {

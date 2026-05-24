@@ -18,7 +18,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "WebAura",
+        title: "Firefly",
       },
       {
         name: "description",
@@ -26,7 +26,7 @@ export const Route = createRootRoute({
       },
       {
         name: "apple-mobile-web-app-title",
-        content: "WebAura",
+        content: "Firefly",
       },
     ],
     links: [

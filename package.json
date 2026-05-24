@@ -1,5 +1,5 @@
 {
-  "name": "webaura",
+  "name": "firefly",
   "private": true,
   "workspaces": {
     "packages": [
@@ -36,8 +36,8 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
+    "@firefly/config": "workspace:*",
     "@types/node": "catalog:",
-    "@webaura/config": "workspace:*",
     "fake-indexeddb": "^6.2.5",
     "turbo": "^2.8.12",
     "typescript": "^5",

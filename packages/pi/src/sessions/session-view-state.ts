@@ -1,5 +1,5 @@
-import type { SessionLeaseState } from "@webaura/db/session-leases";
-import type { RuntimePhase, SessionRuntimeStatus } from "@webaura/db";
+import type { SessionLeaseState } from "@firefly/db/session-leases";
+import type { RuntimePhase, SessionRuntimeStatus } from "@firefly/db";
 
 export type ActiveSessionViewState =
   | { kind: "ready" }

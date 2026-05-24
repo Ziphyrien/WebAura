@@ -1,8 +1,8 @@
 import * as React from "react";
 import { toast } from "sonner";
-import { getExtensionEnabled, setExtensionEnabled } from "@webaura/pi/extensions/settings";
-import type { ExtensionManifest } from "@webaura/pi/extensions/types";
-import { Alert, AlertDescription } from "@webaura/ui/components/alert";
+import { getExtensionEnabled, setExtensionEnabled } from "@firefly/pi/extensions/settings";
+import type { ExtensionManifest } from "@firefly/pi/extensions/types";
+import { Alert, AlertDescription } from "@firefly/ui/components/alert";
 import {
   Card,
   CardAction,
@@ -10,10 +10,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@webaura/ui/components/card";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@webaura/ui/components/empty";
-import { Label } from "@webaura/ui/components/label";
-import { Switch } from "@webaura/ui/components/switch";
+} from "@firefly/ui/components/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@firefly/ui/components/empty";
+import { Label } from "@firefly/ui/components/label";
+import { Switch } from "@firefly/ui/components/switch";
 
 export type ExtensionSettingsPanel = React.ComponentType<{ disabled?: boolean }>;
 
@@ -199,7 +199,7 @@ export function ExtensionsSettings(props: {
     <div className="flex flex-col gap-4">
       <Alert className="border-dashed">
         <AlertDescription className="text-xs">
-          Extensions register AI-callable tools through WebAura's local extension API. Disabled
+          Extensions register AI-callable tools through Firefly's local extension API. Disabled
           extensions do not appear in the model tool list, and default chat starts with every
           extension disabled.
         </AlertDescription>

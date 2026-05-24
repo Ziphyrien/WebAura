@@ -1,7 +1,7 @@
 import * as React from "react";
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { render, screen, waitFor } from "@testing-library/react";
-import { db, deleteAllLocalData, putSession } from "@webaura/db";
+import { db, deleteAllLocalData, putSession } from "@firefly/db";
 import type { MessageRow, SessionData } from "@/types/storage";
 import { createEmptyUsage } from "@/types/models";
 

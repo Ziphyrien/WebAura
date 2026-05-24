@@ -4,9 +4,9 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@webaura/ui/components/collapsible";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@webaura/ui/components/tabs";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@firefly/ui/components/tabs";
+import { cn } from "@firefly/ui/lib/utils";
 import type { ToolUIPart } from "ai";
 import { ChevronDownIcon, Code } from "lucide-react";
 import type { ComponentProps } from "react";

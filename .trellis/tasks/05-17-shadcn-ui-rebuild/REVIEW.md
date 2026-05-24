@@ -27,7 +27,7 @@ Initial work only changed records and shared CSS. That did not constitute a real
 
 ### Fixed: accidental app-local shadcn setup
 
-Running `shadcn init` in `apps/web` created `apps/web/src/lib/utils.ts` and changed app aliases toward local `@/components/ui`. This was not correct for the monorepo because the real shared components live in `packages/ui`. The accidental file was removed and aliases were restored to `@webaura/ui`.
+Running `shadcn init` in `apps/web` created `apps/web/src/lib/utils.ts` and changed app aliases toward local `@/components/ui`. This was not correct for the monorepo because the real shared components live in `packages/ui`. The accidental file was removed and aliases were restored to `@firefly/ui`.
 
 ### Fixed: react-day-picker class name mismatch
 

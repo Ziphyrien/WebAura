@@ -1,8 +1,8 @@
 import * as React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { CheckIcon, Plus } from "lucide-react";
-import { db } from "@webaura/db";
-import type { ProviderGroupId } from "@webaura/pi/types/models";
+import { db } from "@firefly/db";
+import type { ProviderGroupId } from "@firefly/pi/types/models";
 import {
   ModelSelector,
   ModelSelectorContent,
@@ -14,8 +14,8 @@ import {
   ModelSelectorName,
   ModelSelectorTrigger,
   ModelSelectorSeparator,
-} from "@webaura/ui/components/ai-elements/model-selector";
-import { PromptInputButton } from "@webaura/ui/components/ai-elements/prompt-input";
+} from "@firefly/ui/components/ai-elements/model-selector";
+import { PromptInputButton } from "@firefly/ui/components/ai-elements/prompt-input";
 import {
   getConnectedProviders,
   getDefaultModelForGroup,
@@ -23,9 +23,9 @@ import {
   getModelsForGroup,
   getProviderGroupMetadata,
   getVisibleProviderGroups,
-} from "@webaura/pi/models/catalog";
-import { cn } from "@webaura/ui/lib/utils";
-import { useSettingsDialog } from "@webaura/ui/components/settings-state";
+} from "@firefly/pi/models/catalog";
+import { cn } from "@firefly/ui/lib/utils";
+import { useSettingsDialog } from "@firefly/ui/components/settings-state";
 
 export function ChatModelSelector(props: {
   disabled?: boolean;

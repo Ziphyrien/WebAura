@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
-import { ButtonGroup, ButtonGroupText } from "@webaura/ui/components/button-group";
-import { cn } from "@webaura/ui/lib/utils";
+import { Button } from "@firefly/ui/components/button";
+import { ButtonGroup, ButtonGroupText } from "@firefly/ui/components/button-group";
+import { cn } from "@firefly/ui/lib/utils";
 import type { Experimental_SpeechResult as SpeechResult } from "ai";
 import {
   MediaControlBar,

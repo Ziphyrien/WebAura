@@ -4,8 +4,8 @@ import {
   getToolResultText,
   getUserAttachments,
   getUserText,
-} from "@webaura/pi/lib/chat-adapter";
-import type { DisplayChatMessage, ToolCall, ToolResultMessage } from "@webaura/pi/types/chat";
+} from "@firefly/pi/lib/chat-adapter";
+import type { DisplayChatMessage, ToolCall, ToolResultMessage } from "@firefly/pi/types/chat";
 
 function formatExportedAt(date: Date): string {
   return new Intl.DateTimeFormat(undefined, {

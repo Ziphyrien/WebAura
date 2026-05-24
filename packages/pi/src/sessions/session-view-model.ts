@@ -1,12 +1,12 @@
-import { normalizeSessionRuntime } from "@webaura/db/session-runtime";
-import { linkToolResults } from "@webaura/pi/agent/tool-result-linker";
-import { loadSessionWithMessages } from "@webaura/pi/sessions/session-service";
-import type { MessageRow, SessionData, SessionRuntimeRow } from "@webaura/db";
+import { normalizeSessionRuntime } from "@firefly/db/session-runtime";
+import { linkToolResults } from "@firefly/pi/agent/tool-result-linker";
+import { loadSessionWithMessages } from "@firefly/pi/sessions/session-service";
+import type { MessageRow, SessionData, SessionRuntimeRow } from "@firefly/db";
 import type {
   AssistantMessage,
   DisplayAssistantMessage,
   DisplayChatMessage,
-} from "@webaura/pi/types/chat";
+} from "@firefly/pi/types/chat";
 
 export interface SessionViewModel {
   displayMessages: DisplayChatMessage[];

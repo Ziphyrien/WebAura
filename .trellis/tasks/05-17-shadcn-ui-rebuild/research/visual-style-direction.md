@@ -1,6 +1,6 @@
 # Visual Style Direction Analysis
 
-## Current WebAura Aesthetic
+## Current Firefly Aesthetic
 
 **Style**: radix-lyra
 **Characteristics**:
@@ -156,7 +156,7 @@
 | Large  | 0.75rem - 1rem     | Friendly, approachable    | Consumer apps        |
 | Full   | 9999px             | Pill-shaped, playful      | Marketing, creative  |
 
-**Current WebAura**: 0 (none)
+**Current Firefly**: 0 (none)
 
 ### Color Psychology
 
@@ -196,7 +196,7 @@
 **Maia**: Generous, relaxed, spacious
 **Mira**: Most compact, spreadsheet-like
 
-**WebAura consideration**: As an AI chat interface, you need:
+**Firefly consideration**: As an AI chat interface, you need:
 
 - Space for conversation threads
 - Room for code blocks and outputs
@@ -236,7 +236,7 @@
 - Balanced spacing
 - Professional feel
 
-**WebAura opportunity**: Most AI chat interfaces are converging on similar aesthetics. You can differentiate by:
+**Firefly opportunity**: Most AI chat interfaces are converging on similar aesthetics. You can differentiate by:
 
 1. Leaning into technical precision (keep Lyra, add color)
 2. Going warmer and more human (switch to Maia)
@@ -313,7 +313,7 @@
 - May require design adjustments
 - Higher implementation effort
 
-## Specific Recommendations for WebAura
+## Specific Recommendations for Firefly
 
 ### Recommendation 1: Enhanced Lyra (Lowest Risk)
 

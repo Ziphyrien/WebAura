@@ -2,7 +2,7 @@
 
 ## Goal
 
-Implement client-side share links for WebAura conversations without adding a hosted backend. Small shares are fully embedded in the URL fragment. Larger shares are encrypted in the browser and published as chunked Nostr events to public relay nodes.
+Implement client-side share links for Firefly conversations without adding a hosted backend. Small shares are fully embedded in the URL fragment. Larger shares are encrypted in the browser and published as chunked Nostr events to public relay nodes.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ Implement client-side share links for WebAura conversations without adding a hos
 - Support URL fragment shares for payloads whose encoded/compressed share data is at or below 16KB.
 - Support Nostr encrypted chunk shares for payloads over 16KB and up to 300KB.
 - Reject payloads over 300KB with an actionable UI error that reports the size and suggests sharing a shorter conversation.
-- Use browser-only crypto and transport. WebAura must not add a backend API, database table, hosted storage, account requirement, analytics, access statistics, deletion flow, edit flow, or permanent availability guarantee.
+- Use browser-only crypto and transport. Firefly must not add a backend API, database table, hosted storage, account requirement, analytics, access statistics, deletion flow, edit flow, or permanent availability guarantee.
 - Generate a fresh random encryption key per share. The key must stay in the URL fragment and must not be sent to relays.
 - Generate a fresh one-time Nostr signing key per Nostr share. Users must not need to configure or understand Nostr keys.
 - Publish Nostr data as a manifest plus encrypted chunks. Publish chunks before the manifest.
@@ -43,7 +43,7 @@ Implement client-side share links for WebAura conversations without adding a hos
 
 ## Technical Approach
 
-- Add a pure frontend share module under `@webaura/pi` for snapshot creation, encoding, encryption, URL parsing, and Nostr publish/read helpers.
+- Add a pure frontend share module under `@firefly/pi` for snapshot creation, encoding, encryption, URL parsing, and Nostr publish/read helpers.
 - Use `CompressionStream`/`DecompressionStream` when available, with a deterministic fallback if needed for tests/runtime compatibility.
 - Use `crypto.subtle` AES-GCM for payload encryption and SHA-256 for integrity metadata.
 - Add a light Nostr signing implementation/dependency if no existing Schnorr/secp256k1 helper is available.
@@ -61,7 +61,7 @@ Implement client-side share links for WebAura conversations without adding a hos
 
 **Decision**: Implement two client-only share transports: URL fragment for small payloads and encrypted Nostr chunks for medium payloads. Do not implement deletion, editing, statistics, accounts, GitHub/Gist fallback, WebTorrent, or Cloudflare storage.
 
-**Consequences**: WebAura avoids backend cost and preserves local-first architecture. URL shares are reliable but size-limited. Nostr shares are cheap and direct but cannot guarantee retention, deletion, or relay availability.
+**Consequences**: Firefly avoids backend cost and preserves local-first architecture. URL shares are reliable but size-limited. Nostr shares are cheap and direct but cannot guarantee retention, deletion, or relay availability.
 
 ## Out of Scope
 
@@ -78,6 +78,6 @@ Implement client-side share links for WebAura conversations without adding a hos
 
 - Existing chat UI lives in `packages/ui/src/components/chat.tsx` and utility actions in `packages/ui/src/components/session-utility-actions.tsx`.
 - Existing route files live under `apps/web/src/routes`; generated `routeTree.gen.ts` is build-generated and should not be hand-edited unless the project convention requires test fixtures to be updated.
-- Existing display messages use `@webaura/pi/types/chat` and text extraction helpers in `@webaura/pi/lib/chat-adapter`.
-- Existing copy-to-markdown behavior is implemented in `@webaura/pi/lib/copy-session-markdown.ts`.
+- Existing display messages use `@firefly/pi/types/chat` and text extraction helpers in `@firefly/pi/lib/chat-adapter`.
+- Existing copy-to-markdown behavior is implemented in `@firefly/pi/lib/copy-session-markdown.ts`.
 - Relevant specs: web/ui/pi frontend indexes plus shared cross-layer and code-reuse guides.

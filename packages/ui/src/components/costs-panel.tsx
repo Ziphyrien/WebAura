@@ -1,9 +1,9 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { listDailyCosts } from "@webaura/db";
-import type { SessionData } from "@webaura/db";
-import { Alert, AlertDescription } from "@webaura/ui/components/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@webaura/ui/components/card";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@webaura/ui/components/empty";
+import { listDailyCosts } from "@firefly/db";
+import type { SessionData } from "@firefly/db";
+import { Alert, AlertDescription } from "@firefly/ui/components/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@firefly/ui/components/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@firefly/ui/components/empty";
 
 export function CostsPanel({ session }: { session?: SessionData }) {
   const dailyCosts = useLiveQuery(async () => await listDailyCosts(), []);

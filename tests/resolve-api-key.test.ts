@@ -13,7 +13,7 @@ const getProviderKey = vi.fn(async (provider: string) => providerKeyRows.get(pro
 const oauthRefresh = vi.fn();
 const getProxyConfig = vi.fn();
 
-vi.mock("@webaura/db", () => ({
+vi.mock("@firefly/db", () => ({
   db: {
     providerKeys: {},
     settings: {

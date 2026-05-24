@@ -1,13 +1,13 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@webaura/ui/components/avatar";
-import { Button } from "@webaura/ui/components/button";
+import { Avatar, AvatarFallback } from "@firefly/ui/components/avatar";
+import { Button } from "@firefly/ui/components/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@webaura/ui/components/collapsible";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/collapsible";
+import { cn } from "@firefly/ui/lib/utils";
 import { CheckIcon, CopyIcon, FileIcon, GitCommitIcon, MinusIcon, PlusIcon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";

@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@webaura/ui/components/button";
+import { Button } from "@firefly/ui/components/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@webaura/ui/components/select";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/select";
+import { cn } from "@firefly/ui/lib/utils";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import type { ComponentProps, CSSProperties, HTMLAttributes } from "react";
 import {

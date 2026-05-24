@@ -1,14 +1,14 @@
-import { db, getProviderKey, setProviderKey } from "@webaura/db";
-import { oauthRefresh } from "@webaura/pi/auth/oauth-refresh";
+import { db, getProviderKey, setProviderKey } from "@firefly/db";
+import { oauthRefresh } from "@firefly/pi/auth/oauth-refresh";
 import {
   isOAuthCredentials,
   parseOAuthCredentials,
   serializeOAuthCredentials,
-} from "@webaura/pi/auth/oauth-types";
-import { getIsoNow } from "@webaura/pi/lib/dates";
-import { getProxyConfig } from "@webaura/pi/proxy/settings";
-import type { OAuthCredentials } from "@webaura/pi/auth/oauth-types";
-import type { ProviderId } from "@webaura/pi/types/models";
+} from "@firefly/pi/auth/oauth-types";
+import { getIsoNow } from "@firefly/pi/lib/dates";
+import { getProxyConfig } from "@firefly/pi/proxy/settings";
+import type { OAuthCredentials } from "@firefly/pi/auth/oauth-types";
+import type { ProviderId } from "@firefly/pi/types/models";
 
 export interface ResolvedProviderAuth {
   apiKey: string;

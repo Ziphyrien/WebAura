@@ -43,7 +43,7 @@ export default defineConfig({
   plugins,
   resolve: {
     alias: {
-      "@webaura/pi/agent/runtime-worker-client": fileURLToPath(
+      "@firefly/pi/agent/runtime-worker-client": fileURLToPath(
         new URL("./src/agent/runtime-worker-client.ts", import.meta.url),
       ),
     },

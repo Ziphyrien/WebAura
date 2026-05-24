@@ -33,7 +33,7 @@ The shared UI package uses:
 - Use shadcn CLI for preset/source changes. Do not claim a preset migration is complete if only `components.json` or CSS tokens changed.
 - Use the project runner for shadcn commands: `bunx --bun shadcn@latest`.
 - Standard shadcn components live in `packages/ui/src/components`.
-- App-level shadcn config in `apps/web/components.json` must keep monorepo aliases pointing to `@webaura/ui`.
+- App-level shadcn config in `apps/web/components.json` must keep monorepo aliases pointing to `@firefly/ui`.
 
 ### Correct CLI Pattern
 
@@ -147,7 +147,7 @@ Install @fontsource-variable/jetbrains-mono only in the root package.json while 
 Correct:
 
 ```text
-Install @fontsource-variable/jetbrains-mono in packages/ui because globals.css belongs to @webaura/ui.
+Install @fontsource-variable/jetbrains-mono in packages/ui because globals.css belongs to @firefly/ui.
 ```
 
 ---
@@ -215,7 +215,7 @@ Before completing design-system changes:
 
 - [ ] `bun run check-types` passes.
 - [ ] Standard shadcn component source was updated by CLI when changing preset/source style.
-- [ ] `apps/web/components.json` aliases still point to `@webaura/ui` for shared UI.
+- [ ] `apps/web/components.json` aliases still point to `@firefly/ui` for shared UI.
 - [ ] `globals.css` remains the single shared Tailwind v4 CSS entry.
 - [ ] Font imports are backed by dependencies in `packages/ui/package.json`.
 - [ ] Unrelated formatting-only files from `vp fmt --write` are reverted.

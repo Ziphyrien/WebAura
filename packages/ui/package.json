@@ -1,5 +1,5 @@
 {
-  "name": "@webaura/ui",
+  "name": "@firefly/ui",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
+    "@firefly/db": "workspace:*",
+    "@firefly/pi": "workspace:*",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
@@ -24,8 +26,6 @@
     "@streamdown/math": "^1.0.2",
     "@streamdown/mermaid": "^1.0.2",
     "@tanstack/react-router": "^1.167.4",
-    "@webaura/db": "workspace:*",
-    "@webaura/pi": "workspace:*",
     "@xyflow/react": "^12.10.1",
     "ai": "^6.0.137",
     "ansi-to-react": "^6.2.6",
@@ -61,9 +61,9 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@firefly/config": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@webaura/config": "workspace:*",
     "tailwindcss": "catalog:",
     "typescript": "^5.9.3",
     "vite": "catalog:",

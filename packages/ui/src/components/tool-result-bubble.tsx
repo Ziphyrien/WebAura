@@ -1,5 +1,5 @@
-import type { ToolResultMessage } from "@webaura/pi/types/chat";
-import { Badge } from "@webaura/ui/components/badge";
+import type { ToolResultMessage } from "@firefly/pi/types/chat";
+import { Badge } from "@firefly/ui/components/badge";
 
 interface ReadDetails {
   path: string;

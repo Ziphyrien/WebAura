@@ -1,21 +1,31 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { MouseEvent } from "react";
+import { Settings } from "lucide-react";
 
-import { Sidebar, SidebarFooter, SidebarRail } from "@webaura/ui/components/sidebar";
-import { ChatFooter } from "@webaura/ui/components/chat-footer";
-import { ChatSessionList } from "@webaura/ui/components/chat-session-list";
-import { listSessionLeases, listSessions } from "@webaura/db";
-import { getCurrentTabId } from "@webaura/pi/agent/tab-id";
-import { isSessionLeaseStale } from "@webaura/db/session-leases";
+import {
+  Sidebar,
+  SidebarFooter,
+  SidebarRail,
+  SidebarHeader,
+  SidebarTrigger,
+} from "@firefly/ui/components/sidebar";
+import { ChatFooter } from "@firefly/ui/components/chat-footer";
+import { ChatSessionList } from "@firefly/ui/components/chat-session-list";
+import { listSessionLeases, listSessions } from "@firefly/db";
+import { getCurrentTabId } from "@firefly/pi/agent/tab-id";
+import { isSessionLeaseStale } from "@firefly/db/session-leases";
 import {
   buildSessionHref,
   deleteSessionAndResolveNext,
   persistLastUsedSessionSettings,
-} from "@webaura/pi/sessions/session-actions";
+} from "@firefly/pi/sessions/session-actions";
+import { Button } from "@firefly/ui/components/button";
+import { useSettingsDialog } from "@firefly/ui/components/settings-state";
 
 export function AppSidebar({ showGetPro = true }: { showGetPro?: boolean } = {}) {
   const navigate = useNavigate();
+  const settingsDialog = useSettingsDialog();
   const currentMatch = useRouterState({
     select: (state) => state.matches[state.matches.length - 1],
   });
@@ -127,6 +137,18 @@ export function AppSidebar({ showGetPro = true }: { showGetPro?: boolean } = {})
 
   return (
     <Sidebar className="border-r-0">
+      <SidebarTrigger className="fixed top-3 left-4 z-40 h-8 w-8" />
+      <SidebarHeader className="flex flex-row items-center justify-end px-3 py-2 shrink-0 h-14 border-b border-sidebar-border">
+        <Button
+          aria-label="Open settings"
+          className="h-8 w-8 shadow-none text-muted-foreground hover:text-foreground shrink-0"
+          onClick={() => settingsDialog.openSettings("appearance")}
+          size="icon-sm"
+          variant="ghost"
+        >
+          <Settings className="size-4" />
+        </Button>
+      </SidebarHeader>
       <ChatSessionList
         activeSessionId={activeSessionId}
         createSessionTarget={{

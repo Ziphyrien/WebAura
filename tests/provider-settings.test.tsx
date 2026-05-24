@@ -33,12 +33,13 @@ vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: (query: () => unknown) => query(),
 }));
 
-vi.mock("@webaura/db", () => ({
+vi.mock("@firefly/db", () => ({
   db: {
     providerKeys: {
       toArray: () => state.providerKeys,
     },
     settings: {
+      get: (key: string) => state.settingsRows.find((row) => row.key === key),
       where: () => ({
         anyOf: () => ({
           toArray: () => state.settingsRows,
@@ -48,7 +49,7 @@ vi.mock("@webaura/db", () => ({
   },
 }));
 
-vi.mock("@webaura/pi/models/provider-registry", () => ({
+vi.mock("@firefly/pi/models/provider-registry", () => ({
   getOAuthProvidersForSettings: () => ["github-copilot", "openai-codex"],
   getProviderGroupMetadata: (provider: string) => ({
     label:
@@ -61,7 +62,7 @@ vi.mock("@webaura/pi/models/provider-registry", () => ({
   getSortedApiKeyProvidersForSettings: () => [] as string[],
 }));
 
-vi.mock("@webaura/pi/proxy/settings", () => ({
+vi.mock("@firefly/pi/proxy/settings", () => ({
   DEFAULT_PROXY_URL: "https://proxy.example/proxy",
   PROXY_ENABLED_KEY: "proxy-enabled",
   PROXY_URL_KEY: "proxy-url",
@@ -71,11 +72,11 @@ vi.mock("@webaura/pi/proxy/settings", () => ({
   }),
 }));
 
-vi.mock("@webaura/pi/auth/oauth-types", () => ({
+vi.mock("@firefly/pi/auth/oauth-types", () => ({
   isOAuthCredentials: (value: string) => value.trim().startsWith("{"),
 }));
 
-vi.mock("@webaura/pi/auth/auth-service", () => ({
+vi.mock("@firefly/pi/auth/auth-service", () => ({
   disconnectProvider: async (provider: string) => {
     state.providerKeys = state.providerKeys.filter((record) => record.provider !== provider);
   },
@@ -148,7 +149,7 @@ vi.mock("@webaura/pi/auth/auth-service", () => ({
   setProviderApiKey,
 }));
 
-vi.mock("@webaura/ui/components/button", () => ({
+vi.mock("@firefly/ui/components/button", () => ({
   Button: ({
     children,
     disabled,
@@ -171,12 +172,12 @@ vi.mock("@webaura/ui/components/button", () => ({
     ),
 }));
 
-vi.mock("@webaura/ui/components/input", () => ({
+vi.mock("@firefly/ui/components/input", () => ({
   Input: ({ value, onChange, placeholder, type }: React.ComponentProps<"input">) =>
     React.createElement("input", { onChange, placeholder, type, value }),
 }));
 
-vi.mock("@webaura/ui/components/item", () => {
+vi.mock("@firefly/ui/components/item", () => {
   const Passthrough = ({ children }: { children: React.ReactNode }) =>
     React.createElement("div", undefined, children);
 
@@ -257,7 +258,7 @@ describe("provider settings", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: "Sign in" })[0]);
 
-    expect(await screen.findByText("Complete device sign-in")).toBeTruthy();
+    expect(await screen.findByText(/Complete device sign-in/)).toBeTruthy();
     expect(screen.getByText("ABCD-1234")).toBeTruthy();
     expect(screen.getByText("https://github.com/login/device")).toBeTruthy();
   });

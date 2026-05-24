@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { SettingsSection } from "@webaura/ui/lib/search-state";
+import type { SettingsSection } from "@firefly/ui/lib/search-state";
 
 type SettingsDialogState = {
   closeSettings: () => void;

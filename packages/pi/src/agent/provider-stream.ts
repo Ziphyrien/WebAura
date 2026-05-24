@@ -1,13 +1,13 @@
 import * as PiAi from "@earendil-works/pi-ai";
 import type { StreamFn } from "@earendil-works/pi-agent-core";
-import type { AssistantMessage, StopReason, ToolCall } from "@webaura/pi/types/chat";
-import type { ModelDefinition, ProviderId } from "@webaura/pi/types/models";
-import { SYSTEM_PROMPT } from "@webaura/pi/agent/system-prompt";
-import { createProxyAwareStreamFn } from "@webaura/pi/agent/provider-proxy";
-import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@webaura/pi/agent/runtime-errors";
-import { createId } from "@webaura/pi/lib/ids";
-import { getModel } from "@webaura/pi/models/catalog";
-import { createEmptyUsage } from "@webaura/pi/types/models";
+import type { AssistantMessage, StopReason, ToolCall } from "@firefly/pi/types/chat";
+import type { ModelDefinition, ProviderId } from "@firefly/pi/types/models";
+import { SYSTEM_PROMPT } from "@firefly/pi/agent/system-prompt";
+import { createProxyAwareStreamFn } from "@firefly/pi/agent/provider-proxy";
+import { isUserAbortError, USER_ABORT_NOTICE_MESSAGE } from "@firefly/pi/agent/runtime-errors";
+import { createId } from "@firefly/pi/lib/ids";
+import { getModel } from "@firefly/pi/models/catalog";
+import { createEmptyUsage } from "@firefly/pi/types/models";
 
 function createAssistantDraft(
   model: ModelDefinition,

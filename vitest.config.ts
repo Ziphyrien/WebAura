@@ -119,11 +119,11 @@ export default defineConfig({
       { find: "@/types", replacement: fromRoot("./packages/pi/src/types") },
       { find: "@/test", replacement: fromRoot("./tests/lib") },
       {
-        find: /^@webaura\/db$/,
+        find: /^@firefly\/db$/,
         replacement: fromRoot("./packages/db/src/index.ts"),
       },
       {
-        find: /^@webaura\/extensions\/(.*)$/,
+        find: /^@firefly\/extensions\/(.*)$/,
         replacement: fromRoot("./packages/extensions/src/$1"),
       },
     ],

@@ -3,17 +3,17 @@
 import * as React from "react";
 import { useTheme } from "next-themes";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@webaura/db";
-import { Button } from "@webaura/ui/components/button";
-import { Label } from "@webaura/ui/components/label";
+import { db } from "@firefly/db";
+import { Button } from "@firefly/ui/components/button";
+import { Label } from "@firefly/ui/components/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@webaura/ui/components/select";
-import { Textarea } from "@webaura/ui/components/textarea";
+} from "@firefly/ui/components/select";
+import { Textarea } from "@firefly/ui/components/textarea";
 import { Monitor, Moon, Sun } from "lucide-react";
 
 const CUSTOM_CSS_KEY = "custom_css_override";
@@ -26,7 +26,7 @@ export function CustomCSSInjector() {
   }, []);
 
   return (
-    <style id="webaura-custom-css-injector" type="text/css">
+    <style id="firefly-custom-css-injector" type="text/css">
       {customCss ?? ""}
     </style>
   );
@@ -110,7 +110,7 @@ export function AppearanceSettings() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          Write custom CSS to instantly customize WebAura&apos;s interface style. Changes apply
+          Write custom CSS to instantly customize Firefly&apos;s interface style. Changes apply
           reactively in real-time.
         </p>
       </div>

@@ -10,7 +10,7 @@ const persistSessionSnapshot = vi.fn(async () => {});
 const createSession = vi.fn();
 const releaseSessionAndDrain = vi.fn(async () => {});
 
-vi.mock("@webaura/db", () => ({
+vi.mock("@firefly/db", () => ({
   deleteSession,
   getSetting,
   listProviderKeys,

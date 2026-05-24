@@ -1,12 +1,12 @@
 import { schnorr } from "@noble/curves/secp256k1";
-import { getAssistantText, getUserAttachments, getUserText } from "@webaura/pi/lib/chat-adapter";
-import { getProxyConfig } from "@webaura/pi/proxy/settings";
-import { buildProxiedUrl } from "@webaura/pi/proxy/url";
-import type { DisplayChatMessage } from "@webaura/pi/types/chat";
+import { getAssistantText, getUserAttachments, getUserText } from "@firefly/pi/lib/chat-adapter";
+import { getProxyConfig } from "@firefly/pi/proxy/settings";
+import { buildProxiedUrl } from "@firefly/pi/proxy/url";
+import type { DisplayChatMessage } from "@firefly/pi/types/chat";
 
 export const SHARE_FRAGMENT_PREFIX = "wa1.";
 export const SHARE_VERSION = 1;
-export const SHARE_APP_ID = "webaura";
+export const SHARE_APP_ID = "firefly";
 export const URL_FRAGMENT_LIMIT_BYTES = 16 * 1024;
 export const NOSTR_PAYLOAD_LIMIT_BYTES = 300 * 1024;
 const NOSTR_ENCRYPTED_PAYLOAD_LIMIT_BYTES = NOSTR_PAYLOAD_LIMIT_BYTES + 16;
@@ -457,7 +457,7 @@ export function parseShareFragment(hash: string): ShareFragment {
   const token = hash.startsWith("#") ? hash.slice(1) : hash;
 
   if (!token.startsWith(SHARE_FRAGMENT_PREFIX)) {
-    throw new ShareError("invalid_link", "This is not a WebAura share link.");
+    throw new ShareError("invalid_link", "This is not a Firefly share link.");
   }
 
   let parsed: unknown;
@@ -526,7 +526,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function validateShareSnapshot(value: unknown): ShareSnapshot {
   if (!isRecord(value) || value.app !== SHARE_APP_ID || value.version !== SHARE_VERSION) {
-    throw new ShareError("invalid_link", "The shared chat data is not a WebAura snapshot.");
+    throw new ShareError("invalid_link", "The shared chat data is not a Firefly snapshot.");
   }
 
   if (typeof value.createdAt !== "string" || !Array.isArray(value.messages)) {
@@ -601,7 +601,7 @@ async function decodeSnapshotPayload(
   const decompressed = await decompressBytes(bytes, compression);
 
   if (decompressed.byteLength > NOSTR_PAYLOAD_LIMIT_BYTES) {
-    throw new ShareError("oversized", "The shared chat is larger than WebAura can open safely.");
+    throw new ShareError("oversized", "The shared chat is larger than Firefly can open safely.");
   }
 
   try {
@@ -817,7 +817,7 @@ export async function buildNostrShareEvents(input: {
           tags: [
             ["d", `${shareId}:chunk:${index}`],
             ["client", SHARE_APP_ID],
-            ["webaura-share", shareId],
+            ["firefly-share", shareId],
             ["type", "chunk"],
             ["index", String(index)],
             ["sha256", hash],
@@ -857,7 +857,7 @@ export async function buildNostrShareEvents(input: {
       tags: [
         ["d", `${shareId}:manifest`],
         ["client", SHARE_APP_ID],
-        ["webaura-share", shareId],
+        ["firefly-share", shareId],
         ["type", "manifest"],
       ],
     }),
@@ -915,7 +915,7 @@ export async function publishNostrShare(
   if (successfulRelays.length < MIN_SUCCESSFUL_NOSTR_RELAYS) {
     throw new ShareError(
       "publish_failed",
-      `Published to ${successfulRelays.length} relays. WebAura requires at least ${MIN_SUCCESSFUL_NOSTR_RELAYS} relays for a share link.`,
+      `Published to ${successfulRelays.length} relays. Firefly requires at least ${MIN_SUCCESSFUL_NOSTR_RELAYS} relays for a share link.`,
     );
   }
 
@@ -935,7 +935,7 @@ async function resolvePublishRelays(options: {
     if (relays.length < MIN_SUCCESSFUL_NOSTR_RELAYS) {
       throw new ShareError(
         "publish_failed",
-        `WebAura requires at least ${MIN_SUCCESSFUL_NOSTR_RELAYS} relays for a Nostr share link.`,
+        `Firefly requires at least ${MIN_SUCCESSFUL_NOSTR_RELAYS} relays for a Nostr share link.`,
       );
     }
 
@@ -1734,7 +1734,7 @@ async function buildRelayWriteProbeEvent(): Promise<NostrEvent> {
       tags: [
         ["d", `${probeId}:chunk:0`],
         ["client", SHARE_APP_ID],
-        ["webaura-share", probeId],
+        ["firefly-share", probeId],
         ["type", "probe"],
         ["index", "0"],
         ["sha256", hash],

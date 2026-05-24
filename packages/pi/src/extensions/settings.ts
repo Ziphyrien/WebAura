@@ -1,5 +1,5 @@
-import { deleteSetting, getSetting, setSetting } from "@webaura/db";
-import type { ExtensionId, WebAuraExtension } from "@webaura/pi/extensions/types";
+import { deleteSetting, getSetting, setSetting } from "@firefly/db";
+import type { ExtensionId, FireflyExtension } from "@firefly/pi/extensions/types";
 
 const EXTENSION_ENABLED_KEY_PREFIX = "extensions.enabled.";
 
@@ -12,7 +12,7 @@ function readBooleanSetting(value: unknown): boolean | undefined {
 }
 
 export async function getExtensionEnabled(
-  extension: Pick<WebAuraExtension, "defaultEnabled" | "manifest">,
+  extension: Pick<FireflyExtension, "defaultEnabled" | "manifest">,
 ): Promise<boolean> {
   const value = await getSetting(getExtensionEnabledSettingKey(extension.manifest.id));
   return readBooleanSetting(value) ?? Boolean(extension.defaultEnabled);

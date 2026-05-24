@@ -8,9 +8,9 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@webaura/ui/components/command";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@webaura/ui/components/dialog";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/command";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@firefly/ui/components/dialog";
+import { cn } from "@firefly/ui/lib/utils";
 import type { ComponentProps, ReactNode } from "react";
 
 export type ModelSelectorProps = ComponentProps<typeof Dialog>;

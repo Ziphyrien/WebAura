@@ -8,30 +8,30 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@webaura/ui/components/command";
+} from "@firefly/ui/components/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@webaura/ui/components/dropdown-menu";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@webaura/ui/components/hover-card";
+} from "@firefly/ui/components/dropdown-menu";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@firefly/ui/components/hover-card";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
-} from "@webaura/ui/components/input-group";
+} from "@firefly/ui/components/input-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@webaura/ui/components/select";
-import { Spinner } from "@webaura/ui/components/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@webaura/ui/components/tooltip";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/select";
+import { Spinner } from "@firefly/ui/components/spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@firefly/ui/components/tooltip";
+import { cn } from "@firefly/ui/lib/utils";
 import type { ChatStatus, FileUIPart, SourceDocumentUIPart } from "ai";
 import { CornerDownLeftIcon, PaperclipIcon, SquareIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";

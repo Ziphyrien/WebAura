@@ -1,6 +1,6 @@
 import type { Message } from "@earendil-works/pi-ai";
-import type { MessageRow } from "@webaura/db";
-import type { ChatMessage, ToolCall, ToolResultMessage } from "@webaura/pi/types/chat";
+import type { MessageRow } from "@firefly/db";
+import type { ChatMessage, ToolCall, ToolResultMessage } from "@firefly/pi/types/chat";
 
 type LinkableAssistantMessage = Extract<
   Message | ChatMessage | MessageRow,

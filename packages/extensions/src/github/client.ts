@@ -1,5 +1,5 @@
 import { getGithubPersonalAccessToken } from "./token";
-import type { JsonValue } from "@webaura/pi/types/common";
+import type { JsonValue } from "@firefly/pi/types/common";
 
 const GITHUB_API_BASE_URL = "https://api.github.com";
 const GITHUB_REQUEST_TIMEOUT_MS = 45_000;

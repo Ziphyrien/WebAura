@@ -12,11 +12,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@webaura/ui/components",
-    "utils": "@webaura/ui/lib/utils",
-    "hooks": "@webaura/ui/hooks",
-    "lib": "@webaura/ui/lib",
-    "ui": "@webaura/ui/components"
+    "components": "@firefly/ui/components",
+    "utils": "@firefly/ui/lib/utils",
+    "hooks": "@firefly/ui/hooks",
+    "lib": "@firefly/ui/lib",
+    "ui": "@firefly/ui/components"
   },
   "menuColor": "default-translucent",
   "menuAccent": "subtle",

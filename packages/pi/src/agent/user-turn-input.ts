@@ -1,4 +1,4 @@
-import type { ChatAttachment, UserMessage, UserContent } from "@webaura/pi/types/chat";
+import type { ChatAttachment, UserMessage, UserContent } from "@firefly/pi/types/chat";
 
 export interface UserTurnFile {
   filename?: string;

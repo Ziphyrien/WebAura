@@ -6,7 +6,7 @@ import {
   getDailyCost,
   getSessionMessages,
   getSessionRuntime,
-} from "@webaura/db";
+} from "@firefly/db";
 import type { AssistantMessage, ToolResultMessage } from "@/types/chat";
 import type { SessionData, SessionRuntimeRow } from "@/types/storage";
 import { createEmptyUsage } from "@/types/models";

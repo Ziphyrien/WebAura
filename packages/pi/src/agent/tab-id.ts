@@ -1,6 +1,6 @@
-import { createId } from "@webaura/pi/lib/ids";
+import { createId } from "@firefly/pi/lib/ids";
 
-const TAB_ID_STORAGE_KEY = "webaura-tab-id";
+const TAB_ID_STORAGE_KEY = "firefly-tab-id";
 
 let cachedTabId: string | undefined;
 

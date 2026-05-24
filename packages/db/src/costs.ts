@@ -1,5 +1,5 @@
-import { getDateKey } from "@webaura/pi/lib/dates";
-import type { ProviderId, Usage } from "@webaura/pi/types/models";
+import { getDateKey } from "@firefly/pi/lib/dates";
+import type { ProviderId, Usage } from "@firefly/pi/types/models";
 import { db } from "./db";
 import type { DailyCostAggregate } from "./types";
 

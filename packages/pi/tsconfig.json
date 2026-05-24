@@ -1,15 +1,15 @@
 {
-  "extends": "@webaura/config/tsconfig.base.json",
+  "extends": "@firefly/config/tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
     "paths": {
-      "@webaura/pi/*": ["./src/*"],
-      "@webaura/db": ["../db/src/index.ts"],
-      "@webaura/db/session-leases": ["../db/src/session-leases.ts"],
-      "@webaura/db/session-runtime": ["../db/src/session-runtime.ts"],
-      "@webaura/ui/*": ["../ui/src/*"]
+      "@firefly/pi/*": ["./src/*"],
+      "@firefly/db": ["../db/src/index.ts"],
+      "@firefly/db/session-leases": ["../db/src/session-leases.ts"],
+      "@firefly/db/session-runtime": ["../db/src/session-runtime.ts"],
+      "@firefly/ui/*": ["../ui/src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],

@@ -6,8 +6,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@webaura/ui/components/card";
-import { cn } from "@webaura/ui/lib/utils";
+} from "@firefly/ui/components/card";
+import { cn } from "@firefly/ui/lib/utils";
 import { Handle, Position } from "@xyflow/react";
 import type { ComponentProps } from "react";
 

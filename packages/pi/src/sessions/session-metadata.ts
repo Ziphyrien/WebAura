@@ -1,6 +1,6 @@
-import { getMessageText } from "@webaura/pi/lib/preview";
-import { truncateText } from "@webaura/pi/lib/title";
-import type { ChatMessage } from "@webaura/pi/types/chat";
+import { getMessageText } from "@firefly/pi/lib/preview";
+import { truncateText } from "@firefly/pi/lib/title";
+import type { ChatMessage } from "@firefly/pi/types/chat";
 
 export function generateTitle(messages: ChatMessage[]): string {
   const firstUser = messages.find((message) => message.role === "user");

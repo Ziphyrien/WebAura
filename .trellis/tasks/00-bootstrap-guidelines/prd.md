@@ -23,12 +23,12 @@ the rest conversationally.
 
 - [ ] Fill guidelines for extension
 - [ ] Fill guidelines for web
-- [ ] Fill guidelines for @webaura/config
-- [ ] Fill guidelines for @webaura/db
-- [ ] Fill guidelines for @webaura/env
-- [ ] Fill guidelines for @webaura/extensions
-- [ ] Fill guidelines for @webaura/pi
-- [ ] Fill guidelines for @webaura/ui
+- [ ] Fill guidelines for @firefly/config
+- [ ] Fill guidelines for @firefly/db
+- [ ] Fill guidelines for @firefly/env
+- [ ] Fill guidelines for @firefly/extensions
+- [ ] Fill guidelines for @firefly/pi
+- [ ] Fill guidelines for @firefly/ui
 - [ ] Add code examples
 
 ---
@@ -43,34 +43,33 @@ the rest conversationally.
 
 - Frontend guidelines: `.trellis/spec/web/frontend/`
 
-### Package: @webaura/config (`spec/config/`)
+### Package: @firefly/config (`spec/config/`)
 
 - Frontend guidelines: `.trellis/spec/config/frontend/`
 
-### Package: @webaura/db (`spec/db/`)
+### Package: @firefly/db (`spec/db/`)
 
 - Backend guidelines: `.trellis/spec/db/backend/`
 
 - Frontend guidelines: `.trellis/spec/db/frontend/`
 
-### Package: @webaura/env (`spec/env/`)
+### Package: @firefly/env (`spec/env/`)
 
 - Backend guidelines: `.trellis/spec/env/backend/`
 
 - Frontend guidelines: `.trellis/spec/env/frontend/`
 
-### Package: @webaura/extensions (`spec/extensions/`)
+### Package: @firefly/extensions (`spec/extensions/`)
 
 - Frontend guidelines: `.trellis/spec/extensions/frontend/`
 
-### Package: @webaura/pi (`spec/pi/`)
+### Package: @firefly/pi (`spec/pi/`)
 
 - Frontend guidelines: `.trellis/spec/pi/frontend/`
 
-### Package: @webaura/ui (`spec/ui/`)
+### Package: @firefly/ui (`spec/ui/`)
 
 - Frontend guidelines: `.trellis/spec/ui/frontend/`
-
 
 ### Thinking guides (already populated)
 
@@ -87,31 +86,32 @@ Search the repo for existing convention docs. If any exist, read them and
 extract the relevant rules into the matching `.trellis/spec/` files —
 usually much faster than documenting from scratch.
 
-| File / Directory | Tool |
-|------|------|
-| `CLAUDE.md` / `CLAUDE.local.md` | Claude Code |
-| `AGENTS.md` | Codex / Claude Code / agent-compatible tools |
-| `.cursorrules` | Cursor |
-| `.cursor/rules/*.mdc` | Cursor (rules directory) |
-| `.windsurfrules` | Windsurf |
-| `.clinerules` | Cline |
-| `.roomodes` | Roo Code |
-| `.github/copilot-instructions.md` | GitHub Copilot |
-| `.vscode/settings.json` → `github.copilot.chat.codeGeneration.instructions` | VS Code Copilot |
-| `CONVENTIONS.md` / `.aider.conf.yml` | aider |
-| `CONTRIBUTING.md` | General project conventions |
-| `.editorconfig` | Editor formatting rules |
+| File / Directory                                                            | Tool                                         |
+| --------------------------------------------------------------------------- | -------------------------------------------- |
+| `CLAUDE.md` / `CLAUDE.local.md`                                             | Claude Code                                  |
+| `AGENTS.md`                                                                 | Codex / Claude Code / agent-compatible tools |
+| `.cursorrules`                                                              | Cursor                                       |
+| `.cursor/rules/*.mdc`                                                       | Cursor (rules directory)                     |
+| `.windsurfrules`                                                            | Windsurf                                     |
+| `.clinerules`                                                               | Cline                                        |
+| `.roomodes`                                                                 | Roo Code                                     |
+| `.github/copilot-instructions.md`                                           | GitHub Copilot                               |
+| `.vscode/settings.json` → `github.copilot.chat.codeGeneration.instructions` | VS Code Copilot                              |
+| `CONVENTIONS.md` / `.aider.conf.yml`                                        | aider                                        |
+| `CONTRIBUTING.md`                                                           | General project conventions                  |
+| `.editorconfig`                                                             | Editor formatting rules                      |
 
 ### Step 2: Analyze the codebase for anything not covered by existing docs
 
 Scan real code to discover patterns. Before writing each spec file:
+
 - Find 2-3 real examples of each pattern in the codebase.
 - Reference real file paths (not hypothetical ones).
 - Document anti-patterns the team clearly avoids.
 
 ### Step 3: Document reality, not ideals
 
-**Critical**: write what the code *actually does*, not what it should do.
+**Critical**: write what the code _actually does_, not what it should do.
 Sub-agents match the spec, so aspirational patterns that don't exist in the
 codebase will cause sub-agents to write code that looks out of place.
 

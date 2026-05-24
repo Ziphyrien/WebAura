@@ -1,4 +1,4 @@
-import type { AssistantContent, ChatMessage, UserContent } from "@webaura/pi/types/chat";
+import type { AssistantContent, ChatMessage, UserContent } from "@firefly/pi/types/chat";
 
 function getTextFromUserContent(content: string | UserContent[], displayText?: string): string {
   if (typeof displayText === "string") {

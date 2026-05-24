@@ -401,7 +401,7 @@ Modern AI tools use **two-layer token systems**:
 
 ---
 
-## Key Takeaways for WebAura
+## Key Takeaways for Firefly
 
 ### Color System
 

@@ -1,18 +1,18 @@
-import { BusyRuntimeError } from "@webaura/pi/agent/runtime-command-errors";
-import { getCurrentTabId } from "@webaura/pi/agent/tab-id";
-import { getRuntimeWorker } from "@webaura/pi/agent/runtime-worker-client";
-import type { SessionRunner } from "@webaura/pi/agent/session-runner";
-import type { TurnEnvelope } from "@webaura/pi/agent/turn-event-store";
-import { createId } from "@webaura/pi/lib/ids";
-import { clampThinkingLevel } from "@webaura/pi/agent/thinking-levels";
+import { BusyRuntimeError } from "@firefly/pi/agent/runtime-command-errors";
+import { getCurrentTabId } from "@firefly/pi/agent/tab-id";
+import { getRuntimeWorker } from "@firefly/pi/agent/runtime-worker-client";
+import type { SessionRunner } from "@firefly/pi/agent/session-runner";
+import type { TurnEnvelope } from "@firefly/pi/agent/turn-event-store";
+import { createId } from "@firefly/pi/lib/ids";
+import { clampThinkingLevel } from "@firefly/pi/agent/thinking-levels";
 import {
   createUserMessageFromTurnInput,
   hasUserTurnInputContent,
   type UserTurnInput,
-} from "@webaura/pi/agent/user-turn-input";
-import { getCanonicalProvider, getModel } from "@webaura/pi/models/catalog";
-import type { SessionData } from "@webaura/db";
-import type { ProviderGroupId, ThinkingLevel } from "@webaura/pi/types/models";
+} from "@firefly/pi/agent/user-turn-input";
+import { getCanonicalProvider, getModel } from "@firefly/pi/models/catalog";
+import type { SessionData } from "@firefly/db";
+import type { ProviderGroupId, ThinkingLevel } from "@firefly/pi/types/models";
 
 type HostState = "idle" | "starting" | "running" | "disposing" | "disposed";
 

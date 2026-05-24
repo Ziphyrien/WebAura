@@ -88,7 +88,7 @@ describe("webMessageTransformer", () => {
         },
       },
       {
-        content: [{ text: "# WebAura", type: "text" }],
+        content: [{ text: "# Firefly", type: "text" }],
         isError: false,
         role: "toolResult",
         timestamp: 3,
@@ -117,7 +117,7 @@ describe("webMessageTransformer", () => {
       },
       {
         call_id: "call-1",
-        output: "# WebAura",
+        output: "# Firefly",
         type: "function_call_output",
       },
     ]);
@@ -174,7 +174,7 @@ describe("webMessageTransformer", () => {
         timestamp: 1,
       },
       {
-        content: [{ text: "# WebAura", type: "text" }],
+        content: [{ text: "# Firefly", type: "text" }],
         isError: false,
         role: "toolResult",
         timestamp: 2,

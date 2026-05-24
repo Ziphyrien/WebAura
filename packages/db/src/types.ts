@@ -1,6 +1,6 @@
-import type { JsonValue } from "@webaura/pi/types/common";
-import type { AssistantMessage, ChatMessage } from "@webaura/pi/types/chat";
-import type { ProviderGroupId, ProviderId, ThinkingLevel, Usage } from "@webaura/pi/types/models";
+import type { JsonValue } from "@firefly/pi/types/common";
+import type { AssistantMessage, ChatMessage } from "@firefly/pi/types/chat";
+import type { ProviderGroupId, ProviderId, ThinkingLevel, Usage } from "@firefly/pi/types/models";
 
 export interface SessionData {
   cost: number;

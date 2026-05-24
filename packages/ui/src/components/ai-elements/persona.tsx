@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@webaura/ui/lib/utils";
+import { cn } from "@firefly/ui/lib/utils";
 import type { RiveParameters } from "@rive-app/react-webgl2";
 import {
   useRive,

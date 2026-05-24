@@ -1,7 +1,7 @@
-import { refreshGitHubCopilot } from "@webaura/pi/auth/providers/github-copilot";
-import { refreshOpenAICodex } from "@webaura/pi/auth/providers/openai-codex";
-import type { OAuthCredentials } from "@webaura/pi/auth/oauth-types";
-import type { ProxyRequestOptions } from "@webaura/pi/auth/oauth-utils";
+import { refreshGitHubCopilot } from "@firefly/pi/auth/providers/github-copilot";
+import { refreshOpenAICodex } from "@firefly/pi/auth/providers/openai-codex";
+import type { OAuthCredentials } from "@firefly/pi/auth/oauth-types";
+import type { ProxyRequestOptions } from "@firefly/pi/auth/oauth-utils";
 
 export async function oauthRefresh(
   credentials: OAuthCredentials,

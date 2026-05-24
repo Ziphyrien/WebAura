@@ -2,11 +2,11 @@
 
 ## Goal
 
-Rebuild WebAura's shared shadcn/ui layer for a more comfortable AI coding assistant experience: softer ergonomics than Lyra, better long-session readability, clearer visual hierarchy, and a real preset/source update rather than config-only changes.
+Rebuild Firefly's shared shadcn/ui layer for a more comfortable AI coding assistant experience: softer ergonomics than Lyra, better long-session readability, clearer visual hierarchy, and a real preset/source update rather than config-only changes.
 
 ## User Need
 
-WebAura is used by developers for reading AI responses, prompts, code, tool output, and dense navigation for long periods. The UI should feel professional and focused without the overly harsh square-edge look of the previous Lyra + neutral grayscale setup.
+Firefly is used by developers for reading AI responses, prompts, code, tool output, and dense navigation for long periods. The UI should feel professional and focused without the overly harsh square-edge look of the previous Lyra + neutral grayscale setup.
 
 ## Prior State
 
@@ -40,7 +40,7 @@ In scope:
 - Use shadcn CLI to regenerate installed standard shadcn component source for the Nova preset.
 - Update shared global CSS tokens for Zinc/default theme + typography.
 - Add required UI package dependency for JetBrains Mono.
-- Keep monorepo aliases pointing app code to `@webaura/ui`.
+- Keep monorepo aliases pointing app code to `@firefly/ui`.
 - Fix type issues introduced by CLI output if they are dependency-version compatibility issues.
 - Align existing settings panels that hardcoded square cards by composing existing shadcn components (`Card`, `Alert`, `Empty`, `Field`).
 - Record design-system decisions in `.trellis/spec/ui/frontend/design-system.md`.
@@ -60,8 +60,8 @@ Out of scope:
 - Standard shadcn components in `packages/ui/src/components` must be overwritten from the `radix-nova` registry output.
 - Preserve custom project components that are not standard shadcn registry components.
 - Keep `apps/web/components.json` aliases aligned with the monorepo:
-  - `ui`: `@webaura/ui/components`
-  - `utils`: `@webaura/ui/lib/utils`
+  - `ui`: `@firefly/ui/components`
+  - `utils`: `@firefly/ui/lib/utils`
 - `packages/ui/src/styles/globals.css` must remain the single shared Tailwind v4 CSS entry.
 - Preserve shadcn default OKLCH theme tokens unless a future task explicitly calls for brand-color customization.
 - Use `@fontsource-variable/jetbrains-mono` from `packages/ui`, not root-only dependencies.

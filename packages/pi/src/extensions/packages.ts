@@ -1,4 +1,4 @@
-import type { ExtensionPackage, WebAuraExtension } from "@webaura/pi/extensions/types";
+import type { ExtensionPackage, FireflyExtension } from "@firefly/pi/extensions/types";
 
 export function defineExtensionPackage<const TExtensionPackage extends ExtensionPackage>(
   extensionPackage: TExtensionPackage,
@@ -8,7 +8,7 @@ export function defineExtensionPackage<const TExtensionPackage extends Extension
 
 export async function loadExtensionPackageRuntime(
   extensionPackage: ExtensionPackage,
-): Promise<WebAuraExtension> {
+): Promise<FireflyExtension> {
   const extension = await extensionPackage.loadRuntime();
 
   if (extension.manifest.id !== extensionPackage.manifest.id) {
