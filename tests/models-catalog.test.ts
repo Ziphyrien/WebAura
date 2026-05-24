@@ -8,6 +8,9 @@ import {
   getConnectedProviders,
   getDefaultModel,
   getDefaultModelForGroup,
+  getImageModel,
+  getImageModels,
+  getImageProviders,
   getModel,
   getModelsForGroup,
   getProviderGroups,
@@ -83,7 +86,7 @@ describe("model catalog", () => {
     );
   });
 
-  it("calculates per-message cost from usage totals", () => {
+  it("calculates per-message cost from current registry pricing", () => {
     const model = getModel("openai-codex", "gpt-5.1-codex-mini");
     const usage = createEmptyUsage();
     usage.input = 1_000;
@@ -93,9 +96,19 @@ describe("model catalog", () => {
     expect(calculateCost(model, usage)).toEqual({
       cacheRead: 0,
       cacheWrite: 0,
-      input: 0.00025,
-      output: 0.001,
-      total: 0.00125,
+      input: model.cost.input / 1_000,
+      output: model.cost.output / 2_000,
+      total: model.cost.input / 1_000 + model.cost.output / 2_000,
     });
+  });
+
+  it("exposes image generation models from the shared registry", () => {
+    expect(getImageProviders()).toContain("openrouter");
+
+    const models = getImageModels("openrouter");
+    expect(models.length).toBeGreaterThan(0);
+    expect(models[0]?.output).toContain("image");
+    expect(getImageModel("openrouter", models[0]!.id)).toBe(models[0]);
+    expect(getImageModel("openrouter", "missing-image-model")).toBeUndefined();
   });
 });

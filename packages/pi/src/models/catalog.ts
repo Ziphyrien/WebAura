@@ -1,9 +1,18 @@
 // App-facing catalog helpers layered on the shared pi-ai registry.
 import {
+  getImageModels as getRegistryImageModels,
+  getImageProviders as getRegistryImageProviders,
   getModel as getRegistryModel,
   getModels as getRegistryModels,
 } from "@earendil-works/pi-ai";
-import type { ModelDefinition, ProviderGroupId, ProviderId, Usage } from "@firefly/pi/types/models";
+import type {
+  ImageModelDefinition,
+  ImageProviderId,
+  ModelDefinition,
+  ProviderGroupId,
+  ProviderId,
+  Usage,
+} from "@firefly/pi/types/models";
 import { isOAuthCredentials, parseOAuthCredentials } from "@firefly/pi/auth/oauth-types";
 import {
   getAtlasProviderGroups,
@@ -169,6 +178,21 @@ export function getDefaultModel(provider: ProviderId): ModelDefinition {
 
 export function hasModel(provider: ProviderId, modelId: string): boolean {
   return Boolean(getPiAiModel(provider, modelId));
+}
+
+export function getImageProviders(): Array<ImageProviderId> {
+  return getRegistryImageProviders() as ImageProviderId[];
+}
+
+export function getImageModels(provider: ImageProviderId): ImageModelDefinition[] {
+  return getRegistryImageModels(provider) as ImageModelDefinition[];
+}
+
+export function getImageModel(
+  provider: ImageProviderId,
+  modelId: string,
+): ImageModelDefinition | undefined {
+  return getImageModels(provider).find((model) => model.id === modelId);
 }
 
 export function getPreferredProviderGroup(providersWithAuth: Array<ProviderId>): ProviderGroupId {

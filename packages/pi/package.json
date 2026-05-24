@@ -13,8 +13,8 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@earendil-works/pi-agent-core": "^0.74.0",
-    "@earendil-works/pi-ai": "^0.74.0",
+    "@earendil-works/pi-agent-core": "^0.75.5",
+    "@earendil-works/pi-ai": "^0.75.5",
     "@firefly/db": "workspace:*",
     "@noble/curves": "^1.9.7",
     "comlink": "^4.4.2",
@@ -24,7 +24,7 @@
     "pdfjs-dist": "^5.6.205",
     "react": "catalog:",
     "sonner": "catalog:",
-    "typebox": "1.1.24",
+    "typebox": "1.1.38",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

@@ -1,6 +1,14 @@
-import type { Api, KnownProvider, Model, Usage as PiUsage } from "@earendil-works/pi-ai";
+import type {
+  Api,
+  ImagesApi,
+  ImagesModel,
+  KnownImagesProvider,
+  KnownProvider,
+  Model,
+  Usage as PiUsage,
+} from "@earendil-works/pi-ai";
 
-export type { KnownProvider };
+export type { KnownImagesProvider, KnownProvider };
 
 /** Canonical provider ids come directly from the shared pi-ai registry. */
 export type ProviderId = KnownProvider;
@@ -15,8 +23,10 @@ export interface ProviderGroupDefinition {
 }
 
 export type ApiType = Api;
+export type ImagesApiType = ImagesApi;
 export type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 
+export type ImageProviderId = KnownImagesProvider;
 export type ModelInput = "image" | "text";
 
 export type Usage = PiUsage;
@@ -32,6 +42,8 @@ export interface UsageCost {
 export type ModelDefinition = Model<ApiType> & {
   free?: boolean;
 };
+
+export type ImageModelDefinition = ImagesModel<ImagesApiType>;
 
 export function createEmptyUsage(): Usage {
   return {
