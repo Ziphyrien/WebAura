@@ -302,10 +302,10 @@ export function ProviderSettings(props: { onNavigateToProxy?: () => void }) {
           </p>
         </div>
 
-        <Card size="sm">
-          <CardContent className="grid grid-cols-[auto_1fr] items-center gap-2 text-xs text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card px-3.5 py-2.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
             <HelpCircle className="size-4 shrink-0" />
-            <p className="leading-relaxed">
+            <p className="leading-normal">
               OAuth requests use{" "}
               <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-foreground">
                 {proxyConfig.url}
@@ -321,8 +321,8 @@ export function ProviderSettings(props: { onNavigateToProxy?: () => void }) {
                 </button>
               ) : null}
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           {subscriptionOAuthProviders.map((provider) => {
