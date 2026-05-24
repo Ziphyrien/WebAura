@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes";
 
 import { Button } from "@webaura/ui/components/button";
-import { Icons } from "@webaura/ui/components/icons";
+import { Monitor, Moon, Sun } from "lucide-react";
 type ThemePreference = "light" | "dark" | "system";
 
 const THEME_LABELS: Record<ThemePreference, string> = {
@@ -40,11 +40,11 @@ export function ThemeToggle() {
       onClick={() => setTheme(nextTheme)}
     >
       {currentTheme === "system" ? (
-        <Icons.monitor className="text-foreground" />
+        <Monitor className="text-foreground" />
       ) : (
         <>
-          <Icons.sun className="rotate-0 scale-100 text-foreground transition-all dark:-rotate-90 dark:scale-0" />
-          <Icons.moon className="absolute rotate-90 scale-0 text-foreground transition-all dark:rotate-0 dark:scale-100" />
+          <Sun className="rotate-0 scale-100 text-foreground transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute rotate-90 scale-0 text-foreground transition-all dark:rotate-0 dark:scale-100" />
         </>
       )}
       <span className="sr-only">Switch Theme</span>

@@ -1,9 +1,9 @@
 import { Button } from "@webaura/ui/components/button";
-import { Icons } from "@webaura/ui/components/icons";
 import { Separator } from "@webaura/ui/components/separator";
 import { SidebarTrigger } from "@webaura/ui/components/sidebar";
 import { ThemeToggle } from "@webaura/ui/components/theme-toggle";
 import { useSettingsDialog } from "@webaura/ui/components/settings-state";
+import { Settings } from "lucide-react";
 
 export function AppHeader() {
   const settingsDialog = useSettingsDialog();
@@ -21,7 +21,7 @@ export function AppHeader() {
           size="icon-sm"
           variant="ghost"
         >
-          <Icons.cog className="text-foreground" />
+          <Settings className="text-foreground" />
         </Button>
       </div>
       <div className="hidden items-center gap-2 px-3 md:flex">
@@ -35,7 +35,7 @@ export function AppHeader() {
           size="icon-sm"
           variant="ghost"
         >
-          <Icons.cog className="text-foreground" />
+          <Settings className="text-foreground" />
         </Button>
       </div>
     </header>

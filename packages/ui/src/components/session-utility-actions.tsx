@@ -1,6 +1,5 @@
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Share2 } from "lucide-react";
 import { Button } from "@webaura/ui/components/button";
-import { Icons } from "@webaura/ui/components/icons";
 import { useEffect, useState } from "react";
 
 type SessionUtilityActionProps = {
@@ -39,7 +38,7 @@ export function SessionUtilityActions(props: SessionUtilityActionProps) {
         ) : shareState === "success" ? (
           <Check className="absolute size-3.5 text-emerald-600 animate-in fade-in-0 zoom-in-95 duration-200 dark:text-emerald-400" />
         ) : (
-          <Icons.globe className="absolute size-3.5 animate-in fade-in-0 zoom-in-95 duration-200" />
+          <Share2 className="absolute size-3.5 animate-in fade-in-0 zoom-in-95 duration-200" />
         )}
       </span>
       <span>

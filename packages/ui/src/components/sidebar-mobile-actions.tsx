@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Icons } from "@webaura/ui/components/icons";
+import { Monitor, Moon, Settings, Sun } from "lucide-react";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@webaura/ui/components/sidebar";
 import { useSettingsDialog } from "@webaura/ui/components/settings-state";
 
@@ -41,11 +41,11 @@ export function SidebarMobileActions() {
           <SidebarMenuButton className="h-9" onClick={() => setTheme(nextTheme)}>
             <span className="relative flex size-4 shrink-0 items-center justify-center">
               {currentTheme === "system" ? (
-                <Icons.monitor className="size-4 text-sidebar-foreground" />
+                <Monitor className="size-4 text-sidebar-foreground" />
               ) : (
                 <>
-                  <Icons.sun className="size-4 rotate-0 scale-100 text-sidebar-foreground transition-all dark:-rotate-90 dark:scale-0" />
-                  <Icons.moon className="absolute size-4 rotate-90 scale-0 text-sidebar-foreground transition-all dark:rotate-0 dark:scale-100" />
+                  <Sun className="size-4 rotate-0 scale-100 text-sidebar-foreground transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute size-4 rotate-90 scale-0 text-sidebar-foreground transition-all dark:rotate-0 dark:scale-100" />
                 </>
               )}
             </span>
@@ -57,7 +57,7 @@ export function SidebarMobileActions() {
             className="h-9"
             onClick={() => settingsDialog.openSettings("providers")}
           >
-            <Icons.cog className="text-sidebar-foreground" />
+            <Settings className="text-sidebar-foreground" />
             <span>Settings</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
