@@ -11,13 +11,6 @@ import {
 import { ProviderSettings } from "@webaura/ui/components/provider-settings";
 import { ProxySettings } from "@webaura/ui/components/proxy-settings";
 import { Dialog, DialogContent, DialogTitle } from "@webaura/ui/components/dialog";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@webaura/ui/components/breadcrumb";
 import { Tabs, TabsList, TabsTrigger } from "@webaura/ui/components/tabs";
 import {
   Sidebar,
@@ -156,21 +149,8 @@ export function AppSettingsDialog(props: {
             </SidebarContent>
           </Sidebar>
           <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:min-h-0">
-            <header className="shrink-0 border-b border-foreground/10 px-5 pt-4 md:h-16 md:pt-0">
-              <div className="flex min-h-11 items-center">
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbPage>Settings</BreadcrumbPage>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>{activeSection.label}</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-              </div>
-              <Tabs className="gap-0 md:hidden" value={section}>
+            <header className="shrink-0 border-b border-foreground/10 px-5 pt-4 md:hidden">
+              <Tabs className="gap-0" value={section}>
                 <div className="w-full min-w-0 touch-pan-x overflow-x-auto overflow-y-hidden overscroll-x-contain pb-0.5 [-webkit-overflow-scrolling:touch] [scrollbar-width:thin]">
                   <TabsList
                     className="inline-flex h-auto w-max flex-nowrap justify-start gap-4 bg-transparent p-0 px-1 data-[variant=line]:gap-4"
