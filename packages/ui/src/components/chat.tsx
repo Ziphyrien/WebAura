@@ -678,7 +678,7 @@ export function Chat(props: ChatProps) {
               <StatusShimmer>Assistant is streaming...</StatusShimmer>
             </div>
           ) : chatPanelMode === "empty" ? (
-            <ChatEmptyState onSuggestionClick={(text) => void handleSend({ text })} />
+            <ChatEmptyState />
           ) : (
             messages.map((message, index) => {
               if (message.role === "toolResult" && foldedToolResultIds.has(message.id)) {
