@@ -603,10 +603,11 @@ export function Chat(props: ChatProps) {
   const composerDisabledReason = activeComposerState?.disabledReason;
   const chatPanelMode = getChatPanelMode({
     hasAssistantMessage,
-    isStartingSession,
-    isStreaming: displayConversationStreaming || isStartingSession,
+    isStartingSession: false,
+    isStreaming: displayConversationStreaming,
     messageCount: messages.length,
   });
+  const isChatEmpty = chatPanelMode === "empty";
 
   return (
     <div
@@ -661,11 +662,7 @@ export function Chat(props: ChatProps) {
               {lastProgressLabel ? ` Last progress ${lastProgressLabel}.` : ""}
             </div>
           ) : null}
-          {chatPanelMode === "starting" ? (
-            <div className="flex min-h-[30vh] items-center justify-center">
-              <StatusShimmer>Starting session...</StatusShimmer>
-            </div>
-          ) : chatPanelMode === "streaming_pending" ? (
+          {chatPanelMode === "starting" ? null : chatPanelMode === "streaming_pending" ? (
             <div className="mb-4 flex justify-start">
               <StatusShimmer>Assistant is streaming...</StatusShimmer>
             </div>
@@ -705,8 +702,13 @@ export function Chat(props: ChatProps) {
         ) : null}
       </Conversation>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
-        <div className="pointer-events-auto bg-background">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end">
+        <div
+          className="pointer-events-auto w-full"
+          style={{
+            transform: isChatEmpty && !isStreaming ? "translateY(-30vh)" : "translateY(0px)",
+          }}
+        >
           <div className="mx-auto w-full max-w-4xl px-4 pb-4">
             {bannerState?.kind === "interrupted" && resumeAction && activeSession ? (
               <div className="mb-3 rounded-md border border-border bg-muted px-3 py-3 text-sm text-foreground">
