@@ -28,15 +28,15 @@ describe("proxy settings ui", () => {
 
     render(React.createElement(ProxySettings));
 
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("https://proxy.example/proxy")).toBeTruthy();
+    });
+
     expect(
       screen.getByText(
         /When enabled, provider requests that are not browser-CORS-safe use the proxy/i,
       ),
     ).toBeTruthy();
-
-    await waitFor(() => {
-      expect(screen.getByDisplayValue("https://proxy.example/proxy")).toBeTruthy();
-    });
 
     fireEvent.change(screen.getByLabelText("Proxy base URL"), {
       target: {
