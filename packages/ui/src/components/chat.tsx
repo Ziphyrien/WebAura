@@ -721,7 +721,7 @@ export function Chat(props: ChatProps) {
               Copy the generated link manually.
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-sm border border-border bg-muted/40 p-2">
+          <div className="rounded-lg border border-border bg-muted/40 p-2">
             <textarea
               className="h-28 w-full resize-none bg-transparent font-mono text-xs text-foreground outline-none"
               readOnly
@@ -743,12 +743,12 @@ export function Chat(props: ChatProps) {
           }`}
         >
           {bannerState?.kind === "remote-live" ? (
-            <div className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+            <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
               Read-only mirror. This session is active in another tab.
               {lastProgressLabel ? ` Last progress ${lastProgressLabel}.` : ""}
             </div>
           ) : bannerState?.kind === "remote-stale" ? (
-            <div className="mb-4 rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+            <div className="mb-4 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
               Read-only mirror. Another tab still owns this streaming session.
               {lastProgressLabel ? ` Last progress ${lastProgressLabel}.` : ""}
             </div>
@@ -802,7 +802,7 @@ export function Chat(props: ChatProps) {
         >
           <div className="mx-auto w-full max-w-4xl px-4 pb-4">
             {bannerState?.kind === "interrupted" && resumeAction && activeSession ? (
-              <div className="mb-3 rounded-md border border-border bg-muted px-3 py-3 text-sm text-foreground">
+              <div className="mb-3 rounded-lg border border-border bg-muted px-3 py-3 text-sm text-foreground">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="font-medium">Response interrupted</div>
@@ -813,15 +813,16 @@ export function Chat(props: ChatProps) {
                       {lastProgressLabel ? ` Last progress ${lastProgressLabel}.` : ""}
                     </div>
                   </div>
-                  <button
-                    className="inline-flex items-center justify-center rounded-sm border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                  <Button
                     onClick={() => {
                       void handleResumeInterrupted();
                     }}
+                    size="sm"
                     type="button"
+                    variant="outline"
                   >
                     {resumeAction.label}
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : null}

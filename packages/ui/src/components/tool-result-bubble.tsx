@@ -26,21 +26,15 @@ export function ToolResultBubble(props: { message: ToolResultMessage }) {
     <div className="flex flex-col gap-2 border-l border-foreground/10 pl-4">
       <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
         <span>Tool result</span>
-        <Badge className="rounded-none" variant="outline">
-          {props.message.toolName}
-        </Badge>
-        {props.message.isError ? (
-          <Badge className="rounded-none" variant="destructive">
-            Error
-          </Badge>
-        ) : null}
+        <Badge variant="outline">{props.message.toolName}</Badge>
+        {props.message.isError ? <Badge variant="destructive">Error</Badge> : null}
       </div>
       {isReadDetails(props.message.details) ? (
         <div className="text-xs text-muted-foreground">
           {props.message.details.path} → {props.message.details.resolvedPath}
         </div>
       ) : null}
-      <pre className="overflow-x-auto whitespace-pre-wrap break-words bg-card/60 p-3 text-xs leading-5">
+      <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-lg bg-card/60 p-3 text-xs leading-5">
         {text || "(no output)"}
       </pre>
     </div>
