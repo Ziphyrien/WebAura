@@ -196,6 +196,7 @@ export function ChatMessage(props: {
   const isStreamingAssistant = "status" in message && message.status === "streaming";
   const showStreamingPlaceholder =
     isStreamingAssistant &&
+    !view.errorMessage &&
     view.text.length === 0 &&
     view.reasoning.length === 0 &&
     view.toolExecutions.length === 0;
@@ -244,6 +245,27 @@ export function ChatMessage(props: {
               <MessageBranchNext />
             </MessageBranchSelector>
           </MessageBranch>
+        ) : null}
+
+        {view.errorMessage ? (
+          <div className="flex w-full justify-start py-1">
+            <Item
+              className="max-w-full flex-1 flex-wrap items-start gap-2 rounded-lg border border-border bg-destructive/10 text-sm text-destructive"
+              variant="outline"
+            >
+              <ItemMedia variant="icon">
+                <AlertCircle className="size-4 text-destructive" />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle className="line-clamp-none text-[13px] font-medium">
+                  Assistant error
+                </ItemTitle>
+                <ItemDescription className="line-clamp-none text-[13px] text-inherit opacity-90">
+                  {view.errorMessage}
+                </ItemDescription>
+              </ItemContent>
+            </Item>
+          </div>
         ) : null}
 
         {view.toolExecutions.map(({ toolCall, toolResult }) => (

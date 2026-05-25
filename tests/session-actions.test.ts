@@ -9,6 +9,9 @@ const setSetting = vi.fn(async () => {});
 const persistSessionSnapshot = vi.fn(async () => {});
 const createSession = vi.fn();
 const releaseSessionAndDrain = vi.fn(async () => {});
+const getConnectedProviders = vi.fn(() => [] as string[]);
+const getPreferredProviderGroup = vi.fn(() => "openai-codex");
+const getVisibleProviderGroups = vi.fn(() => ["anthropic", "openai-codex"]);
 
 vi.mock("@firefly/db", () => ({
   deleteSession,
@@ -30,16 +33,20 @@ vi.mock("@/agent/runtime-client", () => ({
 
 vi.mock("@/models/catalog", () => ({
   getCanonicalProvider: (providerGroup: string) => providerGroup,
-  getConnectedProviders: () => [],
+  getConnectedProviders,
   getDefaultModelForGroup: () => ({
     id: "gpt-5.1-codex-mini",
   }),
   getDefaultProviderGroup: (provider: string) => provider,
-  getPreferredProviderGroup: () => "openai-codex",
+  getPreferredProviderGroup,
   getProviderGroups: () => ["anthropic", "openai-codex"],
-  getVisibleProviderGroups: () => ["anthropic", "openai-codex"],
+  getVisibleProviderGroups,
   hasModelForGroup: () => true,
   isProviderGroupId: (value: string) => value === "anthropic" || value === "openai-codex",
+  NO_CONFIGURED_PROVIDERS_MESSAGE:
+    "No AI provider configured. Add an API key or sign in to a provider in Settings > Providers.",
+  SELECTED_PROVIDER_NOT_CONFIGURED_MESSAGE:
+    "The selected AI provider is not configured. Add credentials or switch to a configured provider.",
 }));
 
 function buildSession(id: string, overrides: Partial<SessionData> = {}): SessionData {
@@ -73,6 +80,12 @@ describe("session-actions", () => {
     persistSessionSnapshot.mockReset();
     releaseSessionAndDrain.mockReset();
     setSetting.mockReset();
+    getConnectedProviders.mockReset();
+    getConnectedProviders.mockReturnValue([]);
+    getPreferredProviderGroup.mockReset();
+    getPreferredProviderGroup.mockReturnValue("openai-codex");
+    getVisibleProviderGroups.mockReset();
+    getVisibleProviderGroups.mockReturnValue(["anthropic", "openai-codex"]);
   });
 
   it("builds canonical session hrefs", async () => {
@@ -84,8 +97,10 @@ describe("session-actions", () => {
   it("creates empty chat sessions from provider defaults", async () => {
     const created = buildSession("session-new");
     createSession.mockReturnValue(created);
+    getConnectedProviders.mockReturnValue(["openai-codex"]);
     getSetting.mockResolvedValue(undefined);
-    listProviderKeys.mockResolvedValue([]);
+    getVisibleProviderGroups.mockReturnValue(["openai-codex"]);
+    listProviderKeys.mockResolvedValue([{ provider: "openai-codex", value: "oauth-token" }]);
 
     const { createSessionForChat } = await import("@/sessions/session-actions");
     const session = await createSessionForChat();
@@ -96,6 +111,18 @@ describe("session-actions", () => {
     });
     expect(persistSessionSnapshot).not.toHaveBeenCalled();
     expect(session.id).toBe("session-new");
+  });
+
+  it("rejects chat session creation when no provider is configured", async () => {
+    getSetting.mockResolvedValue(undefined);
+    getVisibleProviderGroups.mockReturnValue([]);
+    listProviderKeys.mockResolvedValue([]);
+
+    const { createSessionForChat } = await import("@/sessions/session-actions");
+
+    await expect(createSessionForChat()).rejects.toThrow("No AI provider configured");
+    expect(createSession).not.toHaveBeenCalled();
+    expect(persistSessionSnapshot).not.toHaveBeenCalled();
   });
 
   it("persists last-used session settings", async () => {

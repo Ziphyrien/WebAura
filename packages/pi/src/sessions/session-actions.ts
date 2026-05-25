@@ -12,6 +12,8 @@ import {
   getVisibleProviderGroups,
   hasModelForGroup,
   isProviderGroupId,
+  NO_CONFIGURED_PROVIDERS_MESSAGE,
+  SELECTED_PROVIDER_NOT_CONFIGURED_MESSAGE,
 } from "@firefly/pi/models/catalog";
 import { createSession, persistSessionSnapshot } from "@firefly/pi/sessions/session-service";
 
@@ -25,6 +27,21 @@ function normalizeStoredProviderGroup(value: unknown): ProviderGroupId | undefin
   }
 
   return undefined;
+}
+
+function assertProviderGroupConfigured(
+  providerGroup: ProviderGroupId,
+  connectedProviders: Array<ProviderId>,
+): void {
+  const provider = getCanonicalProvider(providerGroup);
+
+  if (!connectedProviders.includes(provider)) {
+    throw new Error(
+      connectedProviders.length === 0
+        ? NO_CONFIGURED_PROVIDERS_MESSAGE
+        : SELECTED_PROVIDER_NOT_CONFIGURED_MESSAGE,
+    );
+  }
 }
 
 function normalizeVisibleSession(
@@ -124,8 +141,12 @@ export function buildSessionHref(sessionId: string): string {
 }
 
 export async function createSessionForChat(base?: SessionCreationBase): Promise<SessionData> {
+  const providerKeys = await listProviderKeys();
+  const connectedProviders = getConnectedProviders(providerKeys);
+
   if (!base) {
     const { model, providerGroup, visibleProviderGroups } = await resolveProviderDefaults();
+    assertProviderGroupConfigured(providerGroup, connectedProviders);
     return normalizeVisibleSession(
       createSession({
         model,
@@ -135,9 +156,12 @@ export async function createSessionForChat(base?: SessionCreationBase): Promise<
     );
   }
 
+  const providerGroup = base.providerGroup ?? getDefaultProviderGroup(base.provider);
+  assertProviderGroupConfigured(providerGroup, connectedProviders);
+
   const session = createSession({
     model: base.model,
-    providerGroup: base.providerGroup ?? getDefaultProviderGroup(base.provider),
+    providerGroup,
     thinkingLevel: base.thinkingLevel,
   });
 

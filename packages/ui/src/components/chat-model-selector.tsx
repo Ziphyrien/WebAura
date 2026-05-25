@@ -13,7 +13,6 @@ import {
   ModelSelectorLogo,
   ModelSelectorName,
   ModelSelectorTrigger,
-  ModelSelectorSeparator,
 } from "@firefly/ui/components/ai-elements/model-selector";
 import { PromptInputButton } from "@firefly/ui/components/ai-elements/prompt-input";
 import {
@@ -38,7 +37,6 @@ export function ChatModelSelector(props: {
   const providerKeysResult = useLiveQuery(() => db.providerKeys.toArray(), []);
   const providerKeys = Array.isArray(providerKeysResult) ? providerKeysResult : [];
   const connectedProviders = getConnectedProviders(providerKeys);
-  const showAddProviderCta = connectedProviders.length === 0;
   const providerGroups = getVisibleProviderGroups(connectedProviders);
   const activeProviderGroup = providerGroups.includes(props.providerGroup)
     ? props.providerGroup
@@ -48,15 +46,40 @@ export function ChatModelSelector(props: {
       ? props.model
       : getDefaultModelForGroup(activeProviderGroup).id;
   const selectedModel = getModelForGroup(activeProviderGroup, activeModelId);
+  const hasConfiguredProvider = providerGroups.length > 0;
+
+  const triggerButton = (
+    <PromptInputButton disabled={props.disabled} size="sm" type="button">
+      {hasConfiguredProvider ? (
+        <>
+          <ModelSelectorLogo className="size-3.5 shrink-0" provider={selectedModel.provider} />
+          <ModelSelectorName>{selectedModel.name}</ModelSelectorName>
+        </>
+      ) : (
+        <>
+          <Plus className="size-3.5 shrink-0 text-muted-foreground" />
+          <ModelSelectorName>Add provider</ModelSelectorName>
+        </>
+      )}
+    </PromptInputButton>
+  );
+
+  if (!hasConfiguredProvider) {
+    return (
+      <div
+        onClick={() => {
+          if (props.disabled) return;
+          settingsDialog.openSettings("providers");
+        }}
+      >
+        {triggerButton}
+      </div>
+    );
+  }
 
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
-      <ModelSelectorTrigger asChild>
-        <PromptInputButton disabled={props.disabled} type="button">
-          <ModelSelectorLogo className="size-3.5 shrink-0" provider={selectedModel.provider} />
-          <ModelSelectorName>{selectedModel.name}</ModelSelectorName>
-        </PromptInputButton>
-      </ModelSelectorTrigger>
+      <ModelSelectorTrigger asChild>{triggerButton}</ModelSelectorTrigger>
 
       <ModelSelectorContent className="max-h-[min(420px,70vh)]">
         <ModelSelectorInput placeholder="Search models..." />
@@ -90,29 +113,6 @@ export function ChatModelSelector(props: {
               })}
             </ModelSelectorGroup>
           ))}
-          {showAddProviderCta ? (
-            <>
-              <ModelSelectorSeparator />
-              <ModelSelectorGroup heading="Providers">
-                <ModelSelectorItem
-                  className="gap-2"
-                  onSelect={() => {
-                    settingsDialog.openSettings("providers");
-                    setOpen(false);
-                  }}
-                  value="__add_provider__"
-                >
-                  <Plus className="size-3.5 shrink-0 text-muted-foreground" />
-                  <span className="flex min-w-0 flex-1 flex-col text-left">
-                    <span className="text-sm">Add AI provider</span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      Add an API key or import OAuth credentials to start chatting.
-                    </span>
-                  </span>
-                </ModelSelectorItem>
-              </ModelSelectorGroup>
-            </>
-          ) : null}
         </ModelSelectorList>
       </ModelSelectorContent>
     </ModelSelector>

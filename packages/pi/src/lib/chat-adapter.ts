@@ -47,6 +47,11 @@ export function getAssistantToolCalls(message: AssistantMessage): ToolCall[] {
   return message.content.filter((part): part is ToolCall => part.type === "toolCall");
 }
 
+export function getAssistantErrorMessage(message: AssistantMessage): string | undefined {
+  const errorMessage = message.errorMessage?.trim();
+  return errorMessage ? errorMessage : undefined;
+}
+
 function collectToolResultsForAssistant(
   message: AssistantMessage,
   followingMessages: readonly ChatMessage[],
@@ -91,6 +96,7 @@ export interface SourceRef {
 }
 
 export interface DerivedAssistantView {
+  errorMessage?: string;
   reasoning: string;
   sources: readonly SourceRef[];
   text: string;
@@ -110,6 +116,7 @@ export function deriveAssistantView(
   const toolResults = collectToolResultsForAssistant(message, followingMessages);
 
   return {
+    errorMessage: getAssistantErrorMessage(message),
     reasoning: getAssistantThinking(message),
     sources: [],
     text,

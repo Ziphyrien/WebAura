@@ -50,6 +50,8 @@ import {
   getDefaultModelForGroup,
   getDefaultProviderGroup,
   getVisibleProviderGroups,
+  NO_CONFIGURED_PROVIDERS_MESSAGE,
+  SELECTED_PROVIDER_NOT_CONFIGURED_MESSAGE,
 } from "@firefly/pi/models/catalog";
 import {
   persistLastUsedSessionSettings,
@@ -69,6 +71,7 @@ import {
   shouldDisplayConversationStreaming,
 } from "@firefly/pi/sessions/session-view-state";
 import { useConversationStarter } from "@firefly/ui/hooks/use-conversation-starter";
+import { useSettingsDialog } from "@firefly/ui/components/settings-state";
 
 type EmptyChatDraft = {
   model: string;
@@ -189,6 +192,7 @@ function getLastAssistantMessage(
 
 export function Chat(props: ChatProps) {
   const navigate = useNavigate();
+  const settingsDialog = useSettingsDialog();
   const loadedSessionState = useLiveQuery(async (): Promise<LoadedSessionState> => {
     if (!props.sessionId) {
       return { kind: "none" };
@@ -307,19 +311,25 @@ export function Chat(props: ChatProps) {
 
     const visibleProviderGroups = getVisibleProviderGroups(connectedProviders);
 
-    if (visibleProviderGroups.includes(draft.providerGroup)) {
+    if (visibleProviderGroups.length === 0 || visibleProviderGroups.includes(draft.providerGroup)) {
       return;
     }
 
-    const fallbackProviderGroup = visibleProviderGroups[0] ?? draft.providerGroup;
+    const fallbackProviderGroup = visibleProviderGroups[0];
     setDraft((currentDraft) => {
       if (!currentDraft || visibleProviderGroups.includes(currentDraft.providerGroup)) {
         return currentDraft;
       }
 
+      const model = getDefaultModelForGroup(fallbackProviderGroup).id;
+
+      if (currentDraft.providerGroup === fallbackProviderGroup && currentDraft.model === model) {
+        return currentDraft;
+      }
+
       return {
         ...currentDraft,
-        model: getDefaultModelForGroup(fallbackProviderGroup).id,
+        model,
         providerGroup: fallbackProviderGroup,
       };
     });
@@ -527,6 +537,12 @@ export function Chat(props: ChatProps) {
         return;
       }
 
+      if (connectedProviders.length === 0) {
+        toast.error(NO_CONFIGURED_PROVIDERS_MESSAGE);
+        settingsDialog.openSettings("providers");
+        return;
+      }
+
       if (firstSendInFlightRef.current) {
         return;
       }
@@ -571,12 +587,22 @@ export function Chat(props: ChatProps) {
         throw error;
       }
     },
-    [draft, startNewConversation],
+    [connectedProviders.length, draft, settingsDialog, startNewConversation],
   );
 
   const handleSend = React.useCallback(
     async (input: UserTurnInput) => {
       if (activeSession) {
+        if (!connectedProviders.includes(activeSession.provider)) {
+          toast.error(
+            connectedProviders.length === 0
+              ? NO_CONFIGURED_PROVIDERS_MESSAGE
+              : SELECTED_PROVIDER_NOT_CONFIGURED_MESSAGE,
+          );
+          settingsDialog.openSettings("providers");
+          return;
+        }
+
         if (!activeComposerState?.canSend) {
           if (activeComposerState?.disabledReason) {
             toast.error(activeComposerState.disabledReason);
@@ -596,7 +622,15 @@ export function Chat(props: ChatProps) {
 
       await handleFirstSend(input);
     },
-    [activeComposerState, activeSession, handleFirstSend, reportRuntimeFailure, runtime],
+    [
+      activeComposerState,
+      activeSession,
+      connectedProviders,
+      handleFirstSend,
+      reportRuntimeFailure,
+      runtime,
+      settingsDialog,
+    ],
   );
 
   const handleResumeInterrupted = React.useCallback(async () => {

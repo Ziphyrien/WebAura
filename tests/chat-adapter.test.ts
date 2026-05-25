@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vite-plus/test";
 import {
   deriveAssistantView,
+  getAssistantErrorMessage,
   getAssistantText,
   getAssistantThinking,
   getAssistantToolCalls,
@@ -20,7 +21,10 @@ function userMessage(overrides: Partial<UserMessage> = {}): UserMessage {
   };
 }
 
-function assistantMessage(content: AssistantMessage["content"]): AssistantMessage {
+function assistantMessage(
+  content: AssistantMessage["content"],
+  overrides: Partial<AssistantMessage> = {},
+): AssistantMessage {
   return {
     api: "openai-responses",
     content,
@@ -31,6 +35,7 @@ function assistantMessage(content: AssistantMessage["content"]): AssistantMessag
     stopReason: "stop",
     timestamp: 0,
     usage: createEmptyUsage(),
+    ...overrides,
   };
 }
 
@@ -105,6 +110,13 @@ describe("chat-adapter", () => {
     expect(v.reasoning).toBe("plan");
     expect(v.sources).toEqual([]);
     expect(v.versions).toEqual(["out"]);
+  });
+
+  it("deriveAssistantView exposes assistant error messages", () => {
+    const msg = assistantMessage([], { errorMessage: "  Missing API key  ", stopReason: "error" });
+    const v = deriveAssistantView(msg);
+    expect(getAssistantErrorMessage(msg)).toBe("Missing API key");
+    expect(v.errorMessage).toBe("Missing API key");
   });
 
   it("isToolResultMessage narrows tool result", () => {

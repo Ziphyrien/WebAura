@@ -116,15 +116,20 @@ export function getConnectedProviders(
     });
 }
 
+export const NO_CONFIGURED_PROVIDERS_MESSAGE =
+  "No AI provider configured. Add an API key or sign in to a provider in Settings > Providers.";
+
+export const SELECTED_PROVIDER_NOT_CONFIGURED_MESSAGE =
+  "The selected AI provider is not configured. Add credentials or switch to a configured provider.";
+
 export function getVisibleProviderGroups(
   connectedProviders: Array<ProviderId>,
 ): Array<ProviderGroupId> {
   const connectedProviderSet = new Set(connectedProviders);
-  const connectedProviderGroups = getProviderGroups().filter((providerGroup) => {
+
+  return getProviderGroups().filter((providerGroup) => {
     return connectedProviderSet.has(getCanonicalProvider(providerGroup));
   });
-
-  return connectedProviderGroups.length > 0 ? connectedProviderGroups : getProviderGroups();
 }
 
 export function getModels(provider: ProviderId): Array<ModelDefinition> {

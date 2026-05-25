@@ -12,7 +12,9 @@ vi.mock("@tanstack/react-router", () => ({
   }: React.PropsWithChildren<Record<string, unknown>>) => React.createElement("a", props, children),
 }));
 
-function buildStreamingAssistant(): ChatMessageType & { status: "streaming" } {
+function buildAssistant(
+  overrides: Partial<Extract<ChatMessageType, { role: "assistant" }>> = {},
+): Extract<ChatMessageType, { role: "assistant" }> {
   return {
     api: "openai-responses",
     content: [],
@@ -20,7 +22,6 @@ function buildStreamingAssistant(): ChatMessageType & { status: "streaming" } {
     model: "gpt-5.1-codex-mini",
     provider: "openai-codex",
     role: "assistant",
-    status: "streaming",
     stopReason: "stop",
     timestamp: 1,
     usage: {
@@ -37,7 +38,14 @@ function buildStreamingAssistant(): ChatMessageType & { status: "streaming" } {
       output: 0,
       totalTokens: 0,
     },
-  } as ChatMessageType & { status: "streaming" };
+    ...overrides,
+  };
+}
+
+function buildStreamingAssistant(): ChatMessageType & { status: "streaming" } {
+  return buildAssistant({ status: "streaming" } as Partial<
+    Extract<ChatMessageType, { role: "assistant" }>
+  >) as ChatMessageType & { status: "streaming" };
 }
 
 describe("ChatMessage", () => {
@@ -53,6 +61,24 @@ describe("ChatMessage", () => {
     );
 
     expect(screen.getByRole("status").textContent).toContain("Assistant is streaming...");
+  });
+
+  it("renders assistant error messages", async () => {
+    const { ChatMessage } = await import("@/components/chat-message");
+
+    render(
+      <ChatMessage
+        followingMessages={[]}
+        isStreamingReasoning={false}
+        message={buildAssistant({
+          errorMessage: "Missing API key [openai/gpt-5 → https://api.openai.com/v1]",
+          stopReason: "error",
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Assistant error")).toBeTruthy();
+    expect(screen.getByText(/Missing API key/)).toBeTruthy();
   });
 
   it("renders expandable HTML details for system messages", async () => {

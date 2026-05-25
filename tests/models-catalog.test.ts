@@ -14,6 +14,7 @@ import {
   getModel,
   getModelsForGroup,
   getProviderGroups,
+  getVisibleProviderGroups,
 } from "@/models/catalog";
 import type { ProviderId } from "@/types/models";
 
@@ -84,6 +85,14 @@ describe("model catalog", () => {
     expect(getProviderGroups()).toEqual(
       expect.arrayContaining(["opencode", "openai-codex", "kimi-coding"]),
     );
+  });
+
+  it("does not expose provider groups when no provider is connected", () => {
+    expect(getVisibleProviderGroups([])).toEqual([]);
+  });
+
+  it("exposes only connected provider groups", () => {
+    expect(getVisibleProviderGroups(["openai-codex"])).toEqual(["openai-codex"]);
   });
 
   it("calculates per-message cost from current registry pricing", () => {
